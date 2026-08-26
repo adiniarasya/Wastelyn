@@ -12,7 +12,8 @@ class MissionController extends Controller
      */
     public function index()
     {
-        //
+        $missions = Mission::all();
+        return view('admin.missions.index', compact('missions'));
     }
 
     /**
@@ -20,7 +21,7 @@ class MissionController extends Controller
      */
     public function create()
     {
-        //
+        return view('admin.missions.create');
     }
 
     /**
@@ -28,7 +29,21 @@ class MissionController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'xp_reward' => 'required|integer|min:0',
+            'points_reward' => 'required|integer|min:0',
+            'type' => 'required|in:daily,weekly,monthly',
+            'category' => 'nullable|string|max:100',
+            'target' => 'required|integer|min:1',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after:start_date',
+            'status' => 'required|in:active,inactive',
+        ]);
+
+        Mission::create($request->all());
+        return redirect()->route('admin.missions.index')->with('success', 'Misi berhasil ditambahkan');
     }
 
     /**
@@ -36,7 +51,7 @@ class MissionController extends Controller
      */
     public function show(Mission $mission)
     {
-        //
+        return view('admin.missions.show', compact('mission'));
     }
 
     /**
@@ -44,7 +59,7 @@ class MissionController extends Controller
      */
     public function edit(Mission $mission)
     {
-        //
+        return view('admin.missions.edit', compact('mission'));
     }
 
     /**
@@ -52,7 +67,21 @@ class MissionController extends Controller
      */
     public function update(Request $request, Mission $mission)
     {
-        //
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'xp_reward' => 'required|integer|min:0',
+            'points_reward' => 'required|integer|min:0',
+            'type' => 'required|in:daily,weekly,monthly',
+            'category' => 'nullable|string|max:100',
+            'target' => 'required|integer|min:1',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after:start_date',
+            'status' => 'required|in:active,inactive',
+        ]);
+
+        $mission->update($request->all());
+        return redirect()->route('admin.missions.index')->with('success', 'Misi berhasil diupdate');
     }
 
     /**
@@ -60,6 +89,7 @@ class MissionController extends Controller
      */
     public function destroy(Mission $mission)
     {
-        //
+        $mission->delete();
+        return redirect()->route('admin.missions.index')->with('success', 'Misi berhasil dihapus');
     }
 }

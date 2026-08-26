@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AiChatSession;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class AiChatSessionController extends Controller
@@ -12,7 +13,8 @@ class AiChatSessionController extends Controller
      */
     public function index()
     {
-        //
+        $sessions = AiChatSession::with('user')->get();
+        return view('admin.ai-chat-sessions.index', compact('sessions'));
     }
 
     /**
@@ -20,7 +22,8 @@ class AiChatSessionController extends Controller
      */
     public function create()
     {
-        //
+        $users = User::all();
+        return view('admin.ai-chat-sessions.create', compact('users'));
     }
 
     /**
@@ -28,7 +31,13 @@ class AiChatSessionController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'user_id' => 'required|exists:users,user_id',
+            'title' => 'required|string|max:255',
+        ]);
+
+        AiChatSession::create($request->all());
+        return redirect()->route('admin.ai-chat-sessions.index')->with('success', 'Session berhasil ditambahkan');
     }
 
     /**
@@ -36,7 +45,8 @@ class AiChatSessionController extends Controller
      */
     public function show(AiChatSession $aiChatSession)
     {
-        //
+        $aiChatSession->load('user', 'messages');
+        return view('admin.ai-chat-sessions.show', compact('aiChatSession'));
     }
 
     /**
@@ -44,7 +54,8 @@ class AiChatSessionController extends Controller
      */
     public function edit(AiChatSession $aiChatSession)
     {
-        //
+        $users = User::all();
+        return view('admin.ai-chat-sessions.edit', compact('aiChatSession', 'users'));
     }
 
     /**
@@ -52,7 +63,13 @@ class AiChatSessionController extends Controller
      */
     public function update(Request $request, AiChatSession $aiChatSession)
     {
-        //
+        $request->validate([
+            'user_id' => 'required|exists:users,user_id',
+            'title' => 'required|string|max:255',
+        ]);
+
+        $aiChatSession->update($request->all());
+        return redirect()->route('admin.ai-chat-sessions.index')->with('success', 'Session berhasil diupdate');
     }
 
     /**
@@ -60,6 +77,7 @@ class AiChatSessionController extends Controller
      */
     public function destroy(AiChatSession $aiChatSession)
     {
-        //
+        $aiChatSession->delete();
+        return redirect()->route('admin.ai-chat-sessions.index')->with('success', 'Session berhasil dihapus');
     }
 }

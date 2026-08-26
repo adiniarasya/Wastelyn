@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AiChatMessage;
+use App\Models\AiChatSession;
 use Illuminate\Http\Request;
 
 class AiChatMessageController extends Controller
@@ -12,7 +13,8 @@ class AiChatMessageController extends Controller
      */
     public function index()
     {
-        //
+        $messages = AiChatMessage::with('session')->get();
+        return view('admin.ai-chat-messages.index', compact('messages'));
     }
 
     /**
@@ -20,7 +22,8 @@ class AiChatMessageController extends Controller
      */
     public function create()
     {
-        //
+        $sessions = AiChatSession::all();
+        return view('admin.ai-chat-messages.create', compact('sessions'));
     }
 
     /**
@@ -28,7 +31,14 @@ class AiChatMessageController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'session_id' => 'required|exists:ai_chat_sessions,session_id',
+            'role' => 'required|in:user,assistant,system',
+            'content' => 'required|string',
+        ]);
+
+        AiChatMessage::create($request->all());
+        return redirect()->route('admin.ai-chat-messages.index')->with('success', 'Pesan berhasil ditambahkan');
     }
 
     /**
@@ -36,7 +46,7 @@ class AiChatMessageController extends Controller
      */
     public function show(AiChatMessage $aiChatMessage)
     {
-        //
+        return view('admin.ai-chat-messages.show', compact('aiChatMessage'));
     }
 
     /**
@@ -44,7 +54,8 @@ class AiChatMessageController extends Controller
      */
     public function edit(AiChatMessage $aiChatMessage)
     {
-        //
+        $sessions = AiChatSession::all();
+        return view('admin.ai-chat-messages.edit', compact('aiChatMessage', 'sessions'));
     }
 
     /**
@@ -52,7 +63,14 @@ class AiChatMessageController extends Controller
      */
     public function update(Request $request, AiChatMessage $aiChatMessage)
     {
-        //
+        $request->validate([
+            'session_id' => 'required|exists:ai_chat_sessions,session_id',
+            'role' => 'required|in:user,assistant,system',
+            'content' => 'required|string',
+        ]);
+
+        $aiChatMessage->update($request->all());
+        return redirect()->route('admin.ai-chat-messages.index')->with('success', 'Pesan berhasil diupdate');
     }
 
     /**
@@ -60,6 +78,7 @@ class AiChatMessageController extends Controller
      */
     public function destroy(AiChatMessage $aiChatMessage)
     {
-        //
+        $aiChatMessage->delete();
+        return redirect()->route('admin.ai-chat-messages.index')->with('success', 'Pesan berhasil dihapus');
     }
 }

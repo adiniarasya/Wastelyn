@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\PickupItem;
+use App\Models\PickupRequest;
 use Illuminate\Http\Request;
 
 class PickupItemController extends Controller
@@ -12,7 +13,8 @@ class PickupItemController extends Controller
      */
     public function index()
     {
-        //
+        $items = PickupItem::with('pickupRequest')->get();
+        return view('admin.pickup-items.index', compact('items'));
     }
 
     /**
@@ -20,7 +22,8 @@ class PickupItemController extends Controller
      */
     public function create()
     {
-        //
+        $pickupRequests = PickupRequest::all();
+        return view('admin.pickup-items.create', compact('pickupRequests'));
     }
 
     /**
@@ -28,7 +31,15 @@ class PickupItemController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'pickup_request_id' => 'required|exists:pickup_requests,pickup_request_id',
+            'waste_category_id' => 'required|exists:waste_categories,waste_category_id',
+            'weight' => 'required|numeric|min:0',
+            'estimated_price' => 'nullable|numeric|min:0',
+        ]);
+
+        PickupItem::create($request->all());
+        return redirect()->route('admin.pickup-items.index')->with('success', 'Item pickup berhasil ditambahkan');
     }
 
     /**
@@ -36,7 +47,8 @@ class PickupItemController extends Controller
      */
     public function show(PickupItem $pickupItem)
     {
-        //
+        $pickupItem->load('pickupRequest');
+        return view('admin.pickup-items.show', compact('pickupItem'));
     }
 
     /**
@@ -44,7 +56,8 @@ class PickupItemController extends Controller
      */
     public function edit(PickupItem $pickupItem)
     {
-        //
+        $pickupRequests = PickupRequest::all();
+        return view('admin.pickup-items.edit', compact('pickupItem', 'pickupRequests'));
     }
 
     /**
@@ -52,7 +65,15 @@ class PickupItemController extends Controller
      */
     public function update(Request $request, PickupItem $pickupItem)
     {
-        //
+        $request->validate([
+            'pickup_request_id' => 'required|exists:pickup_requests,pickup_request_id',
+            'waste_category_id' => 'required|exists:waste_categories,waste_category_id',
+            'weight' => 'required|numeric|min:0',
+            'estimated_price' => 'nullable|numeric|min:0',
+        ]);
+
+        $pickupItem->update($request->all());
+        return redirect()->route('admin.pickup-items.index')->with('success', 'Item pickup berhasil diupdate');
     }
 
     /**
@@ -60,6 +81,7 @@ class PickupItemController extends Controller
      */
     public function destroy(PickupItem $pickupItem)
     {
-        //
+        $pickupItem->delete();
+        return redirect()->route('admin.pickup-items.index')->with('success', 'Item pickup berhasil dihapus');
     }
 }

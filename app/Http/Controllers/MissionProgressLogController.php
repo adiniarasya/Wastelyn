@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\MissionProgressLog;
+use App\Models\UserMission;
 use Illuminate\Http\Request;
 
 class MissionProgressLogController extends Controller
@@ -12,7 +13,8 @@ class MissionProgressLogController extends Controller
      */
     public function index()
     {
-        //
+        $logs = MissionProgressLog::with('userMission')->get();
+        return view('admin.mission-progress-logs.index', compact('logs'));
     }
 
     /**
@@ -20,7 +22,8 @@ class MissionProgressLogController extends Controller
      */
     public function create()
     {
-        //
+        $userMissions = UserMission::all();
+        return view('admin.mission-progress-logs.create', compact('userMissions'));
     }
 
     /**
@@ -28,7 +31,14 @@ class MissionProgressLogController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'user_mission_id' => 'required|exists:user_missions,user_mission_id',
+            'progress' => 'required|integer|min:0',
+            'note' => 'nullable|string',
+        ]);
+
+        MissionProgressLog::create($request->all());
+        return redirect()->route('admin.mission-progress-logs.index')->with('success', 'Progress log berhasil ditambahkan');
     }
 
     /**
@@ -36,7 +46,8 @@ class MissionProgressLogController extends Controller
      */
     public function show(MissionProgressLog $missionProgressLog)
     {
-        //
+        $missionProgressLog->load('userMission');
+        return view('admin.mission-progress-logs.show', compact('missionProgressLog'));
     }
 
     /**
@@ -44,7 +55,8 @@ class MissionProgressLogController extends Controller
      */
     public function edit(MissionProgressLog $missionProgressLog)
     {
-        //
+        $userMissions = UserMission::all();
+        return view('admin.mission-progress-logs.edit', compact('missionProgressLog', 'userMissions'));
     }
 
     /**
@@ -52,7 +64,14 @@ class MissionProgressLogController extends Controller
      */
     public function update(Request $request, MissionProgressLog $missionProgressLog)
     {
-        //
+        $request->validate([
+            'user_mission_id' => 'required|exists:user_missions,user_mission_id',
+            'progress' => 'required|integer|min:0',
+            'note' => 'nullable|string',
+        ]);
+
+        $missionProgressLog->update($request->all());
+        return redirect()->route('admin.mission-progress-logs.index')->with('success', 'Progress log berhasil diupdate');
     }
 
     /**
@@ -60,6 +79,7 @@ class MissionProgressLogController extends Controller
      */
     public function destroy(MissionProgressLog $missionProgressLog)
     {
-        //
+        $missionProgressLog->delete();
+        return redirect()->route('admin.mission-progress-logs.index')->with('success', 'Progress log berhasil dihapus');
     }
 }
