@@ -22,13 +22,13 @@
         @include('template.sidebar')
         <!-- /Sidebar -->
         <div id="main" class='layout-navbar'>
-            
+
             <header class='mb-3'>
                 <!--- Navbar -->
                 @include('template.navbar')
                 <!--- /Navbar -->
             </header>
-            
+
 
             <!-- Main Content -->
             <div id="main-content">
@@ -52,25 +52,14 @@
                         </div>
                     </div>
                     <section class="section">
-                        <div class="card">
-                            <div class="card-header">
-                                <h4 class="card-title">Example Content</h4>
-                            </div>
-                            <div class="card-body">
-                                Lorem ipsum dolor sit amet consectetur adipisicing elit. Consectetur quas omnis
-                                laudantium tempore
-                                exercitationem, expedita aspernatur sed officia asperiores unde tempora maxime odio
-                                reprehenderit
-                                distinctio incidunt! Vel aspernatur dicta consequatur!
-                            </div>
-                        </div>
+                        @yield('content')
                     </section>
                 </div>
-            <!-- footer -->
+                <!-- footer -->
                 @include('template.footer')
-            <!-- footer -->
+                <!-- footer -->
             </div>
-            
+
         </div>
     </div>
     <script src="{{asset('mazer/dist/assets/vendors/perfect-scrollbar/perfect-scrollbar.min.js')}}"></script>
