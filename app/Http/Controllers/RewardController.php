@@ -13,6 +13,7 @@ class RewardController extends Controller
     public function index()
     {
         $rewards = Reward::all();
+
         return view('admin.rewards.index', compact('rewards'));
     }
 
@@ -32,14 +33,17 @@ class RewardController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'points_required' => 'required|integer|min:1',
+            'point_required' => 'required|integer|min:1',
             'stock' => 'required|integer|min:0',
             'image' => 'nullable|string|max:255',
-            'status' => 'required|in:active,inactive',
+            'status' => 'required|in:available,unavailable',
         ]);
 
         Reward::create($request->all());
-        return redirect()->route('admin.rewards.index')->with('success', 'Reward berhasil ditambahkan');
+
+        return redirect()
+            ->route('admin.rewards.index')
+            ->with('success', 'Reward berhasil ditambahkan');
     }
 
     /**
@@ -66,14 +70,17 @@ class RewardController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'points_required' => 'required|integer|min:1',
+            'point_required' => 'required|integer|min:1',
             'stock' => 'required|integer|min:0',
             'image' => 'nullable|string|max:255',
-            'status' => 'required|in:active,inactive',
+            'status' => 'required|in:available,unavailable',
         ]);
 
         $reward->update($request->all());
-        return redirect()->route('admin.rewards.index')->with('success', 'Reward berhasil diupdate');
+
+        return redirect()
+            ->route('admin.rewards.index')
+            ->with('success', 'Reward berhasil diupdate');
     }
 
     /**
@@ -82,6 +89,9 @@ class RewardController extends Controller
     public function destroy(Reward $reward)
     {
         $reward->delete();
-        return redirect()->route('admin.rewards.index')->with('success', 'Reward berhasil dihapus');
+
+        return redirect()
+            ->route('admin.rewards.index')
+            ->with('success', 'Reward berhasil dihapus');
     }
 }

@@ -21,6 +21,7 @@ class User extends Authenticatable
         'address',
         'photo',
         'role',
+        'status',
         'xp',
         'points',
         'level',
@@ -39,7 +40,6 @@ class User extends Authenticatable
         ];
     }
 
-    // ============ ROLE CHECK ============
     public function isAdmin()
     {
         return $this->role === 'admin';
@@ -55,7 +55,6 @@ class User extends Authenticatable
         return $this->role === 'warga';
     }
 
-    // ============ XP & LEVEL ============
     public function addXp($amount)
     {
         $this->xp += $amount;

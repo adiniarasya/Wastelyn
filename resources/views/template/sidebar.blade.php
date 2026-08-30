@@ -1,178 +1,201 @@
 <div id="sidebar" class="active">
-            <div class="sidebar-wrapper active">
-                <div class="sidebar-header">
-                    <div class="d-flex justify-content-between">
-                        <div class="logo">
-                            <a href="index.html"><img src="assets/images/logo/logo.png" alt="Logo" srcset=""></a>
-                        </div>
-                        <div class="toggler">
-                            <a href="#" class="sidebar-hide d-xl-none d-block"><i class="bi bi-x bi-middle"></i></a>
-                        </div>
-                    </div>
+    <div class="sidebar-wrapper active">
+        <div class="sidebar-header">
+            <div class="d-flex justify-content-between">
+                <div class="logo">
+                    <a href="{{ url('/') }}">
+                        <img src="{{ asset('assets/images/logo/logo.png') }}" alt="Logo" srcset="">
+                    </a>
                 </div>
-                <div class="sidebar-menu">
-                    <ul class="menu">
-                        <li class="sidebar-title">Menu</li>
+                <div class="toggler">
+                    <a href="#" class="sidebar-hide d-xl-none d-block">
+                        <i class="bi bi-x bi-middle"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="sidebar-menu">
+            <ul class="menu">
 
-                        <li class="sidebar-item  ">
-                            <a href="index.html" class='sidebar-link'>
+                @auth
+
+                    {{-- ADMIN --}}
+                    @if(auth()->user()->role == 'admin')
+
+                        {{-- Menu Utama --}}
+                        <li class="sidebar-title">Menu Utama</li>
+
+                        <li class="sidebar-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                            <a href="{{ route('admin.dashboard') }}" class="sidebar-link">
                                 <i class="bi bi-grid-fill"></i>
                                 <span>Dashboard</span>
                             </a>
                         </li>
-                        <li class="sidebar-item  ">
-                            <a href="index.html" class='sidebar-link'>
+
+                        <li class="sidebar-item {{ request()->routeIs('admin.statistics') ? 'active' : '' }}">
+                            <a href="{{ route('admin.statistics') }}" class="sidebar-link">
+                                <i class="bi bi-graph-up"></i>
+                                <span>Statistik</span>
+                            </a>
+                        </li>
+
+                        {{-- Data & Transaksi --}}
+                        <li class="sidebar-title">Data & Transaksi</li>
+
+                        <li class="sidebar-item {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.users.index') }}" class="sidebar-link">
+                                <i class="bi bi-people-fill"></i>
+                                <span>User</span>
+                            </a>
+                        </li>
+
+                        <li class="sidebar-item {{ request()->routeIs('admin.transactions.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.transactions.index') }}" class="sidebar-link">
+                                <i class="bi bi-arrow-left-right"></i>
+                                <span>Setoran</span>
+                            </a>
+                        </li>
+
+                        <li class="sidebar-item {{ request()->routeIs('admin.missions.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.missions.index') }}" class="sidebar-link">
+                                <i class="bi bi-bullseye"></i>
+                                <span>Mission</span>
+                            </a>
+                        </li>
+
+                        <li class="sidebar-item {{ request()->routeIs('admin.rewards.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.rewards.index') }}" class="sidebar-link">
+                                <i class="bi bi-gift"></i>
+                                <span>Reward</span>
+                            </a>
+                        </li>
+
+                        <li class="sidebar-item {{ request()->routeIs('admin.laporan') ? 'active' : '' }}">
+                            <a href="{{ route('admin.laporan') }}" class="sidebar-link">
+                                <i class="bi bi-file-earmark-text"></i>
+                                <span>Laporan</span>
+                            </a>
+                        </li>
+
+                        {{-- Sistem --}}
+                        <li class="sidebar-title">Sistem</li>
+
+                        <li class="sidebar-item {{ request()->routeIs('admin.notifications.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.notifications.index') }}" class="sidebar-link">
+                                <i class="bi bi-bell"></i>
+                                <span>Notifikasi</span>
+                            </a>
+                        </li>
+
+                        <li class="sidebar-item {{ request()->routeIs('admin.profile') ? 'active' : '' }}">
+                            <a href="{{ route('admin.profile') }}" class="sidebar-link">
+                                <i class="bi bi-person"></i>
+                                <span>Profil</span>
+                            </a>
+                        </li>
+
+                        <li class="sidebar-item {{ request()->routeIs('admin.settings') ? 'active' : '' }}">
+                            <a href="{{ route('admin.settings') }}" class="sidebar-link">
+                                <i class="bi bi-gear"></i>
+                                <span>Pengaturan</span>
+                            </a>
+                        </li>
+
+                        {{-- MITRA --}}
+                    @elseif(auth()->user()->role == 'mitra')
+
+                        <li class="sidebar-title">Menu Mitra</li>
+
+                        <li class="sidebar-item {{ request()->routeIs('mitra.dashboard') ? 'active' : '' }}">
+                            <a href="{{ route('mitra.dashboard') }}" class="sidebar-link">
                                 <i class="bi bi-grid-fill"></i>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+
+                        <li class="sidebar-item {{ request()->routeIs('mitra.pickup-requests.*') ? 'active' : '' }}">
+                            <a href="{{ route('mitra.pickup-requests.index') }}" class="sidebar-link">
+                                <i class="bi bi-box-seam"></i>
+                                <span>Kelola Setoran</span>
+                            </a>
+                        </li>
+
+                        <li class="sidebar-item {{ request()->routeIs('mitra.transactions.*') ? 'active' : '' }}">
+                            <a href="{{ route('mitra.transactions.index') }}" class="sidebar-link">
+                                <i class="bi bi-clock-history"></i>
+                                <span>Riwayat Setoran</span>
+                            </a>
+                        </li>
+
+                        <li class="sidebar-item {{ request()->routeIs('mitra.statistics') ? 'active' : '' }}">
+                            <a href="{{ route('mitra.statistics') }}" class="sidebar-link">
+                                <i class="bi bi-graph-up"></i>
+                                <span>Dashboard Statistik</span>
+                            </a>
+                        </li>
+
+                        <li class="sidebar-title">Akun</li>
+
+                        <li class="sidebar-item {{ request()->routeIs('mitra.profile') ? 'active' : '' }}">
+                            <a href="{{ route('mitra.profile') }}" class="sidebar-link">
+                                <i class="bi bi-person"></i>
+                                <span>Profil Mitra</span>
+                            </a>
+                        </li>
+
+                        {{-- WARGA --}}
+                    @elseif(auth()->user()->role == 'warga')
+
+                        <li class="sidebar-title">Menu Warga</li>
+
+                        <li class="sidebar-item {{ request()->routeIs('user.dashboard') ? 'active' : '' }}">
+                            <a href="{{ route('user.dashboard') }}" class="sidebar-link">
+                                <i class="bi bi-grid-fill"></i>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+
+                        <li class="sidebar-item {{ request()->routeIs('user.missions.*') ? 'active' : '' }}">
+                            <a href="{{ route('user.missions.index') }}" class="sidebar-link">
+                                <i class="bi bi-list-check"></i>
                                 <span>Waste Mission</span>
                             </a>
                         </li>
-                        <li class="sidebar-item  ">
-                            <a href="index.html" class='sidebar-link'>
-                                <i class="bi bi-grid-fill"></i>
+
+                        <li class="sidebar-item {{ request()->routeIs('user.waste-banks.*') ? 'active' : '' }}">
+                            <a href="{{ route('user.waste-banks.index') }}" class="sidebar-link">
+                                <i class="bi bi-map"></i>
                                 <span>Smart Waste Network</span>
                             </a>
                         </li>
-                        <li class="sidebar-item  ">
-                            <a href="index.html" class='sidebar-link'>
-                                <i class="bi bi-grid-fill"></i>
+
+                        <li class="sidebar-item {{ request()->routeIs('user.user-missions.*') ? 'active' : '' }}">
+                            <a href="{{ route('user.user-missions.index') }}" class="sidebar-link">
+                                <i class="bi bi-trophy"></i>
                                 <span>Eco Habit Score</span>
                             </a>
                         </li>
-                        <li class="sidebar-item  ">
-                            <a href="index.html" class='sidebar-link'>
-                                <i class="bi bi-grid-fill"></i>
+
+                        <li class="sidebar-item {{ request()->routeIs('user.ai-chat-sessions.*') ? 'active' : '' }}">
+                            <a href="{{ route('user.ai-chat-sessions.index') }}" class="sidebar-link">
+                                <i class="bi bi-robot"></i>
+                                <span>Bero AI</span>
+                            </a>
+                        </li>
+
+                        <li class="sidebar-item {{ request()->routeIs('user.rewards.*') ? 'active' : '' }}">
+                            <a href="{{ route('user.rewards.index') }}" class="sidebar-link">
+                                <i class="bi bi-gift"></i>
                                 <span>Reward Center</span>
                             </a>
                         </li>
-                        
-                        
 
-                        <li class="sidebar-item  has-sub">
-                            <a href="#" class='sidebar-link'>
-                                <i class="bi bi-stack"></i>
-                                <span>Components</span>
-                            </a>
-                            <ul class="submenu ">
-                                <li class="submenu-item ">
-                                    <a href="component-alert.html">Alert</a>
-                                </li>
-                                <li class="submenu-item ">
-                                    <a href="component-badge.html">Badge</a>
-                                </li>
-                                <li class="submenu-item ">
-                                    <a href="component-breadcrumb.html">Breadcrumb</a>
-                                </li>
-                                <li class="submenu-item ">
-                                    <a href="component-button.html">Button</a>
-                                </li>
-                                <li class="submenu-item ">
-                                    <a href="component-card.html">Card</a>
-                                </li>
-                                <li class="submenu-item ">
-                                    <a href="component-carousel.html">Carousel</a>
-                                </li>
-                                <li class="submenu-item ">
-                                    <a href="component-dropdown.html">Dropdown</a>
-                                </li>
-                                <li class="submenu-item ">
-                                    <a href="component-list-group.html">List Group</a>
-                                </li>
-                                <li class="submenu-item ">
-                                    <a href="component-modal.html">Modal</a>
-                                </li>
-                                <li class="submenu-item ">
-                                    <a href="component-navs.html">Navs</a>
-                                </li>
-                                <li class="submenu-item ">
-                                    <a href="component-pagination.html">Pagination</a>
-                                </li>
-                                <li class="submenu-item ">
-                                    <a href="component-progress.html">Progress</a>
-                                </li>
-                                <li class="submenu-item ">
-                                    <a href="component-spinner.html">Spinner</a>
-                                </li>
-                                <li class="submenu-item ">
-                                    <a href="component-tooltip.html">Tooltip</a>
-                                </li>
-                            </ul>
-                        </li>
+                    @endif
 
-                        <li class="sidebar-item  has-sub">
-                            <a href="#" class='sidebar-link'>
-                                <i class="bi bi-collection-fill"></i>
-                                <span>Extra Components</span>
-                            </a>
-                            <ul class="submenu ">
-                                <li class="submenu-item ">
-                                    <a href="extra-component-avatar.html">Avatar</a>
-                                </li>
-                                <li class="submenu-item ">
-                                    <a href="extra-component-sweetalert.html">Sweet Alert</a>
-                                </li>
-                                <li class="submenu-item ">
-                                    <a href="extra-component-toastify.html">Toastify</a>
-                                </li>
-                                <li class="submenu-item ">
-                                    <a href="extra-component-rating.html">Rating</a>
-                                </li>
-                                <li class="submenu-item ">
-                                    <a href="extra-component-divider.html">Divider</a>
-                                </li>
-                            </ul>
-                        </li>
+                @endauth
 
-                        <li class="sidebar-item active has-sub">
-                            <a href="#" class='sidebar-link'>
-                                <i class="bi bi-grid-1x2-fill"></i>
-                                <span>Layouts</span>
-                            </a>
-                            <ul class="submenu active">
-                                <li class="submenu-item ">
-                                    <a href="layout-default.html">Default Layout</a>
-                                </li>
-                                <li class="submenu-item ">
-                                    <a href="layout-vertical-1-column.html">1 Column</a>
-                                </li>
-                                <li class="submenu-item active">
-                                    <a href="layout-vertical-navbar.html">Vertical with Navbar</a>
-                                </li>
-                                <li class="submenu-item ">
-                                    <a href="layout-horizontal.html">Horizontal Menu</a>
-                                </li>
-                            </ul>
-                        </li>
-
-                        <li class="sidebar-title">Forms &amp; Tables</li>
-
-                        <li class="sidebar-item  has-sub">
-                            <a href="#" class='sidebar-link'>
-                                <i class="bi bi-hexagon-fill"></i>
-                                <span>Form Elements</span>
-                            </a>
-                            <ul class="submenu ">
-                                <li class="submenu-item ">
-                                    <a href="form-element-input.html">Input</a>
-                                </li>
-                                <li class="submenu-item ">
-                                    <a href="form-element-input-group.html">Input Group</a>
-                                </li>
-                                <li class="submenu-item ">
-                                    <a href="form-element-select.html">Select</a>
-                                </li>
-                                <li class="submenu-item ">
-                                    <a href="form-element-radio.html">Radio</a>
-                                </li>
-                                <li class="submenu-item ">
-                                    <a href="form-element-checkbox.html">Checkbox</a>
-                                </li>
-                                <li class="submenu-item ">
-                                    <a href="form-element-textarea.html">Textarea</a>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-                <button class="sidebar-toggler btn x"><i data-feather="x"></i></button>
-            </div>
+            </ul>
         </div>
+        <button class="sidebar-toggler btn x"><i data-feather="x"></i></button>
+    </div>
+</div>

@@ -13,9 +13,29 @@ class TransactionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $transactions = Transaction::with('user')->get();
+        $query = Transaction::with('user');
+
+        if ($request->filled('search')) {
+            $query->whereHas('user', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $transactions = $query
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
         return view('admin.transactions.index', compact('transactions'));
     }
 
@@ -25,9 +45,15 @@ class TransactionController extends Controller
     public function create()
     {
         $users = User::where('role', 'warga')->get();
+
         $pickupRequests = PickupRequest::where('status', 'completed')->get();
+
         $redemptions = RewardRedemption::where('status', 'approved')->get();
-        return view('admin.transactions.create', compact('users', 'pickupRequests', 'redemptions'));
+
+        return view(
+            'admin.transactions.create',
+            compact('users', 'pickupRequests', 'redemptions')
+        );
     }
 
     /**
@@ -35,17 +61,21 @@ class TransactionController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'user_id' => 'required|exists:users,user_id',
             'pickup_request_id' => 'nullable|exists:pickup_requests,pickup_request_id',
             'redemption_id' => 'nullable|exists:reward_redemptions,redemption_id',
             'type' => 'required|in:earn,redeem',
             'points' => 'required|integer|min:1',
             'description' => 'nullable|string',
+            'status' => 'required|in:pending,completed,failed,cancelled',
         ]);
 
-        Transaction::create($request->all());
-        return redirect()->route('admin.transactions.index')->with('success', 'Transaksi berhasil ditambahkan');
+        Transaction::create($validated);
+
+        return redirect()
+            ->route('admin.transactions.index')
+            ->with('success', 'Transaksi berhasil ditambahkan');
     }
 
     /**
@@ -54,7 +84,11 @@ class TransactionController extends Controller
     public function show(Transaction $transaction)
     {
         $transaction->load('user', 'pickupRequest', 'redemption');
-        return view('admin.transactions.show', compact('transaction'));
+
+        return view(
+            'admin.transactions.show',
+            compact('transaction')
+        );
     }
 
     /**
@@ -63,9 +97,20 @@ class TransactionController extends Controller
     public function edit(Transaction $transaction)
     {
         $users = User::where('role', 'warga')->get();
+
         $pickupRequests = PickupRequest::where('status', 'completed')->get();
+
         $redemptions = RewardRedemption::where('status', 'approved')->get();
-        return view('admin.transactions.edit', compact('transaction', 'users', 'pickupRequests', 'redemptions'));
+
+        return view(
+            'admin.transactions.edit',
+            compact(
+                'transaction',
+                'users',
+                'pickupRequests',
+                'redemptions'
+            )
+        );
     }
 
     /**
@@ -73,17 +118,21 @@ class TransactionController extends Controller
      */
     public function update(Request $request, Transaction $transaction)
     {
-        $request->validate([
+        $validated = $request->validate([
             'user_id' => 'required|exists:users,user_id',
             'pickup_request_id' => 'nullable|exists:pickup_requests,pickup_request_id',
             'redemption_id' => 'nullable|exists:reward_redemptions,redemption_id',
             'type' => 'required|in:earn,redeem',
             'points' => 'required|integer|min:1',
             'description' => 'nullable|string',
+            'status' => 'required|in:pending,completed,failed,cancelled',
         ]);
 
-        $transaction->update($request->all());
-        return redirect()->route('admin.transactions.index')->with('success', 'Transaksi berhasil diupdate');
+        $transaction->update($validated);
+
+        return redirect()
+            ->route('admin.transactions.index')
+            ->with('success', 'Transaksi berhasil diupdate');
     }
 
     /**
@@ -92,7 +141,10 @@ class TransactionController extends Controller
     public function destroy(Transaction $transaction)
     {
         $transaction->delete();
-        return redirect()->route('admin.transactions.index')->with('success', 'Transaksi berhasil dihapus');
+
+        return redirect()
+            ->route('admin.transactions.index')
+            ->with('success', 'Transaksi berhasil dihapus');
     }
 
     /**
@@ -105,8 +157,13 @@ class TransactionController extends Controller
         ]);
 
         $transaction = Transaction::findOrFail($id);
-        $transaction->update(['status' => $request->status]);
 
-        return redirect()->back()->with('success', 'Status transaksi berhasil diupdate');
+        $transaction->update([
+            'status' => $request->status
+        ]);
+
+        return redirect()
+            ->back()
+            ->with('success', 'Status transaksi berhasil diupdate');
     }
 }

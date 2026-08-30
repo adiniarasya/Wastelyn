@@ -1,201 +1,217 @@
-<!DOCTYPE html>
-<html lang="id">
+@extends('template.layout')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - WasteLyn</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
+@section('title', 'Dashboard Admin - WasteLyn')
 
-<body class="bg-gray-50">
-    <div class="min-h-screen">
-        <!-- Navbar -->
-        <nav class="bg-green-700 text-white p-4 shadow-lg">
-            <div class="container mx-auto flex justify-between items-center">
-                <h1 class="text-2xl font-bold">🌿 WasteLyn Admin</h1>
-                <div class="flex items-center gap-4">
-                    <span>Halo, {{ auth()->user()->name }}</span>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-sm">
-                            Logout
-                        </button>
-                    </form>
+@section('content')
+    <div class="page-heading">
+        <div class="page-title">
+            <div class="row align-items-center">
+                <div class="col-12 col-md-6 order-md-1 order-last">
+                    <h3 class="fw-bold">Dashboard</h3>
+                    <p class="text-subtitle text-muted">Pantau aktivitas platform WasteLyn</p>
                 </div>
-            </div>
-        </nav>
-
-        <!-- Content -->
-        <div class="container mx-auto p-6">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">📊 Dashboard Admin</h2>
-
-            <!-- Stats Users -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500">
-                    <p class="text-gray-500 text-sm">Total Warga</p>
-                    <p class="text-2xl font-bold text-gray-800">{{ $totalWarga }}</p>
-                </div>
-                <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-green-500">
-                    <p class="text-gray-500 text-sm">Total Mitra</p>
-                    <p class="text-2xl font-bold text-gray-800">{{ $totalMitra }}</p>
-                </div>
-                <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-purple-500">
-                    <p class="text-gray-500 text-sm">Total Admin</p>
-                    <p class="text-2xl font-bold text-gray-800">{{ $totalAdmin }}</p>
-                </div>
-                <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-yellow-500">
-                    <p class="text-gray-500 text-sm">Total User</p>
-                    <p class="text-2xl font-bold text-gray-800">{{ $totalUsers }}</p>
-                </div>
-            </div>
-
-            <!-- Stats Transactions & Points -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mt-6">
-                <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-orange-500">
-                    <p class="text-gray-500 text-sm">Total Transaksi</p>
-                    <p class="text-2xl font-bold text-gray-800">{{ $totalTransactions }}</p>
-                </div>
-                <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-red-500">
-                    <p class="text-gray-500 text-sm">Total Pickup</p>
-                    <p class="text-2xl font-bold text-gray-800">{{ $totalPickups }}</p>
-                </div>
-                <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-teal-500">
-                    <p class="text-gray-500 text-sm">Total Bank Sampah</p>
-                    <p class="text-2xl font-bold text-gray-800">{{ $totalWasteBanks }}</p>
-                </div>
-                <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-indigo-500">
-                    <p class="text-gray-500 text-sm">Total Kategori</p>
-                    <p class="text-2xl font-bold text-gray-800">{{ $totalWasteCategories }}</p>
-                </div>
-            </div>
-
-            <!-- Stats Rewards & Missions & Points -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mt-6">
-                <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-pink-500">
-                    <p class="text-gray-500 text-sm">Total Reward</p>
-                    <p class="text-2xl font-bold text-gray-800">{{ $totalRewards }}</p>
-                </div>
-                <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-cyan-500">
-                    <p class="text-gray-500 text-sm">Total Misi</p>
-                    <p class="text-2xl font-bold text-gray-800">{{ $totalMissions }}</p>
-                </div>
-                <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-yellow-500">
-                    <p class="text-gray-500 text-sm">Total Poin Earned</p>
-                    <p class="text-2xl font-bold text-green-600">{{ number_format($totalEarned, 0, ',', '.') }}</p>
-                </div>
-                <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-red-500">
-                    <p class="text-gray-500 text-sm">Total Poin Redeem</p>
-                    <p class="text-2xl font-bold text-red-600">{{ number_format($totalRedeemed, 0, ',', '.') }}</p>
-                </div>
-            </div>
-
-            <!-- Quick Actions -->
-            <div class="mt-6 bg-white rounded-xl shadow-md p-6">
-                <h3 class="font-semibold text-gray-700 mb-4">⚡ Aksi Cepat</h3>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    <a href="{{ route('admin.waste-banks.index') }}"
-                        class="bg-green-50 hover:bg-green-100 p-4 rounded-lg text-center transition">
-                        <div class="text-2xl mb-1">🏪</div>
-                        <span class="text-sm font-medium text-gray-700">Bank Sampah</span>
-                    </a>
-                    <a href="{{ route('admin.waste-categories.index') }}"
-                        class="bg-blue-50 hover:bg-blue-100 p-4 rounded-lg text-center transition">
-                        <div class="text-2xl mb-1">🗑️</div>
-                        <span class="text-sm font-medium text-gray-700">Kategori Sampah</span>
-                    </a>
-                    <a href="{{ route('admin.missions.index') }}"
-                        class="bg-yellow-50 hover:bg-yellow-100 p-4 rounded-lg text-center transition">
-                        <div class="text-2xl mb-1">🎯</div>
-                        <span class="text-sm font-medium text-gray-700">Misi</span>
-                    </a>
-                    <a href="{{ route('admin.rewards.index') }}"
-                        class="bg-purple-50 hover:bg-purple-100 p-4 rounded-lg text-center transition">
-                        <div class="text-2xl mb-1">🎁</div>
-                        <span class="text-sm font-medium text-gray-700">Reward</span>
-                    </a>
-                    <a href="{{ route('admin.pickup-requests.index') }}"
-                        class="bg-orange-50 hover:bg-orange-100 p-4 rounded-lg text-center transition">
-                        <div class="text-2xl mb-1">📦</div>
-                        <span class="text-sm font-medium text-gray-700">Pickup Request</span>
-                    </a>
-                    <a href="{{ route('admin.transactions.index') }}"
-                        class="bg-red-50 hover:bg-red-100 p-4 rounded-lg text-center transition">
-                        <div class="text-2xl mb-1">💰</div>
-                        <span class="text-sm font-medium text-gray-700">Transaksi</span>
-                    </a>
-                    <a href="{{ route('admin.waste-bank-staff.index') }}"
-                        class="bg-indigo-50 hover:bg-indigo-100 p-4 rounded-lg text-center transition">
-                        <div class="text-2xl mb-1">👤</div>
-                        <span class="text-sm font-medium text-gray-700">Staff</span>
-                    </a>
-                    <a href="{{ route('admin.notifications.index') }}"
-                        class="bg-pink-50 hover:bg-pink-100 p-4 rounded-lg text-center transition">
-                        <div class="text-2xl mb-1">🔔</div>
-                        <span class="text-sm font-medium text-gray-700">Notifikasi</span>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Recent Transactions & Pickups -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                <div class="bg-white rounded-xl shadow-md p-6">
-                    <h3 class="font-semibold text-gray-700 mb-4">📝 Transaksi Terbaru</h3>
-                    <div class="space-y-3">
-                        @forelse($recentTransactions as $transaction)
-                            <div class="flex justify-between items-center border-b pb-2">
-                                <div>
-                                    <p class="font-medium text-gray-800">{{ $transaction->user->name ?? 'User' }}</p>
-                                    <p class="text-sm text-gray-500">
-                                        {{ $transaction->created_at->format('d/m/Y H:i') }}</p>
-                                </div>
-                                <div class="text-right">
-                                    <p
-                                        class="font-bold {{ $transaction->type == 'earn' ? 'text-green-600' : 'text-red-600' }}">
-                                        {{ $transaction->type == 'earn' ? '+' : '-' }}
-                                        {{ number_format($transaction->points, 0, ',', '.') }} poin
-                                    </p>
-                                    <span
-                                        class="text-xs px-2 py-1 rounded-full 
-                                    @if ($transaction->type == 'earn') bg-green-100 text-green-800
-                                    @else bg-red-100 text-red-800 @endif">
-                                        {{ $transaction->type }}
-                                    </span>
-                                </div>
-                            </div>
-                        @empty
-                            <p class="text-gray-500 text-center py-4">Belum ada transaksi</p>
-                        @endforelse
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-xl shadow-md p-6">
-                    <h3 class="font-semibold text-gray-700 mb-4">📦 Pickup Terbaru</h3>
-                    <div class="space-y-3">
-                        @forelse($recentPickups as $pickup)
-                            <div class="flex justify-between items-center border-b pb-2">
-                                <div>
-                                    <p class="font-medium text-gray-800">{{ $pickup->user->name ?? 'User' }}</p>
-                                    <p class="text-sm text-gray-500">{{ $pickup->created_at->format('d/m/Y H:i') }}
-                                    </p>
-                                </div>
-                                <span
-                                    class="text-xs px-2 py-1 rounded-full 
-                                @if ($pickup->status == 'completed') bg-green-100 text-green-800
-                                @elseif($pickup->status == 'pending') bg-yellow-100 text-yellow-800
-                                @elseif($pickup->status == 'process') bg-blue-100 text-blue-800
-                                @else bg-red-100 text-red-800 @endif">
-                                    {{ $pickup->status }}
-                                </span>
-                            </div>
-                        @empty
-                            <p class="text-gray-500 text-center py-4">Belum ada pickup</p>
-                        @endforelse
-                    </div>
+                <div class="col-12 col-md-6 order-md-2 order-first">
+                    <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+                        </ol>
+                    </nav>
                 </div>
             </div>
         </div>
-    </div>
-</body>
 
-</html>
+        <section class="section">
+
+            {{-- STATISTIK UTAMA --}}
+            <div class="row g-3">
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="card shadow-sm border-0 rounded-4">
+                        <div class="card-body d-flex align-items-center gap-3">
+                            <div class="bg-primary bg-opacity-10 text-primary rounded-3 p-3">
+                                <i class="bi bi-people-fill fs-2"></i>
+                            </div>
+                            <div>
+                                <div class="fs-2 fw-bold">{{ number_format($totalUsers ?? 0) }}</div>
+                                <div class="text-uppercase small fw-semibold text-secondary">Total User</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="card shadow-sm border-0 rounded-4">
+                        <div class="card-body d-flex align-items-center gap-3">
+                            <div class="bg-success bg-opacity-10 text-success rounded-3 p-3">
+                                <i class="bi bi-handshake fs-2"></i>
+                            </div>
+                            <div>
+                                <div class="fs-2 fw-bold">{{ number_format($totalMitra ?? 0) }}</div>
+                                <div class="text-uppercase small fw-semibold text-secondary">Total Mitra</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="card shadow-sm border-0 rounded-4">
+                        <div class="card-body d-flex align-items-center gap-3">
+                            <div class="bg-warning bg-opacity-10 text-warning rounded-3 p-3">
+                                <i class="bi bi-bullseye fs-2"></i>
+                            </div>
+                            <div>
+                                <div class="fs-2 fw-bold">{{ number_format($totalMissions ?? 0) }}</div>
+                                <div class="text-uppercase small fw-semibold text-secondary">Total Misi</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="card shadow-sm border-0 rounded-4">
+                        <div class="card-body d-flex align-items-center gap-3">
+                            <div class="bg-info bg-opacity-10 text-info rounded-3 p-3">
+                                <i class="bi bi-box-seam fs-2"></i>
+                            </div>
+                            <div>
+                                <div class="fs-2 fw-bold">{{ number_format($totalSetoranKg ?? 0, 0, ',', '.') }} Kg</div>
+                                <div class="text-uppercase small fw-semibold text-secondary">Setoran</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- GRAFIK 7 HARI --}}
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card shadow-sm border-0 rounded-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">Grafik Setoran 7 Hari</h5>
+                            <span class="badge bg-light text-dark">Update otomatis</span>
+                        </div>
+                        <div class="card-body">
+                            <div style="position:relative; height:250px;">
+                                <canvas id="transactionChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4 g-3">
+
+                {{-- Aktivitas Terbaru --}}
+                <div class="col-lg-8">
+                    <div class="card shadow-sm border-0 rounded-4 h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">Aktivitas Terbaru</h5>
+                            <span class="badge bg-light text-dark">Real-time</span>
+                        </div>
+                        <div class="card-body">
+                            @php
+                                $activities = collect();
+                                foreach ($recentTransactions ?? [] as $tx) {
+                                    $activities->push([
+                                        'text' => $tx->user->name ?? 'User' . ' ' . ($tx->type == 'earn' ? 'mendapat' : 'menukarkan') . ' ' . number_format($tx->points) . ' poin',
+                                        'time' => $tx->created_at->diffForHumans(),
+                                    ]);
+                                }
+                                foreach ($recentPickups ?? [] as $pickup) {
+                                    $activities->push([
+                                        'text' => ($pickup->user->name ?? 'User') . ' melakukan pickup ' . $pickup->status,
+                                        'time' => $pickup->created_at->diffForHumans(),
+                                    ]);
+                                }
+                                $activities = $activities->sortByDesc('time')->take(10);
+                            @endphp
+
+                            @forelse($activities as $activity)
+                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                    <span>{{ $activity['text'] }}</span>
+                                    <small class="text-secondary">{{ $activity['time'] }}</small>
+                                </div>
+                            @empty
+                                <p class="text-center text-secondary py-4">Belum ada aktivitas</p>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Pending Approval --}}
+                <div class="col-lg-4">
+                    <div class="card shadow-sm border-0 rounded-4 h-100">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">⏳ Pending Approval</h5>
+                        </div>
+                        <div class="card-body d-flex flex-column gap-3">
+                            <div
+                                class="d-flex justify-content-between align-items-center p-3 bg-warning bg-opacity-10 rounded-3">
+                                <span class="fw-semibold">Mitra</span>
+                                <span class="badge bg-warning rounded-pill fs-6 px-3 py-2">{{ $pendingMitra ?? 0 }}</span>
+                            </div>
+                            <div
+                                class="d-flex justify-content-between align-items-center p-3 bg-primary bg-opacity-10 rounded-3">
+                                <span class="fw-semibold">Setoran</span>
+                                <span class="badge bg-primary rounded-pill fs-6 px-3 py-2">{{ $pendingSetoran ?? 0 }}</span>
+                            </div>
+                            <div
+                                class="d-flex justify-content-between align-items-center p-3 bg-success bg-opacity-10 rounded-3">
+                                <span class="fw-semibold">Reward</span>
+                                <span class="badge bg-success rounded-pill fs-6 px-3 py-2">{{ $pendingReward ?? 0 }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+    </div>
+@endsection
+
+@push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const labels = @json($chartLabels);
+            const data = @json($chartData);
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Setoran (Kg)',
+                        data: data,
+                        backgroundColor: 'rgba(46, 125, 50, 0.6)',
+                        borderColor: '#2E7D32',
+                        borderWidth: 2,
+                        borderRadius: 6,
+                        barPercentage: 0.6,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#2E7D32',
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            cornerRadius: 8,
+                            padding: 10,
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1, font: { size: 12 } },
+                            grid: { color: 'rgba(0,0,0,0.05)' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+@endpush

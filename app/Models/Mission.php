@@ -14,14 +14,11 @@ class Mission extends Model
     protected $fillable = [
         'title',
         'description',
-        'category',
-        'target_amount',
-        'target_unit',
-        'duration_days',
-        'xp_reward',
-        'points_reward',
-        'min_level',
-        'icon',
-        'is_active',
+        'target',
+        'reward_xp',
+        'reward_points',
+        'start_date',
+        'end_date',
+        'status',
     ];
 }

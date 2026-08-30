@@ -8,77 +8,43 @@ use Illuminate\Http\Request;
 
 class AiChatMessageController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index($sessionId)
     {
-        $messages = AiChatMessage::with('session')->get();
-        return view('admin.ai-chat-messages.index', compact('messages'));
+        $messages = AiChatMessage::where('session_id', $sessionId)
+            ->whereHas('session', fn($q) => $q->where('user_id', auth()->id()))
+            ->get();
+        return response()->json($messages);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        $sessions = AiChatSession::all();
-        return view('admin.ai-chat-messages.create', compact('sessions'));
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $request->validate([
-            'session_id' => 'required|exists:ai_chat_sessions,session_id',
-            'role' => 'required|in:user,assistant,system',
-            'content' => 'required|string',
+            'session_id' => 'required|exists:ai_chat_sessions,id',
+            'message' => 'required|string',
+            'sender' => 'required|in:user,ai',
         ]);
 
-        AiChatMessage::create($request->all());
-        return redirect()->route('admin.ai-chat-messages.index')->with('success', 'Pesan berhasil ditambahkan');
-    }
+        $session = AiChatSession::where('user_id', auth()->id())->findOrFail($request->session_id);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(AiChatMessage $aiChatMessage)
-    {
-        return view('admin.ai-chat-messages.show', compact('aiChatMessage'));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(AiChatMessage $aiChatMessage)
-    {
-        $sessions = AiChatSession::all();
-        return view('admin.ai-chat-messages.edit', compact('aiChatMessage', 'sessions'));
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, AiChatMessage $aiChatMessage)
-    {
-        $request->validate([
-            'session_id' => 'required|exists:ai_chat_sessions,session_id',
-            'role' => 'required|in:user,assistant,system',
-            'content' => 'required|string',
+        $message = AiChatMessage::create([
+            'session_id' => $session->id,
+            'message' => $request->message,
+            'sender' => $request->sender,
         ]);
 
-        $aiChatMessage->update($request->all());
-        return redirect()->route('admin.ai-chat-messages.index')->with('success', 'Pesan berhasil diupdate');
+        return response()->json($message);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(AiChatMessage $aiChatMessage)
+    public function show($id)
     {
-        $aiChatMessage->delete();
-        return redirect()->route('admin.ai-chat-messages.index')->with('success', 'Pesan berhasil dihapus');
+        $message = AiChatMessage::whereHas('session', fn($q) => $q->where('user_id', auth()->id()))->findOrFail($id);
+        return response()->json($message);
+    }
+
+    public function destroy($id)
+    {
+        $message = AiChatMessage::whereHas('session', fn($q) => $q->where('user_id', auth()->id()))->findOrFail($id);
+        $message->delete();
+        return response()->json(['success' => true]);
     }
 }
