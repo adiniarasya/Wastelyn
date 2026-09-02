@@ -22,7 +22,7 @@ Route::get('/', function () {
     return view('landing');
 })->name('landing');
 
-// ========== ROUTE BREEZE ==========
+
 Route::middleware('guest')->group(function () {
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
         ->name('login');
@@ -36,7 +36,6 @@ Route::middleware('auth')->group(function () {
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
 });
-// ========== END ROUTE BREEZE ==========
 
 Route::get('/home', function () {
     $user = auth()->user();
@@ -67,6 +66,8 @@ Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function
     Route::get('/users/{id}/edit', [AdminUserController::class, 'edit'])->name('users.edit');
     Route::put('/users/{id}', [AdminUserController::class, 'update'])->name('users.update');
     Route::delete('/users/{id}', [AdminUserController::class, 'destroy'])->name('users.destroy');
+    Route::patch('/users/{id}/approve', [AdminUserController::class, 'approve'])->name('users.approve');
+    Route::patch('/users/{id}/reject', [AdminUserController::class, 'reject'])->name('users.reject');
 
     // Mission Management
     Route::get('/missions', [MissionController::class, 'index'])->name('missions.index');

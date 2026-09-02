@@ -22,48 +22,33 @@ class AuthenticatedSessionController extends Controller
 
         $user = Auth::user();
 
-        /*
-         * Pastikan role yang dipilih di form login
-         * sama dengan role yang ada di database.
-         */
-        if ($user->role !== $request->role) {
-            Auth::logout();
-
-            return back()
-                ->withErrors([
-                    'role' => 'Role yang dipilih tidak sesuai dengan akun ini.',
-                ])
-                ->withInput($request->only('email', 'role'));
-        }
-
-        /*
-         * MITRA YANG BELUM DISETUJUI
-         */
-        if ($user->role === 'mitra' && $user->status !== 'approved') {
+        if ($user->status !== 'active') {
             Auth::logout();
 
             $message = match ($user->status) {
-                'pending' => 'Akun Mitra kamu masih menunggu persetujuan Admin.',
-                'rejected' => 'Pendaftaran Mitra kamu ditolak oleh Admin.',
-                default => 'Akun Mitra kamu belum dapat digunakan.',
+                'pending' => $user->role === 'mitra'
+                ? 'Akun Mitra kamu masih menunggu persetujuan Admin.'
+                : 'Akun kamu masih menunggu persetujuan Admin.',
+                'rejected' => $user->role === 'mitra'
+                ? 'Pendaftaran Mitra kamu ditolak oleh Admin.'
+                : 'Akun kamu ditolak oleh Admin.',
+                'inactive' => 'Akun kamu sedang dinonaktifkan oleh Admin.',
+                default => 'Akun kamu belum dapat digunakan.',
             };
 
             return back()
                 ->withErrors([
                     'email' => $message,
                 ])
-                ->withInput($request->only('email', 'role'));
+                ->withInput($request->only('email'));
         }
 
         $request->session()->regenerate();
 
         return match ($user->role) {
             'admin' => redirect()->intended('/admin/dashboard'),
-
             'mitra' => redirect()->intended('/mitra/dashboard'),
-
             'warga' => redirect()->intended('/user/dashboard'),
-
             default => redirect('/'),
         };
     }

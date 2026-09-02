@@ -10,9 +10,6 @@ use Illuminate\Support\Facades\Storage;
 
 class AdminUserController extends Controller
 {
-    /**
-     * Menampilkan daftar user + search.
-     */
     public function index(Request $request)
     {
         $users = $this->getFilteredUsers($request)
@@ -22,9 +19,6 @@ class AdminUserController extends Controller
         return view('admin.users.index', compact('users'));
     }
 
-    /**
-     * Export data user ke PDF.
-     */
     public function exportPdf(Request $request)
     {
         $users = $this->getFilteredUsers($request)->get();
@@ -35,9 +29,6 @@ class AdminUserController extends Controller
         return $pdf->download('data-user-wastelyn.pdf');
     }
 
-    /**
-     * Query user dengan filter pencarian.
-     */
     private function getFilteredUsers(Request $request)
     {
         $query = User::query();
@@ -56,17 +47,11 @@ class AdminUserController extends Controller
         return $query->orderBy('user_id', 'desc');
     }
 
-    /**
-     * Form tambah user.
-     */
     public function create()
     {
         return view('admin.users.create');
     }
 
-    /**
-     * Simpan user baru.
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -79,7 +64,6 @@ class AdminUserController extends Controller
             'role' => 'required|in:warga,mitra,admin',
         ]);
 
-        // Status otomatis berdasarkan role
         $status = $request->role === 'mitra'
             ? 'pending'
             : 'active';
@@ -97,7 +81,6 @@ class AdminUserController extends Controller
             'level' => 1,
         ];
 
-        // Upload foto
         if ($request->hasFile('photo')) {
             $data['photo'] = $request->file('photo')
                 ->store('users', 'public');
@@ -110,9 +93,6 @@ class AdminUserController extends Controller
             ->with('success', 'User berhasil ditambahkan.');
     }
 
-    /**
-     * Detail user.
-     */
     public function show(string $id)
     {
         $user = User::findOrFail($id);
@@ -120,9 +100,6 @@ class AdminUserController extends Controller
         return view('admin.users.show', compact('user'));
     }
 
-    /**
-     * Form edit user.
-     */
     public function edit(string $id)
     {
         $user = User::findOrFail($id);
@@ -130,9 +107,6 @@ class AdminUserController extends Controller
         return view('admin.users.edit', compact('user'));
     }
 
-    /**
-     * Update user.
-     */
     public function update(Request $request, string $id)
     {
         $user = User::findOrFail($id);
@@ -146,6 +120,7 @@ class AdminUserController extends Controller
             'address' => 'nullable|string',
             'photo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'role' => 'required|in:warga,mitra,admin',
+            'status' => 'required|in:active,pending,rejected,inactive',
         ]);
 
         $data = $request->only([
@@ -154,9 +129,9 @@ class AdminUserController extends Controller
             'phone',
             'address',
             'role',
+            'status',
         ]);
 
-        // Jika role berubah menjadi mitra
         if (
             $request->role === 'mitra' &&
             $user->role !== 'mitra'
@@ -164,7 +139,6 @@ class AdminUserController extends Controller
             $data['status'] = 'pending';
         }
 
-        // Jika mitra diubah menjadi warga atau admin
         if (
             $request->role !== 'mitra' &&
             $user->role === 'mitra'
@@ -172,15 +146,11 @@ class AdminUserController extends Controller
             $data['status'] = 'active';
         }
 
-        // Update password jika diisi
         if ($request->filled('password')) {
             $data['password'] = Hash::make($request->password);
         }
 
-        // Upload foto baru
         if ($request->hasFile('photo')) {
-
-            // Hapus foto lama
             if (
                 $user->photo &&
                 Storage::disk('public')->exists($user->photo)
@@ -188,7 +158,6 @@ class AdminUserController extends Controller
                 Storage::disk('public')->delete($user->photo);
             }
 
-            // Simpan foto baru
             $data['photo'] = $request->file('photo')
                 ->store('users', 'public');
         }
@@ -200,14 +169,10 @@ class AdminUserController extends Controller
             ->with('success', 'User berhasil diperbarui.');
     }
 
-    /**
-     * Setujui Mitra / Bank Sampah.
-     */
     public function approve(string $id)
     {
         $user = User::findOrFail($id);
 
-        // Hanya mitra yang bisa disetujui
         if ($user->role !== 'mitra') {
             return redirect()
                 ->route('admin.users.index')
@@ -223,14 +188,10 @@ class AdminUserController extends Controller
             ->with('success', 'Mitra Bank Sampah berhasil disetujui.');
     }
 
-    /**
-     * Tolak Mitra / Bank Sampah.
-     */
     public function reject(string $id)
     {
         $user = User::findOrFail($id);
 
-        // Hanya mitra yang bisa ditolak
         if ($user->role !== 'mitra') {
             return redirect()
                 ->route('admin.users.index')
@@ -246,21 +207,16 @@ class AdminUserController extends Controller
             ->with('success', 'Mitra Bank Sampah ditolak.');
     }
 
-    /**
-     * Hapus user.
-     */
     public function destroy(string $id)
     {
         $user = User::findOrFail($id);
 
-        // Tidak boleh menghapus akun sendiri
         if ($user->user_id === auth()->id()) {
             return redirect()
                 ->route('admin.users.index')
                 ->with('error', 'Tidak bisa menghapus akun sendiri.');
         }
 
-        // Hapus foto dari storage
         if (
             $user->photo &&
             Storage::disk('public')->exists($user->photo)

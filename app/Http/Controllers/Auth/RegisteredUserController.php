@@ -58,7 +58,7 @@ class RegisteredUserController extends Controller
         // Mitra harus menunggu persetujuan admin.
         $status = $request->role === 'mitra'
             ? 'pending'
-            : 'approved';
+            : 'active';
 
         $user = User::create([
             'name' => $request->name,

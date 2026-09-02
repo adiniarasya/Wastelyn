@@ -8,17 +8,14 @@
 
     <section class="section">
 
-        {{-- Container agar form berada di tengah --}}
         <div class="d-flex justify-content-center align-items-center"
              style="min-height: 75vh;">
 
-            {{-- Card Form --}}
             <div class="card shadow-sm border-0"
                  style="width: 500px; max-width: 100%;">
 
                 <div class="card-body p-4">
 
-                    {{-- Judul --}}
                     <div class="mb-4">
                         <a href="{{ route('admin.users.index') }}"
                            class="text-decoration-none text-dark">
@@ -34,7 +31,6 @@
                         @csrf
                         @method('PUT')
 
-                        {{-- Foto Profil --}}
                         <div class="text-center mb-4">
 
                             @if($user->photo)
@@ -52,8 +48,6 @@
 
                         </div>
 
-
-                        {{-- Nama --}}
                         <div class="row align-items-center mb-3">
 
                             <div class="col-4 text-end">
@@ -79,8 +73,6 @@
 
                         </div>
 
-
-                        {{-- Email --}}
                         <div class="row align-items-center mb-3">
 
                             <div class="col-4 text-end">
@@ -106,8 +98,6 @@
 
                         </div>
 
-
-                        {{-- No HP --}}
                         <div class="row align-items-center mb-3">
 
                             <div class="col-4 text-end">
@@ -126,8 +116,6 @@
 
                         </div>
 
-
-                        {{-- Alamat --}}
                         <div class="row align-items-center mb-3">
 
                             <div class="col-4 text-end">
@@ -145,8 +133,6 @@
 
                         </div>
 
-
-                        {{-- Role --}}
                         <div class="row align-items-center mb-3">
 
                             <div class="col-4 text-end">
@@ -183,8 +169,6 @@
 
                         </div>
 
-
-                        {{-- Status --}}
                         <div class="row align-items-center mb-3">
 
                             <div class="col-4 text-end">
@@ -197,7 +181,8 @@
 
                                 <select id="status"
                                         name="status"
-                                        class="form-select form-select-sm">
+                                        class="form-select form-select-sm"
+                                        required>
 
                                     <option value="active"
                                         {{ old('status', $user->status) == 'active' ? 'selected' : '' }}>
@@ -209,6 +194,11 @@
                                         Pending
                                     </option>
 
+                                    <option value="rejected"
+                                        {{ old('status', $user->status) == 'rejected' ? 'selected' : '' }}>
+                                        Ditolak
+                                    </option>
+
                                     <option value="inactive"
                                         {{ old('status', $user->status) == 'inactive' ? 'selected' : '' }}>
                                         Nonaktif
@@ -216,12 +206,16 @@
 
                                 </select>
 
+                                @error('status')
+                                    <div class="invalid-feedback">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
+
                             </div>
 
                         </div>
 
-
-                        {{-- XP --}}
                         <div class="row align-items-center mb-3">
 
                             <div class="col-4 text-end">
@@ -239,8 +233,6 @@
 
                         </div>
 
-
-                        {{-- Point --}}
                         <div class="row align-items-center mb-3">
 
                             <div class="col-4 text-end">
@@ -258,8 +250,6 @@
 
                         </div>
 
-
-                        {{-- Foto --}}
                         <div class="row align-items-center mb-4">
 
                             <div class="col-4 text-end">
@@ -278,8 +268,6 @@
 
                         </div>
 
-
-                        {{-- Password --}}
                         <div class="border-top pt-3 mt-3 mb-3">
 
                             <small class="text-muted">
@@ -303,10 +291,15 @@
                                        name="password"
                                        class="form-control form-control-sm"
                                        placeholder="Password baru">
+
+                                @error('password')
+                                    <div class="invalid-feedback">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
                             </div>
 
                         </div>
-
 
                         <div class="row align-items-center mb-4">
 
@@ -327,8 +320,6 @@
 
                         </div>
 
-
-                        {{-- Tombol --}}
                         <div class="d-flex justify-content-center gap-2 mt-4">
 
                             <button type="submit"
