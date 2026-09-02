@@ -55,6 +55,16 @@ class User extends Authenticatable
         return $this->role === 'warga';
     }
 
+    public function isPending()
+    {
+        return $this->status === 'pending';
+    }
+
+    public function isApproved()
+    {
+        return $this->status === 'approved';
+    }
+
     public function addXp($amount)
     {
         $this->xp += $amount;
@@ -75,22 +85,24 @@ class User extends Authenticatable
             $this->save();
             return true;
         }
+
         return false;
     }
 
     public function updateLevel()
     {
         if ($this->xp >= 1000) {
-            $this->level = 5; // Eco Legend
+            $this->level = 5;
         } elseif ($this->xp >= 801) {
-            $this->level = 4; // Green Master
+            $this->level = 4;
         } elseif ($this->xp >= 501) {
-            $this->level = 3; // Green Warrior
+            $this->level = 3;
         } elseif ($this->xp >= 201) {
-            $this->level = 2; // Green Explorer
+            $this->level = 2;
         } else {
-            $this->level = 1; // Green Newbie
+            $this->level = 1;
         }
+
         $this->save();
     }
 
@@ -103,6 +115,8 @@ class User extends Authenticatable
             4 => 'Green Master',
             5 => 'Eco Legend',
         ];
+
         return $levels[$this->level] ?? 'Green Newbie';
     }
 }
+

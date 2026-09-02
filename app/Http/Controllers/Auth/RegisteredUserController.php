@@ -32,21 +32,70 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+
+            'email' => [
+                'required',
+                'string',
+                'lowercase',
+                'email',
+                'max:255',
+                'unique:' . User::class
+            ],
+
+            'role' => [
+                'required',
+                'in:warga,mitra'
+            ],
+
+            'password' => [
+                'required',
+                'confirmed',
+                Rules\Password::defaults()
+            ],
         ]);
+
+        // Warga langsung disetujui.
+        // Mitra harus menunggu persetujuan admin.
+        $status = $request->role === 'mitra'
+            ? 'pending'
+            : 'approved';
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => 'warga',
+            'role' => $request->role,
+            'status' => $status,
+            'xp' => 0,
+            'points' => 0,
+            'level' => 1,
         ]);
 
         event(new Registered($user));
 
+        /*
+         * MITRA
+         *
+         * Jangan langsung login karena masih menunggu
+         * persetujuan Admin.
+         */
+        if ($user->role === 'mitra') {
+            return redirect()
+                ->route('login')
+                ->with(
+                    'status',
+                    'Pendaftaran sebagai Mitra berhasil. Akun kamu sedang menunggu persetujuan Admin.'
+                );
+        }
+
+        /*
+         * WARGA
+         *
+         * Warga langsung login.
+         */
         Auth::login($user);
 
         return redirect(RouteServiceProvider::HOME);
     }
 }
+

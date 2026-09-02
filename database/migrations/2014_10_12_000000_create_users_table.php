@@ -19,11 +19,19 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
 
+            // Role user
             $table->enum('role', [
                 'admin',
                 'mitra',
                 'warga'
             ])->default('warga');
+
+            // Status akun
+            $table->enum('status', [
+                'pending',
+                'approved',
+                'rejected'
+            ])->default('approved');
 
             $table->string('phone', 20)->nullable();
             $table->text('address')->nullable();
