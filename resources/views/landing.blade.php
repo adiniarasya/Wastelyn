@@ -124,8 +124,7 @@
     </style>
 </head>
 <body>
-
-    <!-- ==================== NAVBAR ==================== -->
+    
     <nav id="navbar" class="fixed w-full top-0 z-50 transition-all duration-300 py-3">
         <div class="container mx-auto px-4 md:px-6">
             <div class="flex justify-between items-center">
@@ -175,7 +174,6 @@
         </div>
     </nav>
 
-    <!-- ==================== HERO ==================== -->
     <section class="hero-pattern min-h-screen flex items-center pt-20 relative overflow-hidden">
         <div class="absolute top-20 right-10 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
         <div class="absolute bottom-20 left-10 w-80 h-80 bg-tech/5 rounded-full blur-3xl"></div>
@@ -290,7 +288,6 @@
         </div>
     </section>
 
-    <!-- ==================== FEATURES ==================== -->
     <section id="features" class="py-24 bg-white">
         <div class="container mx-auto px-4 md:px-6">
             <div class="text-center max-w-3xl mx-auto mb-16">
