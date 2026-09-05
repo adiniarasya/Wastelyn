@@ -8,9 +8,6 @@ use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         User::create([
@@ -25,6 +22,7 @@ class UserSeeder extends Seeder
             'points' => 0,
             'level' => 1,
             'email_verified_at' => now(),
+            'status' => 'approved',
         ]);
 
         User::create([
@@ -39,6 +37,7 @@ class UserSeeder extends Seeder
             'points' => 0,
             'level' => 1,
             'email_verified_at' => now(),
+            'status' => 'approved',
         ]);
 
         User::create([
@@ -53,6 +52,7 @@ class UserSeeder extends Seeder
             'points' => 0,
             'level' => 1,
             'email_verified_at' => now(),
+            'status' => 'approved',
         ]);
     }
 }

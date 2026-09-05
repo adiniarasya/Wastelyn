@@ -26,11 +26,12 @@ return new class extends Migration
                 'warga'
             ])->default('warga');
 
-            // Status akun
             $table->enum('status', [
+                'active', 
                 'pending',
-                'approved',
-                'rejected'
+                'approved', 
+                'rejected',
+                'Inactive' 
             ])->default('approved');
 
             $table->string('phone', 20)->nullable();
