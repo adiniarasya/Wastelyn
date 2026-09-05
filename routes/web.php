@@ -110,11 +110,13 @@ Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function
     Route::put('/settings', [AdminSettingsController::class, 'update'])->name('settings.update');
 });
 
-Route::middleware('role:mitra')->prefix('mitra')->name('mitra.')->group(function () {
+Route::middleware(['auth', 'role:mitra'])->prefix('mitra')->name('mitra.')->group(function () {
+
     Route::get('/dashboard', [MitraController::class, 'dashboard'])->name('dashboard');
 
-    Route::get('/pickup-requests', [PickupRequestController::class, 'index'])->name('pickup-requests.index');
-    Route::get('/pickup-requests/{id}', [PickupRequestController::class, 'show'])->name('pickup-requests.show');
+Route::get('/pickup-requests', [PickupRequestController::class, 'mitraIndex'])
+    ->name('pickup-requests.index');
+    Route::get('/pickup-requests/{id}', [PickupRequestController::class, 'mitraShow'])->name('pickup-requests.show');
     Route::put('/pickup-requests/{id}/status', [PickupRequestController::class, 'updateStatus'])->name('pickup-requests.status');
 
     Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
