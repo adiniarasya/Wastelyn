@@ -18,6 +18,8 @@ class UserMission extends Model
         'status',
         'started_at',
         'completed_at',
+        'created_at',
+        'updated_at',
     ];
 
     public function user()

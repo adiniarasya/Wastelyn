@@ -14,8 +14,8 @@ class UserMissionController extends Controller
      */
     public function index()
     {
-        $userMissions = UserMission::with('user', 'mission')->get();
-        return view('admin.user-missions.index', compact('userMissions'));
+        $missions = Mission::where('status', 'active')->get();
+        return view('user.user-missions', compact('missions'));
     }
 
     /**
@@ -25,7 +25,7 @@ class UserMissionController extends Controller
     {
         $users = User::where('role', 'warga')->get();
         $missions = Mission::where('status', 'active')->get();
-        return view('admin.user-missions.create', compact('users', 'missions'));
+        return view('user.user-missions.create', compact('users', 'missions'));
     }
 
     /**
@@ -41,7 +41,7 @@ class UserMissionController extends Controller
         ]);
 
         UserMission::create($request->all());
-        return redirect()->route('admin.user-missions.index')->with('success', 'User mission berhasil ditambahkan');
+        return redirect()->route('user.user_missions.index')->with('success', 'User mission berhasil ditambahkan');
     }
 
     /**
@@ -50,7 +50,7 @@ class UserMissionController extends Controller
     public function show(UserMission $userMission)
     {
         $userMission->load('user', 'mission', 'progressLogs');
-        return view('admin.user-missions.show', compact('userMission'));
+        return view('user.user_missions.show', compact('userMission'));
     }
 
     /**
@@ -60,7 +60,7 @@ class UserMissionController extends Controller
     {
         $users = User::where('role', 'warga')->get();
         $missions = Mission::where('status', 'active')->get();
-        return view('admin.user-missions.edit', compact('userMission', 'users', 'missions'));
+        return view('user.user_missions.edit', compact('userMission', 'users', 'missions'));
     }
 
     /**
@@ -76,7 +76,7 @@ class UserMissionController extends Controller
         ]);
 
         $userMission->update($request->all());
-        return redirect()->route('admin.user-missions.index')->with('success', 'User mission berhasil diupdate');
+        return redirect()->route('user.user_missions.index')->with('success', 'User mission berhasil diupdate');
     }
 
     /**
@@ -85,7 +85,7 @@ class UserMissionController extends Controller
     public function destroy(UserMission $userMission)
     {
         $userMission->delete();
-        return redirect()->route('admin.user-missions.index')->with('success', 'User mission berhasil dihapus');
+        return redirect()->route('user.user_missions.index')->with('success', 'User mission berhasil dihapus');
     }
 
     /**
