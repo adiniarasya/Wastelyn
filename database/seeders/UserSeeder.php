@@ -22,7 +22,7 @@ class UserSeeder extends Seeder
             'points' => 0,
             'level' => 1,
             'email_verified_at' => now(),
-            'status' => 'approved',
+            'status' => 'active',
         ]);
 
         User::create([
@@ -37,7 +37,7 @@ class UserSeeder extends Seeder
             'points' => 0,
             'level' => 1,
             'email_verified_at' => now(),
-            'status' => 'approved',
+            'status' => 'active',
         ]);
 
         User::create([
@@ -52,7 +52,7 @@ class UserSeeder extends Seeder
             'points' => 0,
             'level' => 1,
             'email_verified_at' => now(),
-            'status' => 'approved',
+            'status' => 'active',
         ]);
     }
 }
