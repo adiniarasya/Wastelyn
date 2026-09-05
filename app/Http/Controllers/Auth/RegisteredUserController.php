@@ -54,8 +54,7 @@ class RegisteredUserController extends Controller
             ],
         ]);
 
-        // Warga langsung disetujui.
-        // Mitra harus menunggu persetujuan admin.
+    
         $status = $request->role === 'mitra'
             ? 'pending'
             : 'active';
