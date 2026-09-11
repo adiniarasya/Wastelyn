@@ -16,7 +16,7 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h4 class="card-title">Daftar Mission</h4>
 
-                    <a href="{{ route('admin.missions.create') }}" class="btn btn-primary">
+                    <a href="{{ route('mitra.missions.create') }}" class="btn btn-primary">
                         <i class="bi bi-plus-circle"></i>
                         Tambah Mission
                     </a>
@@ -87,17 +87,17 @@
                                         <td>
                                             <div class="d-flex justify-content-center gap-1">
 
-                                                <a href="{{ route('admin.missions.show', $mission->mission_id) }}"
+                                                <a href="{{ route('mitra.missions.show', $mission->mission_id) }}"
                                                     class="btn btn-sm btn-outline-info">
                                                     <i class="bi bi-eye"></i>
                                                 </a>
 
-                                                <a href="{{ route('admin.missions.edit', $mission->mission_id) }}"
+                                                <a href="{{ route('mitra.missions.edit', $mission->mission_id) }}"
                                                     class="btn btn-sm btn-outline-warning">
                                                     <i class="bi bi-pencil"></i>
                                                 </a>
 
-                                                <form action="{{ route('admin.missions.destroy', $mission->mission_id) }}"
+                                                <form action="{{ route('mitra.missions.destroy', $mission->mission_id) }}"
                                                     method="POST" class="d-inline"
                                                     onsubmit="return confirm('Yakin ingin menghapus mission ini?')">
 

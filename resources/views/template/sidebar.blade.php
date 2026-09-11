@@ -134,6 +134,22 @@
                             </a>
                         </li>
 
+                        {{-- >>> MENU BARU: MISSION & REWARD <<< --}}
+                        <li class="sidebar-item {{ request()->routeIs('mitra.missions.*') ? 'active' : '' }}">
+                            <a href="{{ route('mitra.missions.index') }}" class="sidebar-link">
+                                <i class="bi bi-bullseye"></i>
+                                <span>Kelola Mission</span>
+                            </a>
+                        </li>
+
+                        <li class="sidebar-item {{ request()->routeIs('mitra.rewards.*') ? 'active' : '' }}">
+                            <a href="{{ route('mitra.rewards.index') }}" class="sidebar-link">
+                                <i class="bi bi-gift"></i>
+                                <span>Kelola Reward</span>
+                            </a>
+                        </li>
+                        {{-- >>> SELESAI <<< --}}
+
                         <li class="sidebar-title">Akun</li>
 
                         <li class="sidebar-item {{ request()->routeIs('mitra.profile') ? 'active' : '' }}">

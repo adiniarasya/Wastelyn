@@ -16,7 +16,7 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h4 class="card-title">Daftar Reward</h4>
 
-                    <a href="{{ route('admin.rewards.create') }}" class="btn btn-primary">
+                    <a href="{{ route('mitra.rewards.create') }}" class="btn btn-primary">
                         <i class="bi bi-plus-circle"></i>
                         Tambah Reward
                     </a>
@@ -85,17 +85,17 @@
                                         <td>
                                             <div class="d-flex justify-content-center gap-1">
 
-                                                <a href="{{ route('admin.rewards.show', $reward->reward_id) }}"
+                                                <a href="{{ route('mitra.rewards.show', $reward->reward_id) }}"
                                                     class="btn btn-sm btn-outline-info">
                                                     <i class="bi bi-eye"></i>
                                                 </a>
 
-                                                <a href="{{ route('admin.rewards.edit', $reward->reward_id) }}"
+                                                <a href="{{ route('mitra.rewards.edit', $reward->reward_id) }}"
                                                     class="btn btn-sm btn-outline-warning">
                                                     <i class="bi bi-pencil"></i>
                                                 </a>
 
-                                                <form action="{{ route('admin.rewards.destroy', $reward->reward_id) }}"
+                                                <form action="{{ route('mitra.rewards.destroy', $reward->reward_id) }}"
                                                     method="POST" class="d-inline"
                                                     onsubmit="return confirm('Yakin ingin menghapus reward ini?')">
 

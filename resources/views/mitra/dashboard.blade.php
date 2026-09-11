@@ -124,6 +124,7 @@
                         </div>
                     </div>
                 </div>
+                
 
                 {{-- Aktivitas Terbaru --}}
                 <div class="col-lg-8">
