@@ -18,4 +18,9 @@ class WasteCategory extends Model
         'icon',
         'is_active',
     ];
+
+    public function pickupItems()
+    {
+        return $this->hasMany(PickupItem::class, 'category_id', 'category_id');
+    }
 }

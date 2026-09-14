@@ -8,6 +8,7 @@
     </a>
 
     <div class="row g-4">
+        {{-- KOLOM KIRI: INFO & AKSI --}}
         <div class="col-md-6">
             <div class="card card-stat">
                 <div class="card-header bg-white fw-semibold">Informasi Permintaan</div>
@@ -19,7 +20,7 @@
                         </tr>
                         <tr>
                             <td class="text-muted">Alamat</td>
-                            <td>: {{ $pickupRequest->address ?? $pickupRequest->alamat ?? '-' }}</td>
+                            <td>: {{ $pickupRequest->address ?? '-' }}</td>
                         </tr>
                         <tr>
                             <td class="text-muted">Metode</td>
@@ -39,12 +40,25 @@
                         </tr>
                         <tr>
                             <td class="text-muted">Status</td>
-                            <td>: <span class="badge bg-info text-dark text-capitalize">{{ $pickupRequest->status }}</span></td>
+                            <td>:
+                                @php
+                                    $badge = match($pickupRequest->status) {
+                                        'pending' => 'bg-warning text-dark',
+                                        'accepted' => 'bg-info text-dark',
+                                        'scheduled' => 'bg-primary',
+                                        'completed' => 'bg-success',
+                                        'rejected' => 'bg-danger',
+                                        default => 'bg-secondary',
+                                    };
+                                @endphp
+                                <span class="badge {{ $badge }} text-capitalize">{{ $pickupRequest->status }}</span>
+                            </td>
                         </tr>
                     </table>
                 </div>
             </div>
 
+            {{-- Aksi: Ambil / Jadwalkan / Tolak --}}
             @if (is_null($pickupRequest->mitra_id))
                 <div class="card card-stat mt-4">
                     <div class="card-body text-center py-4">
@@ -88,52 +102,110 @@
             @endif
         </div>
 
+        {{-- KOLOM KANAN: ITEM & VERIFIKASI --}}
         <div class="col-md-6">
+            {{-- Daftar item yang diajukan warga --}}
+            <div class="card card-stat mb-4">
+                <div class="card-header bg-white fw-semibold">
+                    Item yang Diajukan Warga
+                    <span class="badge bg-secondary">{{ $pickupRequest->items->count() ?? 0 }}</span>
+                </div>
+                <div class="card-body">
+                    @forelse ($pickupRequest->items as $item)
+                        <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                            <div>
+                                <strong>{{ $item->category->name ?? 'Sampah' }}</strong>
+                                <br>
+                                <small class="text-muted">
+                                    Estimasi: {{ $item->weight ?? 0 }} kg
+                                    @if($item->category->price_per_kg)
+                                        · Rp {{ number_format($item->category->price_per_kg, 0, ',', '.') }}/kg
+                                    @endif
+                                </small>
+                            </div>
+                            <span class="badge bg-light text-dark">#{{ $item->pickup_item_id }}</span>
+                        </div>
+                    @empty
+                        <p class="text-muted mb-0">Tidak ada item.</p>
+                    @endforelse
+                </div>
+            </div>
+
+            {{-- Hasil Verifikasi (jika sudah completed) --}}
             @if ($pickupRequest->status === 'completed')
-                <div class="card card-stat">
-                    <div class="card-header bg-white fw-semibold">Hasil Verifikasi</div>
+                <div class="card card-stat border-success">
+                    <div class="card-header bg-success text-white fw-semibold">Hasil Verifikasi</div>
                     <div class="card-body">
                         <table class="table table-borderless mb-0">
                             <tr>
-                                <td class="text-muted" width="150">Jenis Sampah</td>
-                                <td>: {{ $pickupRequest->jenis_sampah ?? '-' }}</td>
-                            </tr>
-                            <tr>
-                                <td class="text-muted">Berat Aktual</td>
+                                <td class="text-muted" width="150">Berat Aktual</td>
                                 <td>: {{ $pickupRequest->berat_aktual ?? 0 }} kg</td>
                             </tr>
                             <tr>
                                 <td class="text-muted">Total Harga</td>
-                                <td>: Rp {{ number_format($pickupRequest->total_harga ?? 0, 0, ',', '.') }}</td>
+                                <td>: <strong class="text-success">Rp {{ number_format($pickupRequest->total_harga ?? 0, 0, ',', '.') }}</strong></td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">XP</td>
+                                <td>: <span class="badge bg-primary">+{{ $pickupRequest->xp_earned ?? 0 }} XP</span></td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Poin</td>
+                                <td>: <span class="badge bg-warning text-dark">+{{ $pickupRequest->points_earned ?? 0 }} Poin</span></td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Diverifikasi</td>
+                                <td>: {{ optional($pickupRequest->verified_at)->format('d M Y H:i') ?? '-' }}</td>
                             </tr>
                         </table>
                     </div>
                 </div>
             @elseif ($pickupRequest->mitra_id === auth()->id())
+                {{-- FORM VERIFIKASI: timbang per item --}}
                 <div class="card card-stat">
-                    <div class="card-header bg-white fw-semibold">Verifikasi & Selesaikan Setoran</div>
+                    <div class="card-header bg-white fw-semibold">Verifikasi & Timbang Setoran</div>
                     <div class="card-body">
                         <form action="{{ route('mitra.transactions.store') }}" method="POST" id="verifyForm">
                             @csrf
                             <input type="hidden" name="pickup_request_id" value="{{ $pickupRequest->pickup_request_id }}">
 
+                            @foreach ($pickupRequest->items as $index => $item)
+                                <div class="border rounded p-3 mb-3">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <strong>{{ $item->category->name ?? 'Sampah' }}</strong>
+                                        <span class="text-muted small">Estimasi: {{ $item->weight }} kg</span>
+                                    </div>
+                                    <input type="hidden" name="items[{{ $index }}][pickup_item_id]" value="{{ $item->pickup_item_id }}">
+                                    
+                                    <div class="row g-2">
+                                        <div class="col-6">
+                                            <label class="form-label small">Berat Aktual (kg)</label>
+                                            <input type="number" step="0.01" min="0.01"
+                                                   name="items[{{ $index }}][weight]"
+                                                   class="form-control form-control-sm item-weight"
+                                                   data-price="{{ $item->category->price_per_kg ?? 0 }}"
+                                                   value="{{ $item->weight }}"
+                                                   required>
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label small">Harga per Kg (Rp)</label>
+                                            <input type="number" step="1" min="0"
+                                                   name="items[{{ $index }}][price_per_kg]"
+                                                   class="form-control form-control-sm item-price"
+                                                   value="{{ $item->category->price_per_kg ?? 0 }}"
+                                                   required>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+
                             <div class="mb-3">
-                                <label class="form-label">Jenis Sampah</label>
-                                <input type="text" name="jenis_sampah" class="form-control" placeholder="Contoh: Plastik, Kertas, Logam" required>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Berat Aktual (kg)</label>
-                                <input type="number" step="0.01" min="0.01" name="berat_aktual" id="berat_aktual" class="form-control" required>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Harga per Kg (Rp)</label>
-                                <input type="number" step="1" min="0" name="harga_per_kg" id="harga_per_kg" class="form-control" required>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Estimasi Total</label>
+                                <label class="form-label fw-semibold">Total Estimasi</label>
                                 <input type="text" id="totalPreview" class="form-control" value="Rp 0" disabled>
                             </div>
-                            <button type="submit" class="btn btn-success w-100">Selesaikan & Catat Transaksi</button>
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="bi bi-check-circle"></i> Selesaikan & Catat Transaksi
+                            </button>
                         </form>
                     </div>
                 </div>
@@ -144,20 +216,25 @@
 
 @push('scripts')
 <script>
-    const beratInput = document.getElementById('berat_aktual');
-    const hargaInput = document.getElementById('harga_per_kg');
     const totalPreview = document.getElementById('totalPreview');
 
     function updateTotal() {
-        if (!beratInput || !hargaInput || !totalPreview) return;
-        const berat = parseFloat(beratInput.value) || 0;
-        const harga = parseFloat(hargaInput.value) || 0;
-        totalPreview.value = 'Rp ' + (berat * harga).toLocaleString('id-ID');
+        let total = 0;
+        document.querySelectorAll('.item-weight').forEach((weightInput, i) => {
+            const priceInput = document.querySelectorAll('.item-price')[i];
+            const w = parseFloat(weightInput.value) || 0;
+            const p = parseFloat(priceInput.value) || 0;
+            total += w * p;
+        });
+        if (totalPreview) {
+            totalPreview.value = 'Rp ' + total.toLocaleString('id-ID');
+        }
     }
 
-    if (beratInput && hargaInput) {
-        beratInput.addEventListener('input', updateTotal);
-        hargaInput.addEventListener('input', updateTotal);
-    }
+    document.querySelectorAll('.item-weight, .item-price').forEach(el => {
+        el.addEventListener('input', updateTotal);
+    });
+
+    updateTotal();
 </script>
 @endpush

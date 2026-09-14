@@ -177,6 +177,14 @@
                             </a>
                         </li>
 
+                        {{-- ✅ MENU BARU: SETORAN SAMPAH --}}
+                        <li class="sidebar-item {{ request()->routeIs('user.pickup-requests.*') ? 'active' : '' }}">
+                            <a href="{{ route('user.pickup-requests.index') }}" class="sidebar-link">
+                                <i class="bi bi-truck"></i>
+                                <span>Setoran Sampah</span>
+                            </a>
+                        </li>
+
                         <li class="sidebar-item {{ request()->routeIs('user.waste-banks.*') ? 'active' : '' }}">
                             <a href="{{ route('user.waste-banks.index') }}" class="sidebar-link">
                                 <i class="bi bi-map"></i>

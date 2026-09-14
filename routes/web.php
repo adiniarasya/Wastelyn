@@ -160,6 +160,7 @@ Route::middleware('role:warga')->prefix('user')->name('user.')->group(function (
 
     Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
     Route::get('/transactions/{id}', [TransactionController::class, 'show'])->name('transactions.show');
+    Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');
 
     Route::get('/rewards', [RewardController::class, 'index'])->name('rewards.index');
     Route::get('/rewards/{id}', [RewardController::class, 'show'])->name('rewards.show');
@@ -181,4 +182,10 @@ Route::middleware('role:warga')->prefix('user')->name('user.')->group(function (
     Route::post('/ai-chat-messages', [AiChatMessageController::class, 'store'])->name('ai-chat-messages.store');
     Route::get('/ai-chat-messages/{id}', [AiChatMessageController::class, 'show'])->name('ai-chat-messages.show');
     Route::delete('/ai-chat-messages/{id}', [AiChatMessageController::class, 'destroy'])->name('ai-chat-messages.destroy');
+    // Pickup Requests (Warga)
+    Route::get('/pickup-requests', [PickupRequestController::class, 'userIndex'])->name('pickup-requests.index');
+    Route::get('/pickup-requests/create', [PickupRequestController::class, 'userCreate'])->name('pickup-requests.create');
+    Route::post('/pickup-requests', [PickupRequestController::class, 'userStore'])->name('pickup-requests.store');
+    Route::get('/pickup-requests/{pickupRequest}', [PickupRequestController::class, 'userShow'])->name('pickup-requests.show');
+    Route::delete('/pickup-requests/{pickupRequest}', [PickupRequestController::class, 'userDestroy'])->name('pickup-requests.destroy');
 });

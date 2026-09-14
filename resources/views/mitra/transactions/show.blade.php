@@ -1,4 +1,4 @@
-@extends('layouts.mitra')
+@extends('template.layout')
 
 @section('title', 'Detail Transaksi')
 

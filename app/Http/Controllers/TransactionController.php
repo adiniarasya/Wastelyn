@@ -2,168 +2,84 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\PickupRequest;
 use App\Models\Transaction;
 use App\Models\User;
-use App\Models\PickupRequest;
-use App\Models\RewardRedemption;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class TransactionController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Tampilkan riwayat transaksi (admin / mitra).
      */
-    public function index(Request $request)
+    public function index()
     {
-        $query = Transaction::with('user');
-
-        if ($request->filled('search')) {
-            $query->whereHas('user', function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%');
-            });
-        }
-
-        if ($request->filled('type')) {
-            $query->where('type', $request->type);
-        }
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        $transactions = $query
+        $transactions = Transaction::with('user')
             ->latest()
-            ->paginate(10)
-            ->withQueryString();
+            ->paginate(15);
 
-        return view('admin.transactions.index', compact('transactions'));
+        return view('mitra.transactions.index', compact('transactions'));
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        $users = User::where('role', 'warga')->get();
-
-        $pickupRequests = PickupRequest::where('status', 'completed')->get();
-
-        $redemptions = RewardRedemption::where('status', 'approved')->get();
-
-        return view(
-            'admin.transactions.create',
-            compact('users', 'pickupRequests', 'redemptions')
-        );
-    }
-
-    /**
-     * Store a newly created resource in storage.
+     * Verifikasi setoran oleh Mitra → status completed, poin masuk.
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'user_id' => 'required|exists:users,user_id',
-            'pickup_request_id' => 'nullable|exists:pickup_requests,pickup_request_id',
-            'redemption_id' => 'nullable|exists:reward_redemptions,redemption_id',
-            'type' => 'required|in:earn,redeem',
-            'points' => 'required|integer|min:1',
-            'description' => 'nullable|string',
-            'status' => 'required|in:pending,completed,failed,cancelled',
-        ]);
-
-        Transaction::create($validated);
-
-        return redirect()
-            ->route('admin.transactions.index')
-            ->with('success', 'Transaksi berhasil ditambahkan');
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Transaction $transaction)
-    {
-        $transaction->load('user', 'pickupRequest', 'redemption');
-
-        return view(
-            'admin.transactions.show',
-            compact('transaction')
-        );
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Transaction $transaction)
-    {
-        $users = User::where('role', 'warga')->get();
-
-        $pickupRequests = PickupRequest::where('status', 'completed')->get();
-
-        $redemptions = RewardRedemption::where('status', 'approved')->get();
-
-        return view(
-            'admin.transactions.edit',
-            compact(
-                'transaction',
-                'users',
-                'pickupRequests',
-                'redemptions'
-            )
-        );
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Transaction $transaction)
-    {
-        $validated = $request->validate([
-            'user_id' => 'required|exists:users,user_id',
-            'pickup_request_id' => 'nullable|exists:pickup_requests,pickup_request_id',
-            'redemption_id' => 'nullable|exists:reward_redemptions,redemption_id',
-            'type' => 'required|in:earn,redeem',
-            'points' => 'required|integer|min:1',
-            'description' => 'nullable|string',
-            'status' => 'required|in:pending,completed,failed,cancelled',
-        ]);
-
-        $transaction->update($validated);
-
-        return redirect()
-            ->route('admin.transactions.index')
-            ->with('success', 'Transaksi berhasil diupdate');
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Transaction $transaction)
-    {
-        $transaction->delete();
-
-        return redirect()
-            ->route('admin.transactions.index')
-            ->with('success', 'Transaksi berhasil dihapus');
-    }
-
-    /**
-     * Update transaction status.
-     */
-    public function updateStatus(Request $request, $id)
-    {
         $request->validate([
-            'status' => 'required|in:pending,completed,failed,cancelled',
+            'pickup_request_id' => 'required|exists:pickup_requests,pickup_request_id',
+            'weight_kg' => 'required|numeric|min:0.1',
         ]);
 
-        $transaction = Transaction::findOrFail($id);
+        DB::beginTransaction();
+        try {
+            $pickup = PickupRequest::where('pickup_request_id', $request->pickup_request_id)
+                ->where('mitra_id', Auth::id())
+                ->whereIn('status', ['accepted', 'scheduled'])
+                ->firstOrFail();
 
-        $transaction->update([
-            'status' => $request->status
-        ]);
+    
+            $pickup->weight_kg = $request->weight_kg;
+            $pickup->calculateRewards();
 
-        return redirect()
-            ->back()
-            ->with('success', 'Status transaksi berhasil diupdate');
+
+            $pickup->status = 'completed';
+            $pickup->verified_at = now();
+            $pickup->save();
+
+
+            $user = User::find($pickup->user_id);
+            if ($user) {
+                $user->points = ($user->points ?? 0) + $pickup->points_earned;
+                $user->xp = ($user->xp ?? 0) + $pickup->xp_earned;
+                $user->updateLevel();
+                $user->save();
+                Transaction::create([
+                    'user_id' => $user->user_id,
+                    'pickup_request_id' => $pickup->pickup_request_id,
+                    'type' => 'earn',
+                    'points' => $pickup->points_earned,
+                    'description' => "Setoran {$pickup->wasteCategory->name} {$pickup->weight_kg}kg - diverifikasi mitra",
+                ]);
+            }
+
+            DB::commit();
+
+            return redirect()
+                ->route('mitra.pickup-requests.index')
+                ->with('success', 'Setoran berhasil diverifikasi! Poin & XP telah ditambahkan ke warga.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Gagal verifikasi: ' . $e->getMessage());
+        }
+    }
+
+    public function show($id)
+    {
+        $transaction = Transaction::with('user')->findOrFail($id);
+        return view('mitra.transactions.show', compact('transaction'));
     }
 }
