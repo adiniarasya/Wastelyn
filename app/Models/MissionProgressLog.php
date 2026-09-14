@@ -9,18 +9,25 @@ class MissionProgressLog extends Model
 {
     use HasFactory;
 
+    protected $table = 'mission_progress_logs';
     protected $primaryKey = 'progress_log_id';
 
     protected $fillable = [
         'user_mission_id',
+        'submission_id',
         'progress',
+        'progress_increment',
+        'progress_after',
         'description',
-        'created_at',
-        'updated_at',
-    ];
+        ];
 
     public function userMission()
     {
         return $this->belongsTo(UserMission::class, 'user_mission_id', 'user_mission_id');
+    }
+
+    public function submission()
+    {
+        return $this->belongsTo(Submission::class, 'submission_id', 'submission_id');
     }
 }
