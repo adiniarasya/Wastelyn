@@ -124,4 +124,27 @@ class PickupRequestController extends Controller
 
         return redirect()->back()->with('success', 'Pickup berhasil diassign ke mitra');
     }
+        public function mitraIndex()
+    {
+        $available = PickupRequest::with('user', 'wasteBank')
+            ->whereNull('mitra_id')
+            ->where('status', 'pending')
+            ->latest()
+            ->paginate(10, ['*'], 'available_page');
+
+        $mine = PickupRequest::with('user', 'wasteBank')
+            ->where('mitra_id', auth()->id())
+            ->whereIn('status', ['accepted', 'scheduled'])
+            ->latest()
+            ->paginate(10, ['*'], 'mine_page');
+
+        return view('mitra.pickups.index', compact('available', 'mine'));
+    }
+
+        public function mitraShow(PickupRequest $pickupRequest)
+    {
+        $pickupRequest->load('user', 'wasteBank');
+        return view('mitra.pickups.show', compact('pickupRequest'));
+    }
 }
+
