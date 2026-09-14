@@ -1,545 +1,684 @@
-<!-- resources/views/landing.blade.php -->
+{{-- resources/views/landing.blade.php --}}
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>WasteLyn - Platform Pengelolaan Sampah</title>
+    <title>WasteLyn — Platform Pembentukan Kebiasaan Pengelolaan Sampah</title>
+    <meta name="description" content="Platform pembentukan kebiasaan pengelolaan sampah rumah tangga berbasis gamifikasi dan AI. Waste Mission, Eco Habit Score, Smart Waste Network, Bero AI, Reward System.">
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Font Awesome -->
+    {{-- Bootstrap 5 (sesuai proposal: Blade + Bootstrap Mazer) --}}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    {{-- Poppins (sesuai proposal hal. 23) --}}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        * {
-            font-family: 'Inter', 'Poppins', sans-serif;
+        :root {
+            --wl-green:      #2E7D32;
+            --wl-green-dark: #1B5E20;
+            --wl-green-light:#4CAF50;
+            --wl-tech:       #1A237E;
+            --wl-ink:        #1a2330;
+            --wl-muted:      #6b7a8c;
+            --wl-line:       #e6e9ee;
         }
 
-        .font-display {
-            font-family: 'Poppins', sans-serif;
+        * { font-family: 'Poppins', system-ui, -apple-system, sans-serif; }
+        html { scroll-behavior: smooth; }
+        body { color: var(--wl-ink); -webkit-font-smoothing: antialiased; }
+
+        /* ============ Tipografi (proposal 7.1.B) ============ */
+        h1, .h1 { font-size: 28px; font-weight: 700; line-height: 1.25; }
+        h2, .h2 { font-size: 22px; font-weight: 600; }
+        h3, .h3 { font-size: 18px; font-weight: 600; }
+        @media (min-width: 992px) {
+            h1, .h1 { font-size: 44px; }
+            h2, .h2 { font-size: 32px; }
+            h3, .h3 { font-size: 20px; }
+        }
+        .text-caption { font-size: 12px; color: var(--wl-muted); }
+        .text-body-sm { font-size: 14px; }
+
+        /* ============ Warna brand ============ */
+        .text-wl-green { color: var(--wl-green) !important; }
+        .text-wl-tech  { color: var(--wl-tech) !important; }
+        .text-wl-muted { color: var(--wl-muted) !important; }
+        .bg-wl-green   { background: var(--wl-green) !important; }
+        .bg-wl-green-dark { background: var(--wl-green-dark) !important; }
+        .bg-wl-soft    { background: #f6faf6 !important; }
+        .bg-wl-tech-soft { background: rgba(26, 35, 126, 0.06) !important; }
+        .border-wl     { border-color: var(--wl-line) !important; }
+
+        /* ============ Navbar ============ */
+        .wl-navbar {
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: saturate(180%) blur(12px);
+            -webkit-backdrop-filter: saturate(180%) blur(12px);
+            border-bottom: 1px solid transparent;
+            transition: border-color .25s ease, box-shadow .25s ease;
+        }
+        .wl-navbar.scrolled {
+            border-bottom-color: var(--wl-line);
+            box-shadow: 0 2px 12px rgba(15,23,32,0.04);
+        }
+        .wl-navbar .nav-link {
+            color: var(--wl-ink);
+            font-size: 14px;
+            font-weight: 500;
+            padding: .5rem .9rem !important;
+            border-radius: 8px;
+        }
+        .wl-navbar .nav-link:hover { color: var(--wl-green); background: #f3f8f3; }
+
+        /* ============ Tombol ============ */
+        .btn-wl-primary {
+            background: var(--wl-green);
+            color: #fff;
+            border: 0;
+            font-weight: 600;
+            border-radius: 10px;
+            padding: .65rem 1.4rem;
+            transition: background .2s ease, transform .2s ease, box-shadow .2s ease;
+        }
+        .btn-wl-primary:hover {
+            background: var(--wl-green-dark);
+            color: #fff;
+            box-shadow: 0 8px 20px rgba(46,125,50,0.25);
+        }
+        .btn-wl-outline {
+            background: transparent;
+            color: var(--wl-ink);
+            border: 1px solid var(--wl-line);
+            font-weight: 600;
+            border-radius: 10px;
+            padding: .65rem 1.4rem;
+            transition: all .2s ease;
+        }
+        .btn-wl-outline:hover {
+            border-color: var(--wl-green);
+            color: var(--wl-green);
+            background: #f3f8f3;
         }
 
-        /* Warna Brand */
-        .bg-primary { background: #2E7D32; }
-        .bg-primary-dark { background: #1B5E20; }
-        .bg-primary-light { background: #4CAF50; }
-        .bg-tech { background: #1A237E; }
-        .text-primary { color: #2E7D32; }
-        .text-tech { color: #1A237E; }
-        .border-primary { border-color: #2E7D32; }
-        .hover-bg-primary:hover { background: #1B5E20; }
-
-        html {
-            scroll-behavior: smooth;
+        /* ============ Card (proposal 7.1.C: shadow + radius 12px) ============ */
+        .wl-card {
+            background: #fff;
+            border: 1px solid var(--wl-line);
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(15,23,32,0.03);
+            transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease;
+        }
+        .wl-card:hover {
+            border-color: rgba(46,125,50,0.35);
+            box-shadow: 0 10px 24px rgba(46,125,50,0.08);
+            transform: translateY(-3px);
         }
 
-        .hero-pattern {
-            background-color: #f8fbf8;
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(46, 125, 50, 0.03) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(26, 35, 126, 0.03) 0px, transparent 50%);
+        /* ============ Hero ============ */
+        .hero-section {
+            position: relative;
+            background: #f8fbf8;
+            overflow: hidden;
+        }
+        .hero-grid {
+            position: absolute; inset: 0;
+            background-image:
+                linear-gradient(to right, rgba(15,23,32,0.035) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(15,23,32,0.035) 1px, transparent 1px);
+            background-size: 56px 56px;
+            mask-image: radial-gradient(ellipse 75% 65% at 50% 40%, #000 45%, transparent 100%);
+            -webkit-mask-image: radial-gradient(ellipse 75% 65% at 50% 40%, #000 45%, transparent 100%);
+            pointer-events: none;
         }
 
-        .glass {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.8);
+        /* ============ Badge level (proposal hal. 3) ============ */
+        .wl-badge {
+            display: inline-block;
+            padding: .3rem .8rem;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 999px;
+            line-height: 1;
+        }
+        .lv-newbie   { background: #E8F5E9; color: #2E7D32; }
+        .lv-explorer { background: #C8E6C9; color: #1B5E20; }
+        .lv-warrior  { background: #A5D6A7; color: #1B5E20; }
+        .lv-master   { background: #2E7D32; color: #fff; }
+        .lv-legend   { background: linear-gradient(135deg, #2E7D32, #4CAF50); color: #fff; }
+
+        /* ============ Progress bar ============ */
+        .wl-progress { height: 8px; background: #eef1f4; border-radius: 999px; overflow: hidden; }
+        .wl-progress > span {
+            display: block; height: 100%;
+            background: linear-gradient(90deg, var(--wl-green), var(--wl-green-light));
+            border-radius: 999px;
+            transition: width .6s ease;
         }
 
-        .card-hover {
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        /* ============ Divider & section ============ */
+        .section { padding: 72px 0; }
+        @media (min-width: 992px) { .section { padding: 100px 0; } }
+        .section-divider { border-top: 1px solid var(--wl-line); }
+
+        .eyebrow {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: var(--wl-green);
         }
 
-        .card-hover:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 20px 40px -12px rgba(46, 125, 50, 0.15);
+        /* ============ Footer ============ */
+        .wl-footer a { color: var(--wl-muted); text-decoration: none; font-size: 14px; }
+        .wl-footer a:hover { color: var(--wl-green); }
+        .wl-footer h6 {
+            font-size: 12px;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: #94a1b2;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        .wl-social {
+            width: 36px; height: 36px;
+            display: inline-grid; place-items: center;
+            border-radius: 8px;
+            border: 1px solid var(--wl-line);
+            color: var(--wl-muted);
+            transition: all .2s ease;
+        }
+        .wl-social:hover {
+            color: var(--wl-green);
+            border-color: var(--wl-green);
+            background: #f3f8f3;
         }
 
-        .float-slow {
-            animation: floatSlow 6s ease-in-out infinite;
+        /* ============ Kartu dashboard mockup (proposal hal. 41) ============ */
+        .wl-mock-stat {
+            text-align: center;
+            padding: 1rem .5rem;
+        }
+        .wl-mock-stat .n {
+            font-size: 22px;
+            font-weight: 800;
+            line-height: 1;
+            color: var(--wl-ink);
+        }
+        .wl-mock-stat .l {
+            font-size: 12px;
+            color: var(--wl-muted);
+            margin-top: .35rem;
         }
 
-        @keyframes floatSlow {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-12px); }
-        }
-
-        .gradient-text-green {
-            background: linear-gradient(135deg, #2E7D32 0%, #4CAF50 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .btn-primary {
-            background: #2E7D32;
-            color: white;
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary:hover {
-            background: #1B5E20;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(46, 125, 50, 0.3);
-        }
-
-        .btn-outline-primary {
-            border: 2px solid #2E7D32;
-            color: #2E7D32;
-            transition: all 0.3s ease;
-        }
-
-        .btn-outline-primary:hover {
-            background: #2E7D32;
-            color: white;
-            transform: translateY(-2px);
-        }
-
-        .navbar-scrolled {
-            background: rgba(255, 255, 255, 0.92) !important;
-            backdrop-filter: blur(16px) !important;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
-        }
-
-        .navbar-scrolled .nav-link {
-            color: #1a1a2e !important;
-        }
-
-        .navbar-scrolled .nav-brand {
-            color: #2E7D32 !important;
-        }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #2E7D32; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #1B5E20; }
+        ::selection { background: var(--wl-green); color: #fff; }
     </style>
 </head>
 <body>
-    
-    <nav id="navbar" class="fixed w-full top-0 z-50 transition-all duration-300 py-3">
-        <div class="container mx-auto px-4 md:px-6">
-            <div class="flex justify-between items-center">
-                <!-- Logo -->
-                <a href="#" class="flex items-center gap-2.5 nav-brand transition-colors duration-300">
-                    <img src="{{ asset('img/logo.png') }}" alt="WasteLyn" class="h-10 w-auto" onerror="this.style.display='none'">
-                    <span class="text-xl font-bold text-primary font-display">WasteLyn</span>
-                </a>
 
-                <!-- Desktop Nav -->
-                <div class="hidden md:flex items-center gap-8">
-                    <a href="#features" class="nav-link text-gray-600 hover:text-primary transition duration-300 text-sm font-medium">Fitur</a>
-                    <a href="#about" class="nav-link text-gray-600 hover:text-primary transition duration-300 text-sm font-medium">Tentang</a>
-                    <a href="#contact" class="nav-link text-gray-600 hover:text-primary transition duration-300 text-sm font-medium">Kontak</a>
-                    <div class="flex items-center gap-3 ml-4">
-                        <a href="{{ route('login') }}" class="px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 text-primary bg-white/80 hover:bg-white border border-gray-200">
-                            <i class="fas fa-sign-in-alt mr-2"></i>Masuk
-                        </a>
-                        <a href="{{ route('register') }}" class="px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 text-white bg-primary hover:bg-primary-dark shadow-md hover:shadow-lg">
-                            <i class="fas fa-user-plus mr-2"></i>Daftar
-                        </a>
-                    </div>
-                </div>
+{{-- ==================== NAVBAR ==================== --}}
+<nav id="navbar" class="navbar navbar-expand-lg fixed-top wl-navbar py-2">
+    <div class="container" style="max-width: 1180px;">
+        <a href="{{ url('/') }}" class="navbar-brand d-flex align-items-center gap-2 fw-bold">
+            <span class="d-inline-grid bg-wl-green text-white rounded-2"
+                  style="width:34px;height:34px;place-items:center;font-weight:800;">W</span>
+            <span style="font-weight:800; letter-spacing:-.02em;">WasteLyn</span>
+        </a>
 
-                <!-- Mobile Toggle -->
-                <button id="menuToggle" class="md:hidden text-gray-700 text-xl hover:text-primary transition">
-                    <i class="fas fa-bars"></i>
-                </button>
-            </div>
+        <button class="navbar-toggler border-0 shadow-none" type="button"
+                data-bs-toggle="collapse" data-bs-target="#wlNavMenu"
+                aria-controls="wlNavMenu" aria-expanded="false" aria-label="Menu">
+            <i class="fas fa-bars"></i>
+        </button>
 
-            <!-- Mobile Menu -->
-            <div id="mobileMenu" class="md:hidden hidden mt-4 pt-4 border-t border-gray-100">
-                <div class="flex flex-col gap-3">
-                    <a href="#features" class="text-gray-600 hover:text-primary transition py-2 text-sm font-medium">Fitur</a>
-                    <a href="#about" class="text-gray-600 hover:text-primary transition py-2 text-sm font-medium">Tentang</a>
-                    <a href="#contact" class="text-gray-600 hover:text-primary transition py-2 text-sm font-medium">Kontak</a>
-                    <div class="flex flex-col gap-2 pt-2">
-                        <a href="{{ route('login') }}" class="px-5 py-2.5 rounded-full text-sm font-semibold text-center transition text-primary bg-gray-50 hover:bg-gray-100 border border-gray-200">
-                            <i class="fas fa-sign-in-alt mr-2"></i>Masuk
-                        </a>
-                        <a href="{{ route('register') }}" class="px-5 py-2.5 rounded-full text-sm font-semibold text-center transition text-white bg-primary hover:bg-primary-dark">
-                            <i class="fas fa-user-plus mr-2"></i>Daftar
-                        </a>
-                    </div>
-                </div>
+        <div class="collapse navbar-collapse" id="wlNavMenu">
+            <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                <li class="nav-item"><a href="#fitur"  class="nav-link">Fitur</a></li>
+                <li class="nav-item"><a href="#level"  class="nav-link">Level</a></li>
+                <li class="nav-item"><a href="#cara"   class="nav-link">Cara Kerja</a></li>
+                <li class="nav-item"><a href="#kontak" class="nav-link">Kontak</a></li>
+            </ul>
+            <div class="d-flex flex-column flex-lg-row gap-2">
+                <a href="{{ route('login') }}" class="btn btn-wl-outline btn-sm px-3 py-2">Masuk</a>
+                <a href="{{ route('register') }}" class="btn btn-wl-primary btn-sm px-3 py-2">Daftar Gratis</a>
             </div>
         </div>
-    </nav>
+    </div>
+</nav>
 
-    <section class="hero-pattern min-h-screen flex items-center pt-20 relative overflow-hidden">
-        <div class="absolute top-20 right-10 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
-        <div class="absolute bottom-20 left-10 w-80 h-80 bg-tech/5 rounded-full blur-3xl"></div>
+{{-- ==================== HERO ==================== --}}
+<section class="hero-section pt-5" style="padding-top: 130px !important; padding-bottom: 80px;">
+    <div class="hero-grid"></div>
 
-        <div class="container mx-auto px-4 md:px-6 relative z-10">
-            <div class="grid lg:grid-cols-2 gap-16 items-center">
-                <!-- Left -->
-                <div>
-                    <div class="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full text-sm text-primary font-medium border border-primary/10 shadow-sm mb-6">
-                        <span class="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
-                        Platform Pengelolaan Sampah
-                    </div>
+    <div class="container position-relative" style="max-width: 1180px;">
+        <div class="row align-items-center g-5">
 
-                    <h1 class="font-display text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-6">
-                        Bentuk Kebiasaan
-                        <span class="gradient-text-green">Ramah Lingkungan</span>
-                        <br>dengan <span class="text-tech">Teknologi</span>
-                    </h1>
+            {{-- Kiri --}}
+            <div class="col-lg-7">
+                <span class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill small fw-semibold"
+                      style="background:#E8F5E9;color:var(--wl-green);">
+                    <span class="d-inline-block rounded-circle bg-wl-green" style="width:6px;height:6px;"></span>
+                    Platform Pembentukan Kebiasaan
+                </span>
 
-                    <p class="text-gray-600 text-lg leading-relaxed mb-8 max-w-lg">
-                        Wastelyn membantu Anda mengelola sampah rumah tangga dengan pendekatan gamifikasi 
-                        dan kecerdasan buatan. Mulai dari misi harian hingga reward menarik.
-                    </p>
+                <h1 class="mt-3 mb-3" style="letter-spacing:-.02em;">
+                    Ubah sampah jadi <span class="text-wl-green">kebiasaan baik</span>,
+                    bukan sekadar aksi sekali.
+                </h1>
 
-                    <div class="flex flex-wrap gap-4">
-                        <a href="{{ route('register') }}" class="btn-primary px-8 py-3.5 rounded-full font-semibold shadow-lg hover:shadow-xl flex items-center gap-2">
-                            <i class="fas fa-rocket"></i> Mulai Sekarang
-                        </a>
-                        <a href="#features" class="btn-outline-primary px-8 py-3.5 rounded-full font-semibold flex items-center gap-2">
-                            <i class="fas fa-play-circle"></i> Lihat Fitur
-                        </a>
-                    </div>
+                <p class="mb-4" style="max-width: 560px; color: var(--wl-muted); line-height: 1.7;">
+                    WasteLyn adalah platform pembentukan kebiasaan pengelolaan sampah rumah tangga
+                    berbasis <strong class="text-wl-tech">gamifikasi</strong> dan
+                    <strong class="text-wl-tech">kecerdasan buatan</strong>. Lima fitur utama yang saling
+                    terintegrasi: Waste Mission, Eco Habit Score, Smart Waste Network, Bero AI, dan Reward System.
+                </p>
 
-                    <!-- Social Proof -->
-                    <div class="flex items-center gap-8 mt-10 pt-8 border-t border-gray-200/60">
-                        <div class="flex -space-x-2">
-                            <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary border-2 border-white font-semibold text-xs">A</div>
-                            <div class="w-10 h-10 rounded-full bg-tech/10 flex items-center justify-center text-tech border-2 border-white font-semibold text-xs">B</div>
-                            <div class="w-10 h-10 rounded-full bg-primary-light/10 flex items-center justify-center text-primary-light border-2 border-white font-semibold text-xs">C</div>
-                            <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 border-2 border-white font-semibold text-xs">+</div>
-                        </div>
-                        <div>
-                            <p class="text-sm font-semibold text-gray-800">500+ Pengguna Aktif</p>
-                            <p class="text-xs text-gray-500">Bergabung setiap minggu</p>
-                        </div>
-                    </div>
+                <div class="d-flex flex-wrap gap-2 mb-4">
+                    <a href="{{ route('register') }}" class="btn btn-wl-primary d-inline-flex align-items-center gap-2">
+                        Mulai Gratis <i class="fas fa-arrow-right small"></i>
+                    </a>
+                    <a href="#fitur" class="btn btn-wl-outline d-inline-flex align-items-center gap-2">
+                        <i class="fas fa-circle-play text-wl-green"></i> Lihat Fitur
+                    </a>
                 </div>
 
-                <!-- Right - Hero Image -->
-                <div class="hidden lg:block">
-                    <div class="relative">
-                        <div class="glass rounded-3xl p-8 shadow-2xl border border-white/60">
-                            <div class="text-center">
-                                <!-- Placeholder Image -->
-                                <div class="mb-4 flex justify-center">
-                                    <img src="{{ asset('img/hero-illustration.png') }}" 
-                                         alt="WasteLyn Illustration" 
-                                         class="w-full max-w-md mx-auto"
-                                         onerror="this.style.display='none'">
-                                    <!-- Fallback jika gambar tidak ada -->
-                                    <div id="heroFallback" class="w-full max-w-md mx-auto aspect-square bg-gradient-to-br from-primary/5 to-tech/5 rounded-2xl flex items-center justify-center border-2 border-dashed border-gray-300">
-                                        <div class="text-center">
-                                            <div class="text-8xl mb-4">🌿</div>
-                                            <p class="text-gray-400 text-sm">Hero Illustration</p>
-                                            <p class="text-gray-300 text-xs">(Placeholder)</p>
-                                        </div>
-                                    </div>
-                                </div>
+                <div class="d-flex align-items-center gap-3 pt-3 border-top border-wl">
+                    <div class="d-flex" style="margin-left:-6px;">
+                        <span class="d-grid rounded-circle bg-wl-green text-white fw-bold"
+                              style="width:34px;height:34px;place-items:center;font-size:12px;border:2px solid #fff;margin-left:-6px;">A</span>
+                        <span class="d-grid rounded-circle fw-bold"
+                              style="width:34px;height:34px;place-items:center;font-size:12px;background:#FFF3E0;color:#E65100;border:2px solid #fff;margin-left:-6px;">B</span>
+                        <span class="d-grid rounded-circle fw-bold"
+                              style="width:34px;height:34px;place-items:center;font-size:12px;background:#E3F2FD;color:#0D47A1;border:2px solid #fff;margin-left:-6px;">C</span>
+                        <span class="d-grid rounded-circle fw-bold text-wl-muted"
+                              style="width:34px;height:34px;place-items:center;font-size:12px;background:#eef1f4;border:2px solid #fff;margin-left:-6px;">+</span>
+                    </div>
+                    <div class="small">
+                        <div class="fw-bold">1.200+ pengguna aktif</div>
+                        <div class="text-wl-muted" style="font-size:12px;">di Kota Depok & sekitarnya</div>
+                    </div>
+                </div>
+            </div>
 
-                                <h3 class="text-2xl font-bold text-gray-800 font-display">Eco Habit Score</h3>
-                                <p class="text-gray-500 text-sm">Cerminan kebiasaan ramah lingkungan</p>
+            {{-- Kanan: Kartu Dashboard (meniru mock-up proposal hal. 41) --}}
+            <div class="col-lg-5">
+                <div class="wl-card p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <div class="eyebrow">Eco Habit Score</div>
+                            <div class="h3 mt-1 mb-0 fw-bolder" style="font-size:28px;">850</div>
+                            <div class="text-caption">/ 1000 XP</div>
+                        </div>
+                        <span class="wl-badge lv-warrior">
+                            <i class="fas fa-seedling me-1"></i> Green Warrior
+                        </span>
+                    </div>
 
-                                <div class="mt-6 inline-block bg-primary/10 px-4 py-1.5 rounded-full">
-                                    <span class="text-primary font-semibold text-sm">🏆 Green Warrior</span>
-                                </div>
+                    <div class="wl-progress mb-2"><span style="width:85%;"></span></div>
+                    <div class="d-flex justify-content-between text-caption mb-3">
+                        <span>Level 3 → Level 4</span>
+                        <span class="fw-semibold" style="color:var(--wl-green);">85%</span>
+                    </div>
 
-                                <div class="mt-4">
-                                    <div class="flex justify-between text-xs text-gray-500 mb-1.5">
-                                        <span>Level 3</span>
-                                        <span>75% ke Level 4</span>
-                                    </div>
-                                    <div class="h-2.5 bg-gray-100 rounded-full overflow-hidden">
-                                        <div class="h-full bg-gradient-to-r from-primary to-primary-light rounded-full" style="width: 75%"></div>
-                                    </div>
-                                </div>
+                    <div class="row g-0 rounded-3 border border-wl mb-3">
+                        <div class="col-3 wl-mock-stat border-end border-wl">
+                            <div class="n">1250</div><div class="l">Poin</div>
+                        </div>
+                        <div class="col-3 wl-mock-stat border-end border-wl">
+                            <div class="n">7</div><div class="l">Streak</div>
+                        </div>
+                        <div class="col-3 wl-mock-stat border-end border-wl">
+                            <div class="n">15,5</div><div class="l">Kg</div>
+                        </div>
+                        <div class="col-3 wl-mock-stat">
+                            <div class="n">8,2</div><div class="l">CO₂</div>
+                        </div>
+                    </div>
 
-                                <div class="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-gray-100">
-                                    <div>
-                                        <p class="text-2xl font-bold text-primary">750</p>
-                                        <p class="text-xs text-gray-500">XP</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-2xl font-bold text-tech">320</p>
-                                        <p class="text-xs text-gray-500">Poin</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-2xl font-bold text-gray-800">12</p>
-                                        <p class="text-xs text-gray-500">Misi</p>
-                                    </div>
-                                </div>
-
-                                <div class="flex justify-center gap-2 mt-6 pt-6 border-t border-gray-100">
-                                    <span class="px-3 py-1 bg-primary/5 text-primary rounded-full text-xs font-medium">🎯 Misi</span>
-                                    <span class="px-3 py-1 bg-tech/5 text-tech rounded-full text-xs font-medium">🤖 AI</span>
-                                    <span class="px-3 py-1 bg-primary-light/5 text-primary-light rounded-full text-xs font-medium">🎁 Reward</span>
-                                </div>
+                    <div class="d-flex align-items-start gap-3 p-3 rounded-3 bg-wl-soft">
+                        <span class="d-grid rounded-2 bg-white border border-wl text-wl-green"
+                              style="width:38px;height:38px;place-items:center;">
+                            <i class="fas fa-robot"></i>
+                        </span>
+                        <div class="flex-grow-1">
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="fw-bold" style="font-size:14px;">Bero AI</span>
+                                <span class="wl-badge" style="background:var(--wl-tech);color:#fff;font-size:10px;">AI</span>
+                            </div>
+                            <div class="text-body-sm text-wl-muted">
+                                "Botol saus termasuk plastik HDPE. Bisa didaur ulang jadi pot tanaman."
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
 
-    <section id="features" class="py-24 bg-white">
-        <div class="container mx-auto px-4 md:px-6">
-            <div class="text-center max-w-3xl mx-auto mb-16">
-                <span class="text-primary font-semibold text-sm tracking-wider uppercase">FITUR UNGGULAN</span>
-                <h2 class="font-display text-3xl md:text-4xl font-extrabold text-gray-800 mt-2 mb-4">
-                    Semua yang Anda Butuhkan
+        </div>
+    </div>
+</section>
+
+{{-- ==================== TRUST / MITRA ==================== --}}
+<div class="section-divider" style="background:#fafbfc;">
+    <div class="container py-4" style="max-width: 1180px;">
+        <p class="text-center text-caption fw-bold mb-3" style="letter-spacing:.15em; text-transform:uppercase;">
+            Terhubung dengan ekosistem pengelolaan sampah
+        </p>
+        <div class="row align-items-center justify-content-center text-center g-3">
+            <div class="col-6 col-md-3"><div class="fw-bold text-wl-muted">Bank Sampah Depok</div></div>
+            <div class="col-6 col-md-3"><div class="fw-bold text-wl-muted">DLH Kota Depok</div></div>
+            <div class="col-6 col-md-3"><div class="fw-bold text-wl-muted">Komunitas Peduli Lingkungan</div></div>
+            <div class="col-6 col-md-3"><div class="fw-bold text-wl-muted">TPS 3R</div></div>
+        </div>
+    </div>
+</div>
+
+{{-- ==================== FITUR (5 Fitur Utama) ==================== --}}
+<section id="fitur" class="section">
+    <div class="container" style="max-width: 1180px;">
+        <div class="row mb-5">
+            <div class="col-lg-7">
+                <div class="eyebrow">Fitur Utama</div>
+                <h2 class="mt-2 mb-3" style="letter-spacing:-.02em;">
+                    Lima fitur yang saling terintegrasi.
                 </h2>
-                <p class="text-gray-500 leading-relaxed">
-                    5 fitur utama yang terintegrasi untuk membentuk kebiasaan pengelolaan sampah berkelanjutan
+                <p class="text-wl-muted mb-0" style="line-height:1.7;">
+                    Dirancang bukan hanya untuk transaksi setoran, tetapi untuk membentuk
+                    kebiasaan pengelolaan sampah rumah tangga secara berkelanjutan.
                 </p>
             </div>
-
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Feature 1 -->
-                <div class="card-hover bg-white rounded-2xl p-7 border border-gray-100 shadow-sm hover:shadow-lg">
-                    <div class="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-2xl mb-4">🎯</div>
-                    <h3 class="text-lg font-bold text-gray-800">Eco Mission</h3>
-                    <p class="text-gray-500 text-sm leading-relaxed mt-1.5">
-                        Misi lingkungan dengan target dan batas waktu. Dapatkan XP & poin setiap misi selesai.
-                    </p>
-                </div>
-
-                <!-- Feature 2 -->
-                <div class="card-hover bg-white rounded-2xl p-7 border border-gray-100 shadow-sm hover:shadow-lg">
-                    <div class="w-14 h-14 rounded-2xl bg-tech/10 flex items-center justify-center text-2xl mb-4">📊</div>
-                    <h3 class="text-lg font-bold text-gray-800">Eco Habit Score</h3>
-                    <p class="text-gray-500 text-sm leading-relaxed mt-1.5">
-                        XP permanen yang mencerminkan kebiasaan ramah lingkungan. Hanya naik, tidak pernah turun.
-                    </p>
-                </div>
-
-                <!-- Feature 3 -->
-                <div class="card-hover bg-white rounded-2xl p-7 border border-gray-100 shadow-sm hover:shadow-lg">
-                    <div class="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center text-2xl mb-4">🏪</div>
-                    <h3 class="text-lg font-bold text-gray-800">Smart Waste Network</h3>
-                    <p class="text-gray-500 text-sm leading-relaxed mt-1.5">
-                        Cari bank sampah terdekat dan request penjemputan sampah dari rumah.
-                    </p>
-                </div>
-
-                <!-- Feature 4 -->
-                <div class="card-hover bg-white rounded-2xl p-7 border border-gray-100 shadow-sm hover:shadow-lg">
-                    <div class="w-14 h-14 rounded-2xl bg-purple-50 flex items-center justify-center text-2xl mb-4">🤖</div>
-                    <h3 class="text-lg font-bold text-gray-800">EcoGuide AI</h3>
-                    <p class="text-gray-500 text-sm leading-relaxed mt-1.5">
-                        Asisten cerdas untuk edukasi, klasifikasi sampah, dan rekomendasi misi personal.
-                    </p>
-                </div>
-
-                <!-- Feature 5 -->
-                <div class="card-hover bg-white rounded-2xl p-7 border border-gray-100 shadow-sm hover:shadow-lg">
-                    <div class="w-14 h-14 rounded-2xl bg-yellow-50 flex items-center justify-center text-2xl mb-4">🎁</div>
-                    <h3 class="text-lg font-bold text-gray-800">Reward System</h3>
-                    <p class="text-gray-500 text-sm leading-relaxed mt-1.5">
-                        Tukarkan poin dengan pulsa, voucher, bibit tanaman, dan merchandise eksklusif.
-                    </p>
-                </div>
-            </div>
         </div>
-    </section>
 
-    <!-- ==================== HOW IT WORKS ==================== -->
-    <section id="about" class="py-24 bg-gray-50/80">
-        <div class="container mx-auto px-4 md:px-6">
-            <div class="text-center max-w-3xl mx-auto mb-16">
-                <span class="text-tech font-semibold text-sm tracking-wider uppercase">CARA KERJA</span>
-                <h2 class="font-display text-3xl md:text-4xl font-extrabold text-gray-800 mt-2 mb-4">
-                    Mulai dalam 3 Langkah Mudah
+        @php
+            $features = [
+                ['fa-bullseye', 'Waste Mission',
+                 'Misi lingkungan yang dirancang untuk membentuk kebiasaan baik secara bertahap dengan target dan batas waktu.'],
+                ['fa-chart-line', 'Eco Habit Score',
+                 'Sistem XP yang mencerminkan kebiasaan ramah lingkungan jangka panjang. Hanya naik, tidak pernah turun.'],
+                ['fa-map-location-dot', 'Smart Waste Network',
+                 'Menghubungkan pengguna dengan ekosistem pengelolaan sampah — cari bank sampah, ajukan penjemputan.'],
+                ['fa-robot', 'Bero AI',
+                 'Asisten cerdas untuk edukasi, klasifikasi jenis sampah, dan rekomendasi misi personal.'],
+                ['fa-gift', 'Reward System',
+                 'Tukarkan poin menjadi pulsa, voucher, bibit tanaman, atau merchandise eksklusif.'],
+                ['fa-gem', 'Dual Reward System',
+                 'XP untuk motivasi jangka panjang, Poin untuk hadiah instan. Kombinasi menjaga motivasi tetap seimbang.'],
+            ];
+        @endphp
+
+        <div class="row g-3 g-lg-4">
+            @foreach ($features as $f)
+                <div class="col-md-6 col-lg-4">
+                    <div class="wl-card h-100 p-4">
+                        <span class="d-inline-grid rounded-3 mb-3 {{ $loop->index % 2 ? 'bg-wl-tech-soft text-wl-tech' : 'bg-wl-soft text-wl-green' }}"
+                              style="width:44px;height:44px;place-items:center;">
+                            <i class="fas {{ $f[0] }}"></i>
+                        </span>
+                        <h3 class="h3 mb-2" style="font-size:17px;">{{ $f[1] }}</h3>
+                        <p class="text-body-sm text-wl-muted mb-0" style="line-height:1.65;">
+                            {{ $f[2] }}
+                        </p>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+</section>
+
+{{-- ==================== LEVEL (Eco Habit Score) ==================== --}}
+<section id="level" class="section bg-wl-soft section-divider" style="border-bottom:1px solid var(--wl-line);">
+    <div class="container" style="max-width: 1180px;">
+        <div class="row mb-5">
+            <div class="col-lg-7">
+                <div class="eyebrow">Eco Habit Score</div>
+                <h2 class="mt-2 mb-3" style="letter-spacing:-.02em;">
+                    Naik level, buktikan kebiasaanmu.
                 </h2>
-                <p class="text-gray-500 leading-relaxed">
-                    Wastelyn dirancang sederhana agar siapa pun bisa memulai kebiasaan ramah lingkungan
+                <p class="text-wl-muted mb-0" style="line-height:1.7;">
+                    XP permanen sebagai investasi psikologis — kamu tidak akan kehilangan
+                    level yang sudah dicapai. Setiap aksi ramah lingkungan menambah XP.
                 </p>
             </div>
+        </div>
 
-            <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-                <div class="text-center">
-                    <div class="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-3xl mx-auto mb-4 font-bold text-primary border-4 border-white shadow-lg">
-                        1
+        @php
+            $levels = [
+                ['fa-seedling',    'Green Newbie',   '0 – 200 XP',    'lv-newbie'],
+                ['fa-leaf',        'Green Explorer', '201 – 500 XP',  'lv-explorer'],
+                ['fa-tree',        'Green Warrior',  '501 – 800 XP',  'lv-warrior'],
+                ['fa-trophy',      'Green Master',   '801 – 1000 XP', 'lv-master'],
+                ['fa-crown',       'Eco Legend',     '1000+ XP',      'lv-legend'],
+            ];
+        @endphp
+
+        <div class="row g-3">
+            @foreach ($levels as $l)
+                <div class="col-6 col-md-4 col-lg">
+                    <div class="wl-card text-center h-100 p-4">
+                        <i class="fas {{ $l[0] }} fs-3 text-wl-green mb-3 d-block"></i>
+                        <span class="wl-badge {{ $l[3] }} mb-2">{{ $l[1] }}</span>
+                        <div class="text-caption">{{ $l[2] }}</div>
                     </div>
-                    <h3 class="text-lg font-bold text-gray-800">Ikuti Misi</h3>
-                    <p class="text-gray-500 text-sm leading-relaxed mt-1.5 max-w-xs mx-auto">
-                        Pilih misi lingkungan sesuai level dan minat Anda. Mulai dari yang mudah hingga tantangan.
+                </div>
+            @endforeach
+        </div>
+
+        {{-- Perolehan XP (proposal hal. 18) --}}
+        <div class="row mt-5">
+            <div class="col-lg-10 mx-auto">
+                <div class="wl-card p-4">
+                    <h3 class="h3 mb-3" style="font-size:16px;">
+                        <i class="fas fa-plus-circle text-wl-green me-2"></i> Perolehan XP
+                    </h3>
+                    <div class="row g-3">
+                        @php
+                            $xpRules = [
+                                ['Setor sampah', '+20 XP / kg'],
+                                ['Menyelesaikan misi', '+10 XP'],
+                                ['Konsisten 4 minggu', '+50 XP bonus'],
+                                ['Membaca artikel EcoTips', '+5 XP'],
+                                ['Mengikuti tantangan', '+15 XP'],
+                            ];
+                        @endphp
+                        @foreach ($xpRules as $r)
+                            <div class="col-md-6 col-lg-4">
+                                <div class="d-flex justify-content-between align-items-center p-3 rounded-3 border border-wl">
+                                    <span class="text-body-sm">{{ $r[0] }}</span>
+                                    <span class="fw-bold text-wl-green text-body-sm">{{ $r[1] }}</span>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{{-- ==================== CARA KERJA ==================== --}}
+<section id="cara" class="section">
+    <div class="container" style="max-width: 1180px;">
+        <div class="row mb-5">
+            <div class="col-lg-7">
+                <div class="eyebrow">Cara Kerja</div>
+                <h2 class="mt-2 mb-3" style="letter-spacing:-.02em;">
+                    Tiga langkah. Satu kebiasaan baru.
+                </h2>
+                <p class="text-wl-muted mb-0" style="line-height:1.7;">
+                    Mengadopsi siklus <em>cue–routine–reward</em> dari riset pembentukan kebiasaan
+                    (<em>The Power of Habit</em>, Duhigg) ke dalam alur aplikasi.
+                </p>
+            </div>
+        </div>
+
+        @php
+            $steps = [
+                ['01', 'Ikuti Misi', 'Pilih misi lingkungan yang tersedia sesuai level Eco Habit Score kamu. Mulai dari yang paling mudah.'],
+                ['02', 'Kumpulkan XP & Poin', 'Setor sampah, selesaikan misi, dan konsisten setiap minggu. XP akan terus bertambah.'],
+                ['03', 'Nikmati Hasil', 'Tukar poin di Reward Center, pantau progres di Eco Habit Score, dan rasakan dampaknya bagi lingkungan.'],
+            ];
+        @endphp
+
+        <div class="row g-3 g-lg-4">
+            @foreach ($steps as $s)
+                <div class="col-md-4">
+                    <div class="wl-card h-100 p-4">
+                        <div style="font-size:38px;font-weight:800;color:#dcf0de;line-height:1;">{{ $s[0] }}</div>
+                        <h3 class="h3 mt-2 mb-2" style="font-size:17px;">{{ $s[1] }}</h3>
+                        <p class="text-body-sm text-wl-muted mb-0" style="line-height:1.65;">{{ $s[2] }}</p>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+
+        <div class="mt-4">
+            <a href="{{ route('register') }}" class="btn btn-wl-primary d-inline-flex align-items-center gap-2">
+                Gabung Sekarang <i class="fas fa-arrow-right small"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+{{-- ==================== STATISTIK ==================== --}}
+<section class="py-5" style="background: var(--wl-ink); color:#fff;">
+    <div class="container" style="max-width: 1180px;">
+        <div class="row text-center g-4">
+            @php
+                $stats = [
+                    ['50+',   'Bank Sampah Mitra'],
+                    ['1.2K',  'Pengguna Aktif'],
+                    ['8.5K',  'Kg Sampah Didaur Ulang'],
+                    ['95%',   'Kepuasan Pengguna'],
+                ];
+            @endphp
+            @foreach ($stats as $s)
+                <div class="col-6 col-md-3">
+                    <div style="font-size:38px;font-weight:800;letter-spacing:-.02em;">{{ $s[0] }}</div>
+                    <div class="small mt-1" style="color: rgba(255,255,255,.65);">{{ $s[1] }}</div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+</section>
+
+{{-- ==================== CTA ==================== --}}
+<section class="section">
+    <div class="container" style="max-width: 1180px;">
+        <div class="position-relative overflow-hidden rounded-4 p-4 p-lg-5" style="background: var(--wl-green);">
+            <div class="position-absolute rounded-circle" style="width:260px;height:260px;top:-100px;right:-100px;background:rgba(255,255,255,.08);"></div>
+            <div class="position-absolute rounded-circle" style="width:220px;height:220px;bottom:-100px;left:-80px;background:rgba(255,255,255,.08);"></div>
+
+            <div class="row position-relative align-items-center">
+                <div class="col-lg-8">
+                    <h2 class="text-white mb-3" style="letter-spacing:-.02em;">
+                        Siap memulai perubahan?
+                    </h2>
+                    <p class="mb-4" style="color: rgba(255,255,255,.85); max-width: 560px; line-height:1.7;">
+                        Bergabunglah dengan masyarakat Kota Depok yang telah membentuk kebiasaan
+                        mengelola sampah rumah tangga bersama WasteLyn.
                     </p>
-                </div>
-
-                <div class="text-center">
-                    <div class="w-20 h-20 rounded-full bg-tech/10 flex items-center justify-center text-3xl mx-auto mb-4 font-bold text-tech border-4 border-white shadow-lg">
-                        2
-                    </div>
-                    <h3 class="text-lg font-bold text-gray-800">Kumpulkan XP & Poin</h3>
-                    <p class="text-gray-500 text-sm leading-relaxed mt-1.5 max-w-xs mx-auto">
-                        Setor sampah, selesaikan misi, dan konsisten setiap hari. Naikkan level Anda.
-                    </p>
-                </div>
-
-                <div class="text-center">
-                    <div class="w-20 h-20 rounded-full bg-primary-light/10 flex items-center justify-center text-3xl mx-auto mb-4 font-bold text-primary-light border-4 border-white shadow-lg">
-                        3
-                    </div>
-                    <h3 class="text-lg font-bold text-gray-800">Rasakan Manfaatnya</h3>
-                    <p class="text-gray-500 text-sm leading-relaxed mt-1.5 max-w-xs mx-auto">
-                        Tukarkan poin, lihat progress, dan bangga menjadi bagian dari solusi lingkungan.
-                    </p>
-                </div>
-            </div>
-
-            <div class="text-center mt-12">
-                <a href="{{ route('register') }}" class="bg-tech text-white px-10 py-3.5 rounded-full font-semibold shadow-lg hover:shadow-xl inline-flex items-center gap-2 transition hover:bg-opacity-90">
-                    <i class="fas fa-user-plus"></i> Gabung Sekarang
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- ==================== STATISTICS ==================== -->
-    <section class="py-16 bg-primary">
-        <div class="container mx-auto px-4 md:px-6">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center text-white">
-                <div>
-                    <p class="text-4xl md:text-5xl font-extrabold font-display">50+</p>
-                    <p class="text-sm text-white/70 mt-1.5">Bank Sampah</p>
-                </div>
-                <div>
-                    <p class="text-4xl md:text-5xl font-extrabold font-display">1.2K</p>
-                    <p class="text-sm text-white/70 mt-1.5">Pengguna Aktif</p>
-                </div>
-                <div>
-                    <p class="text-4xl md:text-5xl font-extrabold font-display">8.5K</p>
-                    <p class="text-sm text-white/70 mt-1.5">Sampah Didaur Ulang</p>
-                </div>
-                <div>
-                    <p class="text-4xl md:text-5xl font-extrabold font-display">95%</p>
-                    <p class="text-sm text-white/70 mt-1.5">Kepuasan Pengguna</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ==================== CTA ==================== -->
-    <section class="py-20 bg-primary relative overflow-hidden">
-        <div class="absolute inset-0 opacity-10">
-            <div class="absolute top-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
-            <div class="absolute bottom-0 left-0 w-80 h-80 bg-white rounded-full blur-3xl"></div>
-        </div>
-        <div class="container mx-auto px-4 md:px-6 relative z-10 text-center">
-            <h2 class="font-display text-3xl md:text-4xl font-extrabold text-white mb-4">
-                Siap Memulai Perubahan?
-            </h2>
-            <p class="text-white/80 text-lg max-w-2xl mx-auto leading-relaxed mb-8">
-                Bergabunglah dengan ribuan pengguna yang telah membentuk kebiasaan baik 
-                dalam mengelola sampah rumah tangga.
-            </p>
-            <div class="flex flex-wrap gap-4 justify-center">
-                <a href="{{ route('register') }}" class="bg-white text-primary px-10 py-3.5 rounded-full font-semibold hover:bg-gray-50 transition shadow-lg hover:shadow-xl inline-flex items-center gap-2">
-                    <i class="fas fa-rocket"></i> Daftar Sekarang
-                </a>
-                <a href="{{ route('login') }}" class="border-2 border-white text-white px-10 py-3.5 rounded-full font-semibold hover:bg-white/10 transition inline-flex items-center gap-2">
-                    <i class="fas fa-sign-in-alt"></i> Masuk
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- ==================== FOOTER ==================== -->
-    <footer id="contact" class="bg-gray-900 text-white pt-16 pb-8">
-        <div class="container mx-auto px-4 md:px-6">
-            <div class="grid md:grid-cols-4 gap-12">
-                <div>
-                    <div class="flex items-center gap-2.5 text-2xl font-bold font-display">
-                        <img src="{{ asset('img/logo-white.png') }}" alt="WasteLyn" class="h-8 w-auto" onerror="this.style.display='none'">
-                        <span>WasteLyn</span>
-                    </div>
-                    <p class="text-gray-400 text-sm leading-relaxed mt-4">
-                        Platform pembentukan kebiasaan pengelolaan sampah rumah tangga berbasis gamifikasi dan AI.
-                    </p>
-                    <div class="flex gap-4 mt-6">
-                        <a href="#" class="text-gray-400 hover:text-white transition text-lg"><i class="fab fa-instagram"></i></a>
-                        <a href="#" class="text-gray-400 hover:text-white transition text-lg"><i class="fab fa-youtube"></i></a>
-                        <a href="#" class="text-gray-400 hover:text-white transition text-lg"><i class="fab fa-tiktok"></i></a>
-                        <a href="#" class="text-gray-400 hover:text-white transition text-lg"><i class="fab fa-twitter"></i></a>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="{{ route('register') }}" class="btn bg-white text-wl-green fw-semibold px-4 py-2 rounded-3">
+                            Daftar Sekarang
+                        </a>
+                        <a href="{{ route('login') }}" class="btn text-white fw-semibold px-4 py-2 rounded-3"
+                           style="border:1px solid rgba(255,255,255,.45);">
+                            Masuk
+                        </a>
                     </div>
                 </div>
-
-                <div>
-                    <h4 class="font-semibold mb-4 text-sm uppercase tracking-wider text-gray-300">Fitur</h4>
-                    <ul class="space-y-2.5 text-sm text-gray-400">
-                        <li><a href="#" class="hover:text-white transition">Eco Mission</a></li>
-                        <li><a href="#" class="hover:text-white transition">Eco Habit Score</a></li>
-                        <li><a href="#" class="hover:text-white transition">Smart Waste Network</a></li>
-                        <li><a href="#" class="hover:text-white transition">EcoGuide AI</a></li>
-                        <li><a href="#" class="hover:text-white transition">Reward System</a></li>
-                    </ul>
-                </div>
-
-                <div>
-                    <h4 class="font-semibold mb-4 text-sm uppercase tracking-wider text-gray-300">Perusahaan</h4>
-                    <ul class="space-y-2.5 text-sm text-gray-400">
-                        <li><a href="#" class="hover:text-white transition">Tentang Kami</a></li>
-                        <li><a href="#" class="hover:text-white transition">Tim</a></li>
-                        <li><a href="#" class="hover:text-white transition">Kebijakan Privasi</a></li>
-                        <li><a href="#" class="hover:text-white transition">Syarat & Ketentuan</a></li>
-                    </ul>
-                </div>
-
-                <div>
-                    <h4 class="font-semibold mb-4 text-sm uppercase tracking-wider text-gray-300">Kontak</h4>
-                    <ul class="space-y-2.5 text-sm text-gray-400">
-                        <li><i class="fas fa-envelope w-5"></i> wastelyn@gmail.com</li>
-                        <li><i class="fas fa-phone w-5"></i> +62 812 3456 7890</li>
-                        <li><i class="fas fa-map-marker-alt w-5"></i> Kota Depok, Jawa Barat</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="border-t border-gray-800 mt-12 pt-8 text-center text-gray-500 text-sm">
-                <p>&copy; 2026 WasteLyn. Dibuat dengan <span class="text-red-400">❤️</span> untuk lingkungan yang lebih baik.</p>
             </div>
         </div>
-    </footer>
+    </div>
+</section>
 
-    <!-- ==================== SCRIPTS ==================== -->
-    <script>
-        // Mobile Menu
-        document.getElementById('menuToggle').addEventListener('click', function() {
-            document.getElementById('mobileMenu').classList.toggle('hidden');
+{{-- ==================== FOOTER ==================== --}}
+<footer id="kontak" class="wl-footer section-divider">
+    <div class="container py-5" style="max-width: 1180px;">
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <span class="d-inline-grid bg-wl-green text-white rounded-2"
+                          style="width:34px;height:34px;place-items:center;font-weight:800;">W</span>
+                    <span class="fw-bold" style="font-size:18px; letter-spacing:-.02em;">WasteLyn</span>
+                </div>
+                <p class="text-body-sm text-wl-muted mb-3" style="max-width: 320px; line-height: 1.7;">
+                    Platform pembentukan kebiasaan pengelolaan sampah rumah tangga berbasis
+                    gamifikasi dan kecerdasan buatan. Dikembangkan untuk Kota Depok.
+                </p>
+                <div class="d-flex gap-2">
+                    @foreach (['instagram','youtube','tiktok','twitter'] as $icon)
+                        <a href="#" class="wl-social"><i class="fab fa-{{ $icon }}"></i></a>
+                    @endforeach
+                </div>
+            </div>
+
+            <div class="col-6 col-lg-2">
+                <h6>Fitur</h6>
+                <ul class="list-unstyled d-flex flex-column gap-2 mb-0">
+                    <li><a href="#fitur">Waste Mission</a></li>
+                    <li><a href="#fitur">Eco Habit Score</a></li>
+                    <li><a href="#fitur">Smart Waste Network</a></li>
+                    <li><a href="#fitur">Bero AI</a></li>
+                    <li><a href="#fitur">Reward System</a></li>
+                </ul>
+            </div>
+
+            <div class="col-6 col-lg-2">
+                <h6>Perusahaan</h6>
+                <ul class="list-unstyled d-flex flex-column gap-2 mb-0">
+                    <li><a href="#">Tentang Kami</a></li>
+                    <li><a href="#">Tim</a></li>
+                    <li><a href="#">Kebijakan Privasi</a></li>
+                    <li><a href="#">Syarat & Ketentuan</a></li>
+                </ul>
+            </div>
+
+            <div class="col-lg-4">
+                <h6>Kontak</h6>
+                <ul class="list-unstyled d-flex flex-column gap-2 text-body-sm mb-0">
+                    <li><i class="fas fa-envelope text-wl-muted me-2"></i> si.wastelyn@gmail.com</li>
+                    <li><i class="fas fa-phone text-wl-muted me-2"></i> +62 812 3456 7890</li>
+                    <li><i class="fas fa-map-marker-alt text-wl-muted me-2"></i> Kota Depok, Jawa Barat</li>
+                </ul>
+                <div class="text-caption mt-3">
+                    <i class="fas fa-school me-1"></i> SMK Informatika Utama — Tim UtamainMenang
+                </div>
+            </div>
+        </div>
+
+        <hr class="my-4 border-wl">
+
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 text-caption">
+            <span>&copy; {{ date('Y') }} WasteLyn. Seluruh hak cipta dilindungi.</span>
+            <span>Dibuat dengan <span class="text-wl-green">♥</span> untuk lingkungan yang lebih baik.</span>
+        </div>
+    </div>
+</footer>
+
+{{-- Bootstrap JS --}}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Navbar scroll shadow
+    (function () {
+        const nav = document.getElementById('navbar');
+        const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 8);
+        onScroll();
+        window.addEventListener('scroll', onScroll, { passive: true });
+    })();
+
+    // Close mobile menu on link click
+    document.querySelectorAll('#wlNavMenu a.nav-link').forEach(a => {
+        a.addEventListener('click', () => {
+            const el = document.getElementById('wlNavMenu');
+            const c = bootstrap.Collapse.getInstance(el) || new bootstrap.Collapse(el, { toggle: false });
+            c.hide();
         });
-
-        // Navbar Scroll Effect
-        window.addEventListener('scroll', function() {
-            const navbar = document.getElementById('navbar');
-            if (window.scrollY > 50) {
-                navbar.classList.add('navbar-scrolled');
-            } else {
-                navbar.classList.remove('navbar-scrolled');
-            }
-        });
-
-        // Close mobile menu on link click
-        document.querySelectorAll('#mobileMenu a').forEach(link => {
-            link.addEventListener('click', () => {
-                document.getElementById('mobileMenu').classList.add('hidden');
-            });
-        });
-
-        // Hide fallback jika gambar muncul
-        document.querySelectorAll('img').forEach(img => {
-            img.addEventListener('load', function() {
-                const fallback = this.parentElement.querySelector('#heroFallback');
-                if (fallback) fallback.style.display = 'none';
-            });
-        });
-    </script>
-
+    });
+</script>
 </body>
 </html>
