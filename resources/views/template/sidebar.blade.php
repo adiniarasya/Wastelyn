@@ -134,7 +134,6 @@
                             </a>
                         </li>
 
-                        {{-- >>> MENU BARU: MISSION & REWARD <<< --}}
                         <li class="sidebar-item {{ request()->routeIs('mitra.missions.*') ? 'active' : '' }}">
                             <a href="{{ route('mitra.missions.index') }}" class="sidebar-link">
                                 <i class="bi bi-bullseye"></i>
@@ -211,7 +210,7 @@
                 @endauth
 
             </ul>
-        </div>
+        </div>  
         <button class="sidebar-toggler btn x"><i data-feather="x"></i></button>
     </div>
 </div>
