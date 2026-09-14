@@ -14,6 +14,7 @@ class PickupRequest extends Model
     protected $fillable = [
         'user_id',
         'mitra_id',
+        'user_mission_id',
         'address',
         'pickup_date',
         'pickup_time',
@@ -29,5 +30,10 @@ class PickupRequest extends Model
     public function mitra()
     {
         return $this->belongsTo(Mitra::class, 'mitra_id', 'mitra_id');
+    }
+
+    public function userMission()
+    {
+        return $this->belongsTo(UserMission::class, 'user_mission_id', 'user_mission_id');
     }
 }

@@ -16,6 +16,7 @@ use App\Http\Controllers\AiChatSessionController;
 use App\Http\Controllers\AiChatMessageController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\SubmissionController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -146,12 +147,12 @@ Route::middleware('role:warga')->prefix('user')->name('user.')->group(function (
     Route::get('/rewards', [RewardController::class, 'index'])->name('rewards.index');
     Route::get('/rewards/{id}', [RewardController::class, 'show'])->name('rewards.show');
 
-    Route::get('/missions', [MissionController::class, 'index'])->name('missions.index');
-    Route::get('/missions/{id}', [MissionController::class, 'show'])->name('missions.show');
-
     Route::get('/user-missions', [UserMissionController::class, 'index'])->name('user-missions.index');
     Route::post('/user-missions', [UserMissionController::class, 'store'])->name('user-missions.store');
     Route::put('/user-missions/{id}', [UserMissionController::class, 'update'])->name('user-missions.update');
+    Route::get('/user-missions/{mission}', [UserMissionController::class, 'show'])->name('user-missions.show');
+
+    Route::post('/user-missions/{userMission}/submissions', [SubmissionController::class, 'store'])->name('user.submissions.store');
 
     Route::get('/ai-chat-sessions', [AiChatSessionController::class, 'index'])->name('ai-chat-sessions.index');
     Route::post('/ai-chat-sessions', [AiChatSessionController::class, 'store'])->name('ai-chat-sessions.store');

@@ -155,8 +155,8 @@
                             </a>
                         </li>
 
-                        <li class="sidebar-item {{ request()->routeIs('user.missions.*') ? 'active' : '' }}">
-                            <a href="{{ route('user.missions.index') }}" class="sidebar-link">
+                        <li class="sidebar-item {{ request()->routeIs('user.user-missions.*') ? 'active' : '' }}">
+                            <a href="{{ route('user.user-missions.index') }}" class="sidebar-link">
                                 <i class="bi bi-list-check"></i>
                                 <span>Waste Mission</span>
                             </a>
@@ -169,8 +169,8 @@
                             </a>
                         </li>
 
-                        <li class="sidebar-item {{ request()->routeIs('user.user-missions.*') ? 'active' : '' }}">
-                            <a href="{{ route('user.user-missions.index') }}" class="sidebar-link">
+                        <li class="sidebar-item ">
+                            <a href="#" class="sidebar-link">
                                 <i class="bi bi-trophy"></i>
                                 <span>Eco Habit Score</span>
                             </a>

@@ -6,6 +6,7 @@ use App\Models\UserMission;
 use App\Models\User;
 use App\Models\Mission;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class UserMissionController extends Controller
 {
@@ -34,22 +35,68 @@ class UserMissionController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'user_id' => 'required|exists:users,user_id',
             'mission_id' => 'required|exists:missions,mission_id',
-            'status' => 'required|in:in_progress,completed,failed',
-            'progress' => 'required|integer|min:0',
         ]);
 
-        UserMission::create($request->all());
-        return redirect()->route('user.user_missions.index')->with('success', 'User mission berhasil ditambahkan');
+        $mission = Mission::findOrFail($request->mission_id);
+
+        // cek misi masih aktif & dalam periode
+        if ($mission->status !== 'active') {
+            return back()->with('error', 'Misi ini sedang tidak aktif.');
+        }
+
+        $today = now()->toDateString();
+        if ($today < $mission->start_date || $today > $mission->end_date) {
+            return back()->with('error', 'Misi ini sedang di luar periode.');
+        }
+
+        // cek udah pernah join
+        $existing = UserMission::where('user_id', auth()->user()->user_id)
+            ->where('mission_id', $mission->mission_id)
+            ->first();
+
+        if ($existing) {
+            return redirect()
+                ->route('user.user-missions.show', $mission->mission_id)
+                ->with('info', 'Kamu sudah mengikuti misi ini.');
+        }
+
+        // generate unique code
+        $uniqueCode = 'MISI-' . $mission->mission_id . '-' . strtoupper(Str::random(4));
+        while (UserMission::where('unique_code', $uniqueCode)->exists()) {
+            $uniqueCode = 'MISI-' . $mission->mission_id . '-' . strtoupper(Str::random(4));
+        }
+
+        UserMission::create([
+            'user_id'     => auth()->user()->user_id,
+            'mission_id'  => $request->mission_id,
+            'unique_code' => $uniqueCode,
+            'status'      => 'ongoing',
+            'progress'    => 0,
+        ]);
+
+        return redirect()
+            ->route('user.user-missions.show', $mission->mission_id)
+            ->with('success', 'Berhasil mengikuti misi! Kode misimu: ' . $uniqueCode);
     }
+
 
     /**
      * Display the specified resource.
      */
-    public function show(UserMission $userMission)
+    public function show(Mission $mission)
     {
-        $userMission->load('user', 'mission', 'progressLogs');
+        $userMission = UserMission::where('user_id', auth()->user()->user_id)
+            ->where('mission_id', $mission->mission_id)
+            ->with(['submissions', 'progressLogs'])
+            ->first();
+
+        return view('user.user_missions.show', compact('mission', 'userMission'));
+    }
+
+    public function buatprogress(UserMission $userMission)
+    {
+        $userMission->load('user', 'mission', 'progressLogs', 'submissions');
         return view('user.user_missions.show', compact('userMission'));
     }
 
@@ -69,14 +116,15 @@ class UserMissionController extends Controller
     public function update(Request $request, UserMission $userMission)
     {
         $request->validate([
-            'user_id' => 'required|exists:users,user_id',
+            'user_id'    => 'required|exists:users,user_id',
             'mission_id' => 'required|exists:missions,mission_id',
-            'status' => 'required|in:in_progress,completed,failed',
-            'progress' => 'required|integer|min:0',
+            'status'     => 'required|in:ongoing,ready_pickup,picked_up,completed',
+            'progress'   => 'required|integer|min:0',
         ]);
 
         $userMission->update($request->all());
-        return redirect()->route('user.user_missions.index')->with('success', 'User mission berhasil diupdate');
+        return redirect()->route('user.user_missions.index')
+            ->with('success', 'User mission berhasil diupdate');
     }
 
     /**
@@ -85,7 +133,8 @@ class UserMissionController extends Controller
     public function destroy(UserMission $userMission)
     {
         $userMission->delete();
-        return redirect()->route('user.user_missions.index')->with('success', 'User mission berhasil dihapus');
+        return redirect()->route('user.user_missions.index')
+            ->with('success', 'User mission berhasil dihapus');
     }
 
     /**
@@ -94,57 +143,35 @@ class UserMissionController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:in_progress,completed,failed',
+            'status' => 'required|in:ongoing,ready_pickup,picked_up,completed',
         ]);
 
         $userMission = UserMission::findOrFail($id);
-        
-        $userMission->update(['status' => $request->status]);
+        $oldStatus = $userMission->status;
+        $userMission->status = $request->status;
 
-        // Jika completed, berikan reward ke user
+        if ($request->status === 'picked_up') {
+            $userMission->picked_up_at = now();
+        }
+
         if ($request->status === 'completed') {
+            $userMission->completed_at = now();
+        }
+
+        $userMission->save();
+
+        // kasih reward cuma pas transisi pertama kali ke 'completed'
+        if ($request->status === 'completed' && $oldStatus !== 'completed') {
             $mission = $userMission->mission;
             $user = $userMission->user;
 
             if ($mission && $user) {
-                $user->increment('xp', $mission->xp_reward);
-                $user->increment('points', $mission->points_reward);
+                $user->increment('xp', $mission->reward_xp);
+                $user->increment('points', $mission->reward_points);
             }
         }
 
         return redirect()->back()->with('success', 'Status user mission berhasil diupdate');
     }
 
-    /**
-     * Update progress user mission.
-     */
-    public function updateProgress(Request $request, $id)
-    {
-        $request->validate([
-            'progress' => 'required|integer|min:0',
-        ]);
-
-        $userMission = UserMission::findOrFail($id);
-        $mission = $userMission->mission;
-
-        // Cek apakah progress sudah mencapai target
-        if ($mission && $request->progress >= $mission->target) {
-            $userMission->update([
-                'progress' => $request->progress,
-                'status' => 'completed'
-            ]);
-
-            // Berikan reward
-            $user = $userMission->user;
-            if ($user) {
-                $user->increment('xp', $mission->xp_reward);
-                $user->increment('points', $mission->points_reward);
-            }
-
-            return redirect()->back()->with('success', 'Misi selesai! Reward sudah diberikan.');
-        }
-
-        $userMission->update(['progress' => $request->progress]);
-        return redirect()->back()->with('success', 'Progress berhasil diupdate');
-    }
 }
