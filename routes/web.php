@@ -170,7 +170,7 @@ Route::middleware('role:warga')->prefix('user')->name('user.')->group(function (
     Route::put('/user-missions/{id}', [UserMissionController::class, 'update'])->name('user-missions.update');
     Route::get('/user-missions/{mission}', [UserMissionController::class, 'show'])->name('user-missions.show');
 
-    Route::post('/user-missions/{userMission}/submissions', [SubmissionController::class, 'store'])->name('user.submissions.store');
+    Route::post('/user-missions/{userMission}/submissions', [SubmissionController::class, 'store'])->name('submissions.store');
 
     Route::get('/ai-chat-sessions', [AiChatSessionController::class, 'index'])->name('ai-chat-sessions.index');
     Route::post('/ai-chat-sessions', [AiChatSessionController::class, 'store'])->name('ai-chat-sessions.store');
