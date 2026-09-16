@@ -7,6 +7,7 @@ use App\Http\Controllers\AdminSettingsController;
 use App\Http\Controllers\MitraController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WasteBankController;
+use App\Http\Controllers\WasteCategoryController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\RewardController;
 use App\Http\Controllers\MissionController;
@@ -66,6 +67,15 @@ Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function
     Route::delete('/users/{id}', [AdminUserController::class, 'destroy'])->name('users.destroy');
     Route::patch('/users/{id}/approve', [AdminUserController::class, 'approve'])->name('users.approve');
     Route::patch('/users/{id}/reject', [AdminUserController::class, 'reject'])->name('users.reject');
+
+    // Waste Category Management (Admin)
+    Route::get('/waste-categories', [WasteCategoryController::class, 'index'])->name('waste-categories.index');
+    Route::get('/waste-categories/create', [WasteCategoryController::class, 'create'])->name('waste-categories.create');
+    Route::post('/waste-categories', [WasteCategoryController::class, 'store'])->name('waste-categories.store');
+    Route::get('/waste-categories/{wasteCategory}', [WasteCategoryController::class, 'show'])->name('waste-categories.show');
+    Route::get('/waste-categories/{wasteCategory}/edit', [WasteCategoryController::class, 'edit'])->name('waste-categories.edit');
+    Route::put('/waste-categories/{wasteCategory}', [WasteCategoryController::class, 'update'])->name('waste-categories.update');
+    Route::delete('/waste-categories/{wasteCategory}', [WasteCategoryController::class, 'destroy'])->name('waste-categories.destroy');
 
     // Mission Management (Admin)
     Route::get('/missions', [MissionController::class, 'index'])->name('missions.index');

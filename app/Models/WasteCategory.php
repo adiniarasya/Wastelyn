@@ -15,6 +15,9 @@ class WasteCategory extends Model
         'name',
         'description',
         'price_per_kg',
+        'reward_per_kg',
+        'point_per_kg',      
+        'co2_saved_per_kg',  
         'icon',
         'is_active',
     ];

@@ -49,6 +49,13 @@
                             </a>
                         </li>
 
+                        <li class="sidebar-item {{ request()->routeIs('admin.waste-categories.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.waste-categories.index') }}" class="sidebar-link">
+                                <i class="bi bi-recycle"></i>
+                                <span>Jenis Sampah</span>
+                            </a>
+                        </li>
+
                         <li class="sidebar-item {{ request()->routeIs('admin.transactions.*') ? 'active' : '' }}">
                             <a href="{{ route('admin.transactions.index') }}" class="sidebar-link">
                                 <i class="bi bi-arrow-left-right"></i>
@@ -147,7 +154,6 @@
                                 <span>Kelola Reward</span>
                             </a>
                         </li>
-                        {{-- >>> SELESAI <<< --}}
 
                         <li class="sidebar-title">Akun</li>
 
@@ -218,7 +224,7 @@
                 @endauth
 
             </ul>
-        </div>  
+        </div>
         <button class="sidebar-toggler btn x"><i data-feather="x"></i></button>
     </div>
 </div>
