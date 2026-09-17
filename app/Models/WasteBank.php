@@ -9,21 +9,33 @@ class WasteBank extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = 'waste_bank_id';
+    protected $primaryKey = 'bank_id';
 
     protected $fillable = [
         'mitra_id',
         'name',
         'address',
         'phone',
+        'email',
         'latitude',
         'longitude',
-        'operational_hours',
-        'is_active',
+        'opening_hours',   
+        'status',
     ];
 
-    public function mitra()
+    public function owner()
     {
-        return $this->belongsTo(Mitra::class, 'mitra_id', 'mitra_id');
+        return $this->belongsTo(User::class, 'mitra_id', 'user_id');
     }
+
+    public function missions()
+    {
+        return $this->hasMany(Mission::class, 'bank_id', 'bank_id');
+    }
+
+    public function pickupRequests()
+    {
+        return $this->hasMany(PickupRequest::class, 'bank_id', 'bank_id');
+    }
+
 }

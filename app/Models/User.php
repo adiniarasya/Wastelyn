@@ -55,6 +55,11 @@ class User extends Authenticatable
         return $this->role === 'warga';
     }
 
+    public function wasteBanks()
+    {
+        return $this->hasMany(WasteBank::class, 'mitra_id', 'user_id');
+    }
+
     public function isPending()
     {
         return $this->status === 'pending';
@@ -119,4 +124,3 @@ class User extends Authenticatable
         return $levels[$this->level] ?? 'Green Newbie';
     }
 }
-

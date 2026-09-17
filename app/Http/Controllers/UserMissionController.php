@@ -16,7 +16,7 @@ class UserMissionController extends Controller
     public function index()
     {
         $missions = Mission::where('status', 'active')->get();
-        return view('user.user-missions', compact('missions'));
+        return view('user.user_missions.index', compact('missions'));
     }
 
     /**

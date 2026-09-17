@@ -19,8 +19,8 @@ class GeminiService
         $mime = mime_content_type($imagePath) ?: 'image/jpeg';
 
         try {
-            $response = Http::timeout(30)->post(
-                "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={$apiKey}",
+            $response = Http::timeout(60)->post(
+                "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key={$apiKey}",
                 [
                     'contents' => [[
                         'parts' => [

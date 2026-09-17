@@ -14,12 +14,12 @@
 
             {{-- Alert --}}
             @foreach (['success' => 'success', 'error' => 'danger', 'info' => 'info'] as $key => $type)
-                @if (session($key))
-                    <div class="alert alert-{{ $type }} alert-dismissible fade show" role="alert">
-                        {{ session($key) }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                @endif
+            @if (session($key))
+            <div class="alert alert-{{ $type }} alert-dismissible fade show" role="alert">
+                {{ session($key) }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            @endif
             @endforeach
 
             <div class="card">
@@ -62,180 +62,180 @@
                     </div>
 
                     @if ($userMission)
-                        <hr>
+                    <hr>
 
-                        {{-- Progress --}}
-                        @php
-                            $progressPercent = $mission->target > 0
-                                ? min(100, round(($userMission->progress / $mission->target) * 100))
-                                : 0;
-                        @endphp
+                    {{-- Progress --}}
+                    @php
+                    $progressPercent = $mission->target > 0
+                    ? min(100, round(($userMission->progress / $mission->target) * 100))
+                    : 0;
+                    @endphp
 
-                        <div class="mb-4">
-                            <h5 class="mb-3">Progres Misi Kamu</h5>
+                    <div class="mb-4">
+                        <h5 class="mb-3">Progres Misi Kamu</h5>
 
-                            <div class="d-flex justify-content-between mb-2">
-                                <span>Progress</span>
-                                <strong>
-                                    {{ $userMission->progress }} / {{ $mission->target }}
-                                    {{ $mission->unit ?? 'item' }}
-                                    ({{ $progressPercent }}%)
-                                </strong>
-                            </div>
-
-                            <div class="progress" style="height: 20px;">
-                                <div class="progress-bar bg-success"
-                                     role="progressbar"
-                                     style="width: {{ $progressPercent }}%;"
-                                     aria-valuenow="{{ $progressPercent }}"
-                                     aria-valuemin="0"
-                                     aria-valuemax="100">
-                                    {{ $progressPercent }}%
-                                </div>
-                            </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Progress</span>
+                            <strong>
+                                {{ $userMission->progress }} / {{ $mission->target }}
+                                {{ $mission->unit ?? 'item' }}
+                                ({{ $progressPercent }}%)
+                            </strong>
                         </div>
 
-                        {{-- Kode Unik --}}
-                        <div class="alert alert-warning">
-                            <i class="bi bi-key me-2"></i>
-                            <strong>Kode Misi Kamu:</strong>
-                            <span class="badge bg-dark fs-6 ms-2">{{ $userMission->unique_code }}</span>
-                            <div class="mt-2 small">
-                                Tulis kode ini di kertas, lalu foto bareng sampahmu
-                                biar AI bisa verifikasi.
+                        <div class="progress" style="height: 20px;">
+                            <div class="progress-bar bg-success"
+                                role="progressbar"
+                                style="width: {{ $progressPercent }}%;"
+                                aria-valuenow="{{ $progressPercent }}"
+                                aria-valuemin="0"
+                                aria-valuemax="100">
+                                {{ $progressPercent }}%
                             </div>
                         </div>
+                    </div>
 
-                        {{-- Form Upload Bukti (hanya muncul kalau status ongoing) --}}
-                        @if ($userMission->status === 'ongoing')
-                            <div class="card border-success mb-4">
-                                <div class="card-header bg-success text-white">
-                                    <h6 class="mb-0">
-                                        <i class="bi bi-camera me-1"></i>
-                                        Upload Bukti
-                                    </h6>
-                                </div>
-                                <div class="card-body">
-                                    <form action="{{ route('user.submissions.store', $userMission->user_mission_id) }}"
-                                          method="POST"
-                                          enctype="multipart/form-data">
-                                        @csrf
-
-                                        <div class="mb-3">
-                                            <label class="form-label">Foto Bukti *</label>
-                                            <input type="file"
-                                                   name="photo"
-                                                   accept="image/*"
-                                                   capture="environment"
-                                                   required
-                                                   class="form-control @error('photo') is-invalid @enderror">
-                                            @error('photo')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
-                                            <small class="text-muted">
-                                                Maks 5MB. Foto bareng kode misi
-                                                <b>{{ $userMission->unique_code }}</b>.
-                                            </small>
-                                        </div>
-
-                                        <div class="mb-3">
-                                            <label class="form-label">Catatan (opsional)</label>
-                                            <textarea name="note"
-                                                      rows="2"
-                                                      maxlength="200"
-                                                      class="form-control"
-                                                      placeholder="Misal: baru kumpulin 3 botol"></textarea>
-                                        </div>
-
-                                        <button type="submit" class="btn btn-success">
-                                            <i class="bi bi-cloud-upload me-1"></i>
-                                            Kirim Bukti
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-                        @endif
-
-                        {{-- Status info --}}
-                        @if ($userMission->status === 'ready_pickup')
-                            <div class="alert alert-info">
-                                <i class="bi bi-truck me-2"></i>
-                                Misi selesai! Sampahmu siap dijemput oleh bank sampah.
-                                <a href="#" class="alert-link">Ajukan jemput →</a>
-                                {{-- nanti diganti route pickup --}}
-                            </div>
-                        @elseif ($userMission->status === 'picked_up')
-                            <div class="alert alert-primary">
-                                <i class="bi bi-check-circle me-2"></i>
-                                Sampahmu sudah dijemput. Menunggu verifikasi akhir.
-                            </div>
-                        @elseif ($userMission->status === 'completed')
-                            <div class="alert alert-success">
-                                <i class="bi bi-trophy me-2"></i>
-                                Misi selesai! Kamu dapat
-                                {{ $mission->reward_xp }} XP &
-                                {{ $mission->reward_points }} Points.
-                            </div>
-                        @endif
-
-                        {{-- Riwayat submission --}}
-                        @if ($userMission->submissions && $userMission->submissions->count() > 0)
-                            <hr>
-                            <h6 class="mb-3">Riwayat Bukti</h6>
-                            @foreach ($userMission->submissions as $sub)
-                                <div class="d-flex align-items-center border-bottom py-2">
-                                    <div class="me-3">
-                                        <img src="{{ asset('storage/' . $sub->photo_path) }}"
-                                             alt="bukti"
-                                             style="width: 60px; height: 60px; object-fit: cover;"
-                                             class="rounded">
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <strong>+{{ $sub->detected_count }} {{ $mission->unit ?? 'item' }}</strong>
-                                        <div class="small text-muted">
-                                            {{ $sub->created_at->diffForHumans() }}
-                                            @if ($sub->note)
-                                                — {{ $sub->note }}
-                                            @endif
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
-                        @endif
-
-                        <hr>
-
-                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                            <a href="{{ route('user.user-missions.index') }}" class="btn btn-secondary">
-                                <i class="bi bi-arrow-left me-1"></i> Kembali
-                            </a>
-
-                            <span class="badge bg-warning text-dark p-2">
-                                Status: {{ $userMission->status }}
-                            </span>
+                    {{-- Kode Unik --}}
+                    <div class="alert alert-warning">
+                        <i class="bi bi-key me-2"></i>
+                        <strong>Kode Misi Kamu:</strong>
+                        <span class="badge bg-dark fs-6 ms-2">{{ $userMission->unique_code }}</span>
+                        <div class="mt-2 small">
+                            Tulis kode ini di kertas, lalu foto bareng sampahmu
+                            biar AI bisa verifikasi.
                         </div>
+                    </div>
 
-                    @else
-                        <hr>
-
-                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                            <a href="{{ route('user.user-missions.index') }}" class="btn btn-secondary">
-                                <i class="bi bi-arrow-left me-1"></i> Kembali
-                            </a>
-
-                            <form id="confirmMissionForm"
-                                  action="{{ route('user.user-missions.store') }}"
-                                  method="POST">
+                    {{-- Form Upload Bukti (hanya muncul kalau status ongoing) --}}
+                    @if ($userMission->status === 'ongoing')
+                    <div class="card border-success mb-4">
+                        <div class="card-header bg-success text-white">
+                            <h6 class="mb-0">
+                                <i class="bi bi-camera me-1"></i>
+                                Upload Bukti
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <form action="{{ route('user.submissions.store', $userMission->user_mission_id) }}"
+                                method="POST"
+                                enctype="multipart/form-data">
                                 @csrf
-                                <input type="hidden" name="mission_id" value="{{ $mission->mission_id }}">
-                                <button type="button"
-                                        class="btn btn-success"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#confirmMissionModal">
-                                    <i class="bi bi-check-circle me-1"></i> Ikuti Misi
+
+                                <div class="mb-3">
+                                    <label class="form-label">Foto Bukti *</label>
+                                    <input type="file"
+                                        name="photo"
+                                        accept="image/*"
+                                        capture="environment"
+                                        required
+                                        class="form-control @error('photo') is-invalid @enderror">
+                                    @error('photo')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <small class="text-muted">
+                                        Maks 5MB. Foto bareng kode misi
+                                        <b>{{ $userMission->unique_code }}</b>.
+                                    </small>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Catatan (opsional)</label>
+                                    <textarea name="note"
+                                        rows="2"
+                                        maxlength="200"
+                                        class="form-control"
+                                        placeholder="Misal: baru kumpulin 3 botol"></textarea>
+                                </div>
+
+                                <button type="submit" class="btn btn-success">
+                                    <i class="bi bi-cloud-upload me-1"></i>
+                                    Kirim Bukti
                                 </button>
                             </form>
                         </div>
+                    </div>
+                    @endif
+
+                    {{-- Status info --}}
+                    @if ($userMission->status === 'ready_pickup')
+                    <div class="alert alert-info">
+                        <i class="bi bi-truck me-2"></i>
+                        Misi selesai! Sampahmu siap dijemput oleh bank sampah.
+                        <a href="#" class="alert-link">Ajukan jemput →</a>
+                        {{-- nanti diganti route pickup --}}
+                    </div>
+                    @elseif ($userMission->status === 'picked_up')
+                    <div class="alert alert-primary">
+                        <i class="bi bi-check-circle me-2"></i>
+                        Sampahmu sudah dijemput. Menunggu verifikasi akhir.
+                    </div>
+                    @elseif ($userMission->status === 'completed')
+                    <div class="alert alert-success">
+                        <i class="bi bi-trophy me-2"></i>
+                        Misi selesai! Kamu dapat
+                        {{ $mission->reward_xp }} XP &
+                        {{ $mission->reward_points }} Points.
+                    </div>
+                    @endif
+
+                    {{-- Riwayat submission --}}
+                    @if ($userMission->submissions && $userMission->submissions->count() > 0)
+                    <hr>
+                    <h6 class="mb-3">Riwayat Bukti</h6>
+                    @foreach ($userMission->submissions as $sub)
+                    <div class="d-flex align-items-center border-bottom py-2">
+                        <div class="me-3">
+                            <img src="{{ asset('storage/' . $sub->photo_path) }}"
+                                alt="bukti"
+                                style="width: 60px; height: 60px; object-fit: cover;"
+                                class="rounded">
+                        </div>
+                        <div class="flex-grow-1">
+                            <strong>+{{ $sub->detected_count }} {{ $mission->unit ?? 'item' }}</strong>
+                            <div class="small text-muted">
+                                {{ $sub->created_at->diffForHumans() }}
+                                @if ($sub->note)
+                                — {{ $sub->note }}
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                    @endif
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <a href="{{ route('user.user-missions.index') }}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left me-1"></i> Kembali
+                        </a>
+
+                        <span class="badge bg-warning text-dark p-2">
+                            Status: {{ $userMission->status }}
+                        </span>
+                    </div>
+
+                    @else
+                    <hr>
+
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <a href="{{ route('user.user-missions.index') }}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left me-1"></i> Kembali
+                        </a>
+
+                        <form id="confirmMissionForm"
+                            action="{{ route('user.user-missions.store') }}"
+                            method="POST">
+                            @csrf
+                            <input type="hidden" name="mission_id" value="{{ $mission->mission_id }}">
+                            <button type="button"
+                                class="btn btn-success"
+                                data-bs-toggle="modal"
+                                data-bs-target="#confirmMissionModal">
+                                <i class="bi bi-check-circle me-1"></i> Ikuti Misi
+                            </button>
+                        </form>
+                    </div>
                     @endif
 
                 </div>

@@ -45,4 +45,9 @@ class Mitra extends Model
     {
         return $this->hasMany(Transaction::class, 'mitra_id', 'mitra_id');
     }
+
+    public function wasteBanks()
+    {
+        return $this->hasMany(WasteBank::class, 'mitra_id', 'mitra_id');
+    }
 }
