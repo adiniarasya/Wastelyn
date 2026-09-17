@@ -28,6 +28,13 @@ class UserController extends Controller
             ->where('status', 'completed')
             ->count();
 
+        $userMissions = UserMission::where('user_id', $user->user_id)
+            ->with('mission')
+            ->whereIn('status', ['ongoing', 'ready_pickup'])
+            ->latest()
+            ->limit(5)
+            ->get();
+
         $recentPickups = PickupRequest::where('user_id', $user->user_id)
             ->latest()
             ->limit(5)
@@ -53,7 +60,8 @@ class UserController extends Controller
             'completedMissions',
             'recentPickups',
             'recentTransactions',
-            'unreadNotifications'
+            'unreadNotifications',
+            'userMissions'
         ));
     }
 }
