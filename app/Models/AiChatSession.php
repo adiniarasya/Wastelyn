@@ -16,7 +16,10 @@ class AiChatSession extends Model
         'title',
         'is_active',
     ];
-    
+
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
 
     public function user()
     {
@@ -25,6 +28,18 @@ class AiChatSession extends Model
 
     public function messages()
     {
-        return $this->hasMany(AiChatMessage::class, 'session_id', 'session_id');
+        return $this->hasMany(AiChatMessage::class, 'session_id', 'session_id')
+            ->orderBy('message_id');
+    }
+
+    public function latestMessage()
+    {
+        return $this->hasOne(AiChatMessage::class, 'session_id', 'session_id')
+            ->latestOfMany('message_id');
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
     }
 }

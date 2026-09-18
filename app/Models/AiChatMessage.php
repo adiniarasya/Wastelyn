@@ -13,13 +13,22 @@ class AiChatMessage extends Model
 
     protected $fillable = [
         'session_id',
-        'role',
-        'content',
-        'context',
+        'sender',
+        'message',
     ];
 
     public function session()
     {
         return $this->belongsTo(AiChatSession::class, 'session_id', 'session_id');
+    }
+
+    public function scopeForSession($query, $sessionId)
+    {
+        return $query->where('session_id', $sessionId)->orderBy('message_id');
+    }
+
+    public function isFromUser(): bool
+    {
+        return $this->sender === 'user';
     }
 }

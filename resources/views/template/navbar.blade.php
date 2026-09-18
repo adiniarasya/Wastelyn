@@ -1,55 +1,39 @@
 <nav class="navbar navbar-expand navbar-light">
     <div class="container-fluid">
 
-        {{-- Toggle Sidebar --}}
         <a href="#" class="burger-btn d-block">
             <i class="bi bi-justify fs-3"></i>
         </a>
 
-        {{-- Navbar Toggler Mobile --}}
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-            data-bs-target="#navbarSupportedContent"
-            aria-controls="navbarSupportedContent"
-            aria-expanded="false"
-            aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        {{-- Navbar Content --}}
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
 
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
 
-                {{-- ============================ --}}
-                {{-- NOTIFIKASI — SESUAI ROLE --}}
-                {{-- ============================ --}}
                 <li class="nav-item dropdown me-1">
-                    <a class="nav-link active dropdown-toggle"
-                        href="#"
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false">
+                    <a class="nav-link active dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">
 
                         <i class="bi bi-bell bi-sub fs-4 text-gray-600"></i>
 
                         @php
-                            // Ambil jumlah notifikasi sesuai role
                             $notifCount = 0;
 
                             if (auth()->user()->role === 'admin') {
-                                // Notifikasi admin: user pending approval + setoran pending
                                 $notifCount = \App\Models\User::where('status', 'pending')->count()
-                                            + \App\Models\PickupRequest::where('status', 'pending')->count();
+                                    + \App\Models\PickupRequest::where('status', 'pending')->count();
                             } elseif (auth()->user()->role === 'mitra') {
-                                // Notifikasi mitra: setoran pending yang belum diambil
                                 $notifCount = \App\Models\PickupRequest::where('status', 'pending')
-                                                ->whereNull('mitra_id')
-                                                ->count();
+                                    ->whereNull('mitra_id')
+                                    ->count();
                             } elseif (auth()->user()->role === 'warga') {
-                                // Notifikasi warga: setoran yang sudah diverifikasi / rejected
                                 $notifCount = \App\Models\PickupRequest::where('user_id', auth()->id())
-                                                ->whereIn('status', ['completed', 'rejected'])
-                                                ->whereDate('updated_at', '>=', now()->subDays(7))
-                                                ->count();
+                                    ->whereIn('status', ['completed', 'rejected'])
+                                    ->whereDate('updated_at', '>=', now()->subDays(7))
+                                    ->count();
                             }
                         @endphp
 
@@ -66,10 +50,11 @@
                             </h6>
                         </li>
 
-                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
 
                         @if(auth()->user()->role === 'admin')
-                            {{-- NOTIFIKASI ADMIN --}}
                             @php
                                 $pendingUsers = \App\Models\User::where('status', 'pending')->latest()->take(3)->get();
                                 $pendingPickups = \App\Models\PickupRequest::where('status', 'pending')->latest()->take(3)->get();
@@ -108,18 +93,18 @@
                             @endif
 
                         @elseif(auth()->user()->role === 'mitra')
-                            {{-- NOTIFIKASI MITRA --}}
                             @php
                                 $pendingPickups = \App\Models\PickupRequest::where('status', 'pending')
-                                                    ->whereNull('mitra_id')
-                                                    ->latest()
-                                                    ->take(5)
-                                                    ->get();
+                                    ->whereNull('mitra_id')
+                                    ->latest()
+                                    ->take(5)
+                                    ->get();
                             @endphp
 
                             @forelse($pendingPickups as $p)
                                 <li>
-                                    <a class="dropdown-item" href="{{ route('mitra.pickup-requests.show', $p->pickup_request_id) }}">
+                                    <a class="dropdown-item"
+                                        href="{{ route('mitra.pickup-requests.show', $p->pickup_request_id) }}">
                                         <i class="bi bi-truck text-success me-2"></i>
                                         <small>
                                             Setoran baru dari <strong>{{ $p->user->name ?? 'Warga' }}</strong>
@@ -135,18 +120,18 @@
                             @endforelse
 
                         @elseif(auth()->user()->role === 'warga')
-                            {{-- NOTIFIKASI WARGA --}}
                             @php
                                 $myUpdates = \App\Models\PickupRequest::where('user_id', auth()->id())
-                                                ->whereIn('status', ['completed', 'rejected'])
-                                                ->latest('updated_at')
-                                                ->take(5)
-                                                ->get();
+                                    ->whereIn('status', ['completed', 'rejected'])
+                                    ->latest('updated_at')
+                                    ->take(5)
+                                    ->get();
                             @endphp
 
                             @forelse($myUpdates as $p)
                                 <li>
-                                    <a class="dropdown-item" href="{{ route('user.pickup-requests.show', $p->pickup_request_id) }}">
+                                    <a class="dropdown-item"
+                                        href="{{ route('user.pickup-requests.show', $p->pickup_request_id) }}">
                                         @if($p->status === 'completed')
                                             <i class="bi bi-check-circle text-success me-2"></i>
                                             <small>
@@ -170,7 +155,9 @@
                             @endforelse
                         @endif
 
-                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
 
                         <li class="text-center">
                             <small class="text-muted">Notifikasi 7 hari terakhir</small>
@@ -181,9 +168,6 @@
 
             </ul>
 
-            {{-- ============================ --}}
-            {{-- PROFIL USER — PAKAI INISIAL --}}
-            {{-- ============================ --}}
             <div class="dropdown">
 
                 <a href="#" data-bs-toggle="dropdown" aria-expanded="false">
@@ -198,10 +182,8 @@
                             </p>
                         </div>
 
-                        {{-- AVATAR INISIAL --}}
                         <div class="user-img d-flex align-items-center">
                             @php
-                                // Ambil inisial dari nama
                                 $nameParts = explode(' ', trim(auth()->user()->name));
                                 $initials = '';
                                 if (count($nameParts) >= 2) {
@@ -210,17 +192,15 @@
                                     $initials = strtoupper(substr($nameParts[0], 0, 2));
                                 }
 
-                                // Warna background berdasarkan role
-                                $bgColor = match(auth()->user()->role) {
-                                    'admin' => '#1A237E',   // biru teknologi
-                                    'mitra' => '#2E7D32',   // hijau utama
-                                    'warga' => '#4CAF50',   // hijau muda
+                                $bgColor = match (auth()->user()->role) {
+                                    'admin' => '#1A237E',
+                                    'mitra' => '#2E7D32',
+                                    'warga' => '#4CAF50',
                                     default => '#6C757D',
                                 };
                             @endphp
 
-                            <div class="avatar avatar-md"
-                                 style="background-color: {{ $bgColor }};
+                            <div class="avatar avatar-md" style="background-color: {{ $bgColor }};
                                         color: white;
                                         width: 40px;
                                         height: 40px;
@@ -271,7 +251,9 @@
                         </li>
                     @endif
 
-                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
 
                     <li>
                         <form method="POST" action="{{ route('logout') }}">

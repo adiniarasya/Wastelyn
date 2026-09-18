@@ -2,49 +2,78 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AiChatMessage;
 use App\Models\AiChatSession;
+use App\Models\AiChatMessage;
+use App\Services\GeminiService;
 use Illuminate\Http\Request;
 
 class AiChatMessageController extends Controller
 {
-    public function index($sessionId)
-    {
-        $messages = AiChatMessage::where('session_id', $sessionId)
-            ->whereHas('session', fn($q) => $q->where('user_id', auth()->id()))
-            ->get();
-        return response()->json($messages);
-    }
+    public function __construct(protected GeminiService $gemini) {}
 
-    public function store(Request $request)
+    public function store(Request $request, $sessionId)
     {
+        $session = AiChatSession::where('user_id', auth()->id())->findOrFail($sessionId);
+
         $request->validate([
-            'session_id' => 'required|exists:ai_chat_sessions,id',
-            'message' => 'required|string',
-            'sender' => 'required|in:user,ai',
+            'message' => 'required|string|max:4000',
         ]);
 
-        $session = AiChatSession::where('user_id', auth()->id())->findOrFail($request->session_id);
+        $userMessage = $request->input('message');
 
-        $message = AiChatMessage::create([
-            'session_id' => $session->id,
-            'message' => $request->message,
-            'sender' => $request->sender,
+        AiChatMessage::create([
+            'session_id' => $session->session_id,
+            'sender'     => 'user',
+            'message'    => $userMessage,
         ]);
 
-        return response()->json($message);
+        $history = $session->messages()
+            ->orderBy('message_id')
+            ->get()
+            ->map(fn ($m) => [
+                'role'  => $m->sender === 'ai' ? 'model' : 'user',
+                'parts' => [['text' => $m->message]],
+            ])
+            ->toArray();
+
+        array_pop($history);
+
+        try {
+            $reply = $this->gemini->chat(
+                message: $userMessage,
+                history: $history,
+                systemPrompt: 'Anda adalah asisten AI yang ramah dan membantu.'
+            );
+        } catch (\Throwable $e) {
+            return redirect()
+                ->route('user.ai-chat-sessions.show', $session->session_id)
+                ->with('error', 'Gagal menghubungi AI: ' . $e->getMessage());
+        }
+
+        AiChatMessage::create([
+            'session_id' => $session->session_id,
+            'sender'     => 'ai',
+            'message'    => $reply,
+        ]);
+
+        if ($session->messages()->count() === 2 && str_starts_with($session->title, 'Chat ')) {
+            $session->update(['title' => mb_substr($userMessage, 0, 50)]);
+        }
+
+        return redirect()
+            ->route('user.ai-chat-sessions.show', $session->session_id)
+            ->with('success', 'Pesan terkirim.');
     }
 
-    public function show($id)
+    public function destroy($sessionId, $messageId)
     {
-        $message = AiChatMessage::whereHas('session', fn($q) => $q->where('user_id', auth()->id()))->findOrFail($id);
-        return response()->json($message);
-    }
+        $session = AiChatSession::where('user_id', auth()->id())->findOrFail($sessionId);
+        $message = AiChatMessage::where('session_id', $session->session_id)->findOrFail($messageId);
 
-    public function destroy($id)
-    {
-        $message = AiChatMessage::whereHas('session', fn($q) => $q->where('user_id', auth()->id()))->findOrFail($id);
         $message->delete();
-        return response()->json(['success' => true]);
+
+        return redirect()
+            ->route('user.ai-chat-sessions.show', $session->session_id)
+            ->with('success', 'Pesan dihapus.');
     }
 }

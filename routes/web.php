@@ -155,18 +155,20 @@ Route::middleware(['auth', 'role:mitra'])->prefix('mitra')->name('mitra.')->grou
     Route::put('/rewards/{reward}', [RewardController::class, 'mitraUpdate'])->name('rewards.update');
     Route::delete('/rewards/{reward}', [RewardController::class, 'mitraDestroy'])->name('rewards.destroy');
 });
+
 //user
 Route::middleware('role:warga')->prefix('user')->name('user.')->group(function () {
+
     Route::get('/dashboard', [UserController::class, 'dashboard'])->name('dashboard');
 
     Route::get('/waste-banks', [WasteBankController::class, 'index'])->name('waste-banks.index');
     Route::get('/waste-banks/{id}', [WasteBankController::class, 'show'])->name('waste-banks.show');
 
-    Route::get('/pickup-requests', [PickupRequestController::class, 'index'])->name('pickup-requests.index');
-    Route::get('/pickup-requests/create', [PickupRequestController::class, 'create'])->name('pickup-requests.create');
-    Route::post('/pickup-requests', [PickupRequestController::class, 'store'])->name('pickup-requests.store');
-    Route::get('/pickup-requests/{id}', [PickupRequestController::class, 'show'])->name('pickup-requests.show');
-    Route::delete('/pickup-requests/{id}', [PickupRequestController::class, 'destroy'])->name('pickup-requests.destroy');
+    Route::get('/pickup-requests', [PickupRequestController::class, 'userIndex'])->name('pickup-requests.index');
+    Route::get('/pickup-requests/create', [PickupRequestController::class, 'userCreate'])->name('pickup-requests.create');
+    Route::post('/pickup-requests', [PickupRequestController::class, 'userStore'])->name('pickup-requests.store');
+    Route::get('/pickup-requests/{pickupRequest}', [PickupRequestController::class, 'userShow'])->name('pickup-requests.show');
+    Route::delete('/pickup-requests/{pickupRequest}', [PickupRequestController::class, 'userDestroy'])->name('pickup-requests.destroy');
 
     Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
     Route::get('/transactions/{id}', [TransactionController::class, 'show'])->name('transactions.show');
@@ -188,14 +190,11 @@ Route::middleware('role:warga')->prefix('user')->name('user.')->group(function (
     Route::put('/ai-chat-sessions/{id}', [AiChatSessionController::class, 'update'])->name('ai-chat-sessions.update');
     Route::delete('/ai-chat-sessions/{id}', [AiChatSessionController::class, 'destroy'])->name('ai-chat-sessions.destroy');
 
-    Route::get('/ai-chat-messages', [AiChatMessageController::class, 'index'])->name('ai-chat-messages.index');
-    Route::post('/ai-chat-messages', [AiChatMessageController::class, 'store'])->name('ai-chat-messages.store');
-    Route::get('/ai-chat-messages/{id}', [AiChatMessageController::class, 'show'])->name('ai-chat-messages.show');
-    Route::delete('/ai-chat-messages/{id}', [AiChatMessageController::class, 'destroy'])->name('ai-chat-messages.destroy');
-    // Pickup Requests (Warga)
-    Route::get('/pickup-requests', [PickupRequestController::class, 'userIndex'])->name('pickup-requests.index');
-    Route::get('/pickup-requests/create', [PickupRequestController::class, 'userCreate'])->name('pickup-requests.create');
-    Route::post('/pickup-requests', [PickupRequestController::class, 'userStore'])->name('pickup-requests.store');
-    Route::get('/pickup-requests/{pickupRequest}', [PickupRequestController::class, 'userShow'])->name('pickup-requests.show');
-    Route::delete('/pickup-requests/{pickupRequest}', [PickupRequestController::class, 'userDestroy'])->name('pickup-requests.destroy');
+    Route::post('/ai-chat-sessions/{sessionId}/messages', [AiChatMessageController::class, 'store'])
+        ->middleware('throttle:20,1')
+        ->name('ai-chat-messages.store');
+
+    Route::delete('/ai-chat-sessions/{sessionId}/messages/{messageId}', [AiChatMessageController::class, 'destroy'])
+        ->name('ai-chat-messages.destroy');
+
 });

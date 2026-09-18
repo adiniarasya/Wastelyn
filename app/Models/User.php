@@ -123,4 +123,21 @@ class User extends Authenticatable
 
         return $levels[$this->level] ?? 'Green Newbie';
     }
+
+    public function aiChatSessions()
+    {
+        return $this->hasMany(AiChatSession::class, 'user_id', 'user_id');
+    }
+
+    public function aiChatMessages()
+    {
+        return $this->hasManyThrough(
+            AiChatMessage::class,
+            AiChatSession::class,
+            'user_id',
+            'session_id',
+            'user_id',
+            'session_id'
+        );
+    }
 }

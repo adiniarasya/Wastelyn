@@ -421,7 +421,7 @@
 
             <a class="wl-brand" href="{{ url('/') }}">
                 <span class="wl-brand-logo">
-                    <img src="{{ asset('storage/logo.jpg') }}" alt="Logo WasteLyn">
+                    <img src="{{ asset('assets/logo.png') }}" alt="Logo WasteLyn">
                 </span>
                 <span class="wl-brand-text">
                     <span class="wl-brand-title d-block">WasteLyn</span>
@@ -516,7 +516,7 @@
                         <div class="circle-big"></div>
                         <div class="circle-small"></div>
                         <div class="tentang-logo">
-                            <img src="{{ asset('storage/logo.jpg') }}" alt="Logo WasteLyn">
+                            <img src="{{ asset('assets/logo.PNG') }}" alt="Logo WasteLyn">
                         </div>
                     </div>
                 </div>

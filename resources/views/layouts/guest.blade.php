@@ -85,7 +85,7 @@
         <div class="w-full max-w-md">
 
             <div class="text-center mb-6">
-                <img src="{{ asset('storage/logo.jpg') }}" alt="Logo WasteLyn" class="mx-auto mb-3"
+                <img src="{{ asset('assets/logo.png') }}" alt="Logo WasteLyn" class="mx-auto mb-3"
                     style="height:56px;width:auto;">
                 <h1 class="text-xl font-bold" style="color:var(--wl-ink);">WasteLyn</h1>
                 <p class="text-sm mt-1" style="color:var(--wl-muted);">

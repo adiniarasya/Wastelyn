@@ -1,28 +1,26 @@
 <div id="sidebar" class="active">
     <div class="sidebar-wrapper active">
         <div class="sidebar-header">
-            <div class="d-flex justify-content-between">
+            <div class="d-flex justify-content-between align-items-center w-100">
                 <div class="logo">
-                    <a href="{{ url('/') }}">
-                        <img src="{{ asset('assets/images/logo/logo.png') }}" alt="Logo" srcset="">
+                    <a href="{{ url('/') }}" class="d-flex align-items-center">
+                        <img src="{{ asset('assets/logo.png') }}" alt="Logo" class="sidebar-logo">
                     </a>
                 </div>
                 <div class="toggler">
                     <a href="#" class="sidebar-hide d-xl-none d-block">
-                        <i class="bi bi-x bi-middle"></i>
+                        <i class="bi bi-x-lg"></i>
                     </a>
                 </div>
             </div>
         </div>
+
         <div class="sidebar-menu">
             <ul class="menu">
-
                 @auth
 
-                    {{-- ADMIN --}}
                     @if(auth()->user()->role == 'admin')
 
-                        {{-- Menu Utama --}}
                         <li class="sidebar-title">Menu Utama</li>
 
                         <li class="sidebar-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
@@ -39,7 +37,6 @@
                             </a>
                         </li>
 
-                        {{-- Data & Transaksi --}}
                         <li class="sidebar-title">Data & Transaksi</li>
 
                         <li class="sidebar-item {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
@@ -84,7 +81,6 @@
                             </a>
                         </li>
 
-                        {{-- Sistem --}}
                         <li class="sidebar-title">Sistem</li>
 
                         <li class="sidebar-item {{ request()->routeIs('admin.notifications.*') ? 'active' : '' }}">
@@ -108,7 +104,6 @@
                             </a>
                         </li>
 
-                        {{-- MITRA --}}
                     @elseif(auth()->user()->role == 'mitra')
 
                         <li class="sidebar-title">Menu Mitra</li>
@@ -164,7 +159,6 @@
                             </a>
                         </li>
 
-                        {{-- WARGA --}}
                     @elseif(auth()->user()->role == 'warga')
 
                         <li class="sidebar-title">Menu Warga</li>
@@ -183,7 +177,6 @@
                             </a>
                         </li>
 
-                        {{-- ✅ MENU BARU: SETORAN SAMPAH --}}
                         <li class="sidebar-item {{ request()->routeIs('user.pickup-requests.*') ? 'active' : '' }}">
                             <a href="{{ route('user.pickup-requests.index') }}" class="sidebar-link">
                                 <i class="bi bi-truck"></i>
@@ -198,7 +191,7 @@
                             </a>
                         </li>
 
-                        <li class="sidebar-item ">
+                        <li class="sidebar-item">
                             <a href="#" class="sidebar-link">
                                 <i class="bi bi-trophy"></i>
                                 <span>Eco Habit Score</span>
@@ -222,9 +215,8 @@
                     @endif
 
                 @endauth
-
             </ul>
         </div>
-        <button class="sidebar-toggler btn x"><i data-feather="x"></i></button>
+
     </div>
 </div>

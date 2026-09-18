@@ -19,7 +19,6 @@ class WasteCategory extends Model
         'point_per_kg',      
         'co2_saved_per_kg',  
         'icon',
-        'is_active',
     ];
 
     public function pickupItems()
