@@ -4,7 +4,7 @@
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h1>Daftar Jenis Sampah</h1>
-            <a href="{{ route('waste-categories.create') }}" class="btn btn-primary">+ Tambah</a>
+            <a href="{{ route('admin.waste-categories.create') }}" class="btn btn-primary">+ Tambah</a>
         </div>
 
         @if(session('success'))
@@ -15,17 +15,17 @@
             <div class="alert alert-danger">{{ session('error') }}</div>
         @endif
 
-        <table class="table table-bordered">
+        <table class="table table-bordered align-middle">
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Icon</th>
+                    <th>Foto</th>
                     <th>Nama</th>
+                    <th>Deskripsi</th>
                     <th>Harga/kg</th>
+                    <th>Reward/kg</th>
                     <th>Poin/kg</th>
                     <th>CO2/kg</th>
-                    <th>Status</th>
-                    <th>Total Pickup</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
@@ -35,27 +35,24 @@
                         <td>{{ $c->category_id }}</td>
                         <td>
                             @if($c->icon)
-                                <img src="{{ asset('storage/icons/' . $c->icon) }}" width="40" alt="">
+                                <img src="{{ asset('storage/' . $c->icon) }}" width="48" height="48"
+                                    style="object-fit:cover; border-radius:6px;" alt="{{ $c->name }}">
+                            @else
+                                <span class="text-muted">—</span>
                             @endif
                         </td>
                         <td>{{ $c->name }}</td>
+                        <td>{{ \Illuminate\Support\Str::limit($c->description, 50) ?? '-' }}</td>
                         <td>Rp {{ number_format($c->price_per_kg, 0, ',', '.') }}</td>
+                        <td>{{ $c->reward_per_kg ?? '-' }}</td>
                         <td>{{ $c->point_per_kg }}</td>
                         <td>{{ $c->co2_saved_per_kg }}</td>
                         <td>
-                            @if($c->is_active)
-                                <span class="badge bg-success">Aktif</span>
-                            @else
-                                <span class="badge bg-secondary">Nonaktif</span>
-                            @endif
-                        </td>
-                        <td>{{ $c->pickup_items_count }}</td>
-                        <td>
-                            <a href="{{ route('waste-categories.show', $c->category_id) }}"
+                            <a href="{{ route('admin.waste-categories.show', $c->category_id) }}"
                                 class="btn btn-info btn-sm">Detail</a>
-                            <a href="{{ route('waste-categories.edit', $c->category_id) }}"
+                            <a href="{{ route('admin.waste-categories.edit', $c->category_id) }}"
                                 class="btn btn-warning btn-sm">Edit</a>
-                            <form action="{{ route('waste-categories.destroy', $c->category_id) }}" method="POST"
+                            <form action="{{ route('admin.waste-categories.destroy', $c->category_id) }}" method="POST"
                                 class="d-inline" onsubmit="return confirm('Yakin hapus?')">
                                 @csrf
                                 @method('DELETE')
