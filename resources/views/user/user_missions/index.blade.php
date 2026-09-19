@@ -7,9 +7,9 @@
     <div class="page-title">
         <div class="row align-items-center">
             <div class="col-12 col-md-8">
-                <h3 class="fw-bold">🎯 Waste Mission</h3>
+                <h3 class="fw-bold">Waste Mission</h3>
                 <p class="text-subtitle text-muted">
-                    Ikuti berbagai misi untuk membangun kebiasaan ramah lingkungan 🌱
+                    Ikuti berbagai misi untuk membangun kebiasaan ramah lingkungan
                 </p>
             </div>
             <div class="col-12 col-md-4">

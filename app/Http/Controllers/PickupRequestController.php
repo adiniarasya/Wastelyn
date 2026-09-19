@@ -11,8 +11,6 @@ use Illuminate\Support\Facades\Auth;
 
 class PickupRequestController extends Controller
 {
-
-
     public function index()
     {
         $pickups = PickupRequest::with('user', 'wasteBank')->get();
@@ -135,8 +133,6 @@ class PickupRequestController extends Controller
         return redirect()->back()->with('success', 'Pickup berhasil diassign ke mitra');
     }
 
-
-
     public function mitraIndex()
     {
         $available = PickupRequest::with('user', 'wasteBank', 'wasteCategory')
@@ -164,8 +160,6 @@ class PickupRequestController extends Controller
         return view('mitra.pickups.show', compact('pickupRequest'));
     }
 
-
-
     public function userIndex()
     {
         $pickups = PickupRequest::where('user_id', Auth::id())
@@ -190,7 +184,7 @@ class PickupRequestController extends Controller
 
     public function userCreate()
     {
-$wasteCategories = WasteCategory::all();
+        $wasteCategories = WasteCategory::all();
         $wasteBanks = WasteBank::all();
 
         return view('user.pickups.create', compact('wasteCategories', 'wasteBanks'));

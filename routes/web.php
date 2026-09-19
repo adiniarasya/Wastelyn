@@ -125,8 +125,8 @@ Route::middleware(['auth', 'role:mitra'])->prefix('mitra')->name('mitra.')->grou
 
     // Pickup Requests
     Route::get('/pickup-requests', [PickupRequestController::class, 'mitraIndex'])->name('pickup-requests.index');
-    Route::get('/pickup-requests/{id}', [PickupRequestController::class, 'mitraShow'])->name('pickup-requests.show');
-    Route::put('/pickup-requests/{id}/status', [PickupRequestController::class, 'updateStatus'])->name('pickup-requests.status');
+    Route::get('/pickup-requests/{pickupRequest}', [PickupRequestController::class, 'mitraShow'])->name('pickup-requests.show');
+    Route::put('/pickup-requests/{pickupRequest}/status', [PickupRequestController::class, 'updateStatus'])->name('pickup-requests.status');
 
     // Transactions
     Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
@@ -137,7 +137,7 @@ Route::middleware(['auth', 'role:mitra'])->prefix('mitra')->name('mitra.')->grou
     Route::get('/profile', [MitraController::class, 'profile'])->name('profile');
     Route::put('/profile', [MitraController::class, 'updateProfile'])->name('profile.update');
 
-//mision reward
+    //mision reward
     Route::get('/missions', [MissionController::class, 'mitraIndex'])->name('missions.index');
     Route::get('/missions/create', [MissionController::class, 'mitraCreate'])->name('missions.create');
     Route::post('/missions', [MissionController::class, 'mitraStore'])->name('missions.store');
@@ -146,7 +146,7 @@ Route::middleware(['auth', 'role:mitra'])->prefix('mitra')->name('mitra.')->grou
     Route::put('/missions/{mission}', [MissionController::class, 'mitraUpdate'])->name('missions.update');
     Route::delete('/missions/{mission}', [MissionController::class, 'mitraDestroy'])->name('missions.destroy');
 
-//rewards
+    //rewards
     Route::get('/rewards', [RewardController::class, 'mitraIndex'])->name('rewards.index');
     Route::get('/rewards/create', [RewardController::class, 'mitraCreate'])->name('rewards.create');
     Route::post('/rewards', [RewardController::class, 'mitraStore'])->name('rewards.store');

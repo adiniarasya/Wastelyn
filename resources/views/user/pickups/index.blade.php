@@ -26,6 +26,8 @@
                             <th>#</th>
                             <th>Tanggal</th>
                             <th>Bank Sampah</th>
+                            <th>Kategori</th>
+                            <th>Berat</th>
                             <th>Metode</th>
                             <th>Status</th>
                             <th>Poin</th>
@@ -37,10 +39,12 @@
                             <tr>
                                 <td>{{ $loop->iteration + ($pickups->currentPage() - 1) * $pickups->perPage() }}</td>
                                 <td>
-                                    {{ optional($pickup->pickup_date)->format('d M Y') }}
-                                    <br><small class="text-muted">{{ $pickup->pickup_time }}</small>
+                                    {{ optional($pickup->pickup_date)->format('d M Y') ?? '-' }}
+                                    <br><small class="text-muted">{{ $pickup->pickup_time ?? '-' }}</small>
                                 </td>
-                                <td>{{ $pickup->wasteBank->name ?? '-' }}</td>
+                                <td>{{ $pickup->wasteBank?->name ?? '-' }}</td>
+                                <td>{{ $pickup->wasteCategory?->name ?? '-' }}</td>
+                                <td>{{ $pickup->weight_kg ? $pickup->weight_kg . ' kg' : '-' }}</td>
                                 <td>
                                     <span class="badge bg-secondary text-capitalize">
                                         {{ $pickup->pickup_method ?? '-' }}
@@ -48,7 +52,7 @@
                                 </td>
                                 <td>
                                     @php
-                                        $badge = match($pickup->status) {
+                                        $badge = match ($pickup->status) {
                                             'pending' => 'bg-warning text-dark',
                                             'accepted' => 'bg-info text-dark',
                                             'scheduled' => 'bg-primary',
@@ -57,7 +61,7 @@
                                             default => 'bg-secondary',
                                         };
                                     @endphp
-                                    <span class="badge {{ $badge }} text-capitalize">{{ $pickup->status }}</span>
+                                    <span class="badge {{ $badge }} text-capitalize">{{ $pickup->status ?? '-' }}</span>
                                 </td>
                                 <td>
                                     @if($pickup->status === 'completed')
@@ -68,13 +72,13 @@
                                 </td>
                                 <td class="text-end">
                                     <a href="{{ route('user.pickup-requests.show', $pickup->pickup_request_id) }}"
-                                       class="btn btn-sm btn-outline-secondary">
+                                        class="btn btn-sm btn-outline-secondary">
                                         Detail
                                     </a>
                                     @if($pickup->status === 'pending')
                                         <form action="{{ route('user.pickup-requests.destroy', $pickup->pickup_request_id) }}"
-                                              method="POST" class="d-inline"
-                                              onsubmit="return confirm('Yakin batalkan pengajuan ini?');">
+                                            method="POST" class="d-inline"
+                                            onsubmit="return confirm('Yakin batalkan pengajuan ini?');">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-sm btn-outline-danger">Batalkan</button>
@@ -84,7 +88,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center text-muted py-4">
+                                <td colspan="9" class="text-center text-muted py-4">
                                     Belum ada riwayat setoran.
                                     <a href="{{ route('user.pickup-requests.create') }}">Ajukan sekarang</a>.
                                 </td>

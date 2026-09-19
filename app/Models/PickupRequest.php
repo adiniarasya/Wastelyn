@@ -16,6 +16,10 @@ class PickupRequest extends Model
         'user_mission_id',
         'bank_id',
         'mitra_id',
+        'waste_category_id',
+        'weight_kg',
+        'points_earned',
+        'co2_saved',
         'pickup_method',
         'pickup_date',
         'pickup_time',
@@ -30,6 +34,18 @@ class PickupRequest extends Model
         'jenis_sampah',
     ];
 
+    protected $casts = [
+        'pickup_date' => 'date',
+        'weight_kg' => 'decimal:2',
+        'co2_saved' => 'decimal:2',
+    ];
+
+    // Route model binding pakai pickup_request_id, bukan id
+    public function getRouteKeyName()
+    {
+        return 'pickup_request_id';
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'user_id');
@@ -40,7 +56,7 @@ class PickupRequest extends Model
         return $this->belongsTo(WasteBank::class, 'bank_id', 'bank_id');
     }
 
-    // alias, karena controller kamu pakai 'wasteBank'
+    // alias, karena controller pakai 'wasteBank'
     public function wasteBank()
     {
         return $this->belongsTo(WasteBank::class, 'bank_id', 'bank_id');
@@ -55,5 +71,15 @@ class PickupRequest extends Model
     public function userMission()
     {
         return $this->belongsTo(UserMission::class, 'user_mission_id', 'user_mission_id');
+    }
+
+    public function wasteCategory()
+    {
+        return $this->belongsTo(WasteCategory::class, 'waste_category_id', 'category_id');
+    }
+
+    public function items()
+    {
+        return $this->hasMany(PickupItem::class, 'pickup_request_id', 'pickup_request_id');
     }
 }
