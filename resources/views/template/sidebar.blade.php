@@ -2,6 +2,7 @@
     <div class="sidebar-wrapper active">
         <div class="sidebar-header">
             <div class="d-flex justify-content-between align-items-center w-100">
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
                 <div class="logo">
                     <a href="{{ url('/') }}" class="d-flex align-items-center">
                         <img src="{{ asset('assets/logo.png') }}" alt="Logo" class="sidebar-logo">

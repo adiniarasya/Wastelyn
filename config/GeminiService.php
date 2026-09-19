@@ -19,7 +19,7 @@ class GeminiService
 
         $this->model = config(
             'services.gemini.model',
-            'gemini-2.5-flash'
+            'gemini-3.6-flash'
         );
 
         $this->baseUrl = rtrim(
