@@ -161,8 +161,8 @@ Route::middleware('role:warga')->prefix('user')->name('user.')->group(function (
 
     Route::get('/dashboard', [UserController::class, 'dashboard'])->name('dashboard');
 
-    Route::get('/waste-banks', [WasteBankController::class, 'index'])->name('waste-banks.index');
-    Route::get('/waste-banks/{id}', [WasteBankController::class, 'show'])->name('waste-banks.show');
+    Route::get('/waste-banks', [WasteBankController::class, 'userIndex'])->name('waste-banks.index');
+    Route::get('/waste-banks/{wasteBank}', [WasteBankController::class, 'userShow'])->name('waste-banks.show');
 
     Route::get('/pickup-requests', [PickupRequestController::class, 'userIndex'])->name('pickup-requests.index');
     Route::get('/pickup-requests/create', [PickupRequestController::class, 'userCreate'])->name('pickup-requests.create');

@@ -193,7 +193,8 @@
                         </li>
 
                         <li class="sidebar-item">
-                            <a href="#" class="sidebar-link">
+                            <a href="{{ route('user.eco-habit.index') }}"
+                                class="sidebar-link {{ request()->routeIs('user.eco-habit.*') ? 'active' : '' }}">
                                 <i class="bi bi-trophy"></i>
                                 <span>Eco Habit Score</span>
                             </a>

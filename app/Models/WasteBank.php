@@ -23,7 +23,7 @@ class WasteBank extends Model
         'status',
     ];
 
-    public function owner()
+    public function mitra()
     {
         return $this->belongsTo(User::class, 'mitra_id', 'user_id');
     }

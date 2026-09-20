@@ -108,9 +108,20 @@ class PickupRequestController extends Controller
                 break;
 
             case 'completed':
-                $pickup->status = 'completed';
-                break;
+                if ($pickup->status !== 'completed') {
+                    $pickup->status = 'completed';
 
+                    $xpGained = 20 * ($pickup->weight_kg ?? 0);
+
+                    if ($pickup->user) {
+                        $pickup->user->addXp($xpGained);
+                    }
+
+                    if ($pickup->user) {
+                        $pickup->user->addPoints(100 * ($pickup->weight_kg ?? 0));
+                    }
+                }
+                break;
             default:
                 $pickup->status = $request->status;
                 break;

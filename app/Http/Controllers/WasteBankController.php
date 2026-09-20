@@ -9,12 +9,30 @@ use Illuminate\Http\Request;
 class WasteBankController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * ADMIN — daftar semua bank sampah + mitra
      */
     public function index()
     {
         $wasteBanks = WasteBank::with('mitra')->get();
         return view('admin.waste-banks.index', compact('wasteBanks'));
+    }
+
+    /**
+     * WARGA — daftar bank sampah
+     */
+    public function userIndex()
+    {
+        $wasteBanks = WasteBank::all();
+        return view('user.waste-banks.index', compact('wasteBanks'));
+    }
+
+    /**
+     * WARGA — detail bank sampah
+     */
+    public function userShow(WasteBank $wasteBank)
+    {
+        $wasteBank->load('pickupRequests');
+        return view('user.waste-banks.show', compact('wasteBank'));
     }
 
     /**
@@ -48,7 +66,7 @@ class WasteBankController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Display the specified resource (ADMIN).
      */
     public function show(WasteBank $wasteBank)
     {
