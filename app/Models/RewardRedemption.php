@@ -19,6 +19,11 @@ class RewardRedemption extends Model
         'processed_at',
     ];
 
+    protected $casts = [
+        'redeemed_at' => 'datetime',
+        'processed_at' => 'datetime',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'user_id');

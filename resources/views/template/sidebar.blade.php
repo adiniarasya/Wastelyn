@@ -105,7 +105,7 @@
                             </a>
                         </li>
 
-                    @elseif(auth()->user()->role == 'mitra')
+                                        @elseif(auth()->user()->role == 'mitra')
 
                         <li class="sidebar-title">Menu Mitra</li>
 
@@ -137,6 +137,22 @@
                             </a>
                         </li>
 
+                        <li class="sidebar-item {{ request()->routeIs('mitra.harga-sampah.*') ? 'active' : '' }}">
+                            <a href="{{ route('mitra.harga-sampah.index') }}" class="sidebar-link">
+                                <i class="bi bi-cash-coin"></i>
+                                <span>Kelola Harga Sampah</span>
+                            </a>
+                        </li>
+
+                        <li class="sidebar-item {{ request()->routeIs('mitra.laporan') ? 'active' : '' }}">
+                            <a href="{{ route('mitra.laporan') }}" class="sidebar-link">
+                                <i class="bi bi-file-earmark-bar-graph"></i>
+                                <span>Laporan Bulanan</span>
+                            </a>
+                        </li>
+
+                        <li class="sidebar-title">Pengaturan</li>
+
                         <li class="sidebar-item {{ request()->routeIs('mitra.missions.*') ? 'active' : '' }}">
                             <a href="{{ route('mitra.missions.index') }}" class="sidebar-link">
                                 <i class="bi bi-bullseye"></i>
@@ -148,6 +164,21 @@
                             <a href="{{ route('mitra.rewards.index') }}" class="sidebar-link">
                                 <i class="bi bi-gift"></i>
                                 <span>Kelola Reward</span>
+                            </a>
+                        </li>
+
+                        <li class="sidebar-item {{ request()->routeIs('mitra.notifications.*') ? 'active' : '' }}">
+                            <a href="{{ route('mitra.notifications.index') }}" class="sidebar-link">
+                                <i class="bi bi-bell"></i>
+                                <span>Notifikasi</span>
+                                @php
+                                    $unreadNotif = \App\Models\Notification::where('user_id', auth()->id())
+                                        ->where('is_read', false)
+                                        ->count();
+                                @endphp
+                                @if($unreadNotif > 0)
+                                    <span class="badge bg-danger ms-auto">{{ $unreadNotif }}</span>
+                                @endif
                             </a>
                         </li>
 
@@ -193,7 +224,7 @@
                         </li>
 
                         <li class="sidebar-item">
-                            <a href="{{ route('user.eco-habit.index') }}"
+                            <a href="{#}"
                                 class="sidebar-link {{ request()->routeIs('user.eco-habit.*') ? 'active' : '' }}">
                                 <i class="bi bi-trophy"></i>
                                 <span>Eco Habit Score</span>

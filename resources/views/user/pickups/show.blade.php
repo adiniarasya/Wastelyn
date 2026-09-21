@@ -7,13 +7,23 @@
         <i class="bi bi-arrow-left"></i> Kembali ke Riwayat
     </a>
 
-    <h3 class="mb-4"><i class="bi bi-file-earmark-text"></i> Detail Setoran #{{ $pickupRequest->pickup_request_id }}</h3>
+    @if (session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
+    @if (session('error'))
+        <div class="alert alert-danger">{{ session('error') }}</div>
+    @endif
+
+    <h3 class="mb-4">
+        <i class="bi bi-file-earmark-text"></i>
+        Detail Setoran #{{ $pickupRequest->pickup_request_id }}
+    </h3>
 
     <div class="row g-4">
-        {{-- Info Pickup --}}
+        {{-- Info --}}
         <div class="col-md-6">
             <div class="card card-stat">
-                <div class="card-header bg-white fw-semibold">Informasi Penjemputan</div>
+                <div class="card-header bg-white fw-semibold">Informasi Setoran</div>
                 <div class="card-body">
                     <table class="table table-borderless mb-0">
                         <tr>
@@ -23,6 +33,14 @@
                         <tr>
                             <td class="text-muted">Metode</td>
                             <td>: <span class="text-capitalize">{{ $pickupRequest->pickup_method ?? '-' }}</span></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Kategori</td>
+                            <td>: {{ $pickupRequest->wasteCategory->name ?? '-' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Estimasi Berat</td>
+                            <td>: {{ $pickupRequest->weight_kg ?? $pickupRequest->estimasi_berat ?? 0 }} kg</td>
                         </tr>
                         <tr>
                             <td class="text-muted">Jadwal</td>
@@ -39,17 +57,9 @@
                         <tr>
                             <td class="text-muted">Status</td>
                             <td>:
-                                @php
-                                    $badge = match($pickupRequest->status) {
-                                        'pending' => 'bg-warning text-dark',
-                                        'accepted' => 'bg-info text-dark',
-                                        'scheduled' => 'bg-primary',
-                                        'completed' => 'bg-success',
-                                        'rejected' => 'bg-danger',
-                                        default => 'bg-secondary',
-                                    };
-                                @endphp
-                                <span class="badge {{ $badge }} text-capitalize">{{ $pickupRequest->status }}</span>
+                                <span class="badge {{ $pickupRequest->status_badge }} text-capitalize">
+                                    {{ $pickupRequest->status_label }}
+                                </span>
                             </td>
                         </tr>
                         @if($pickupRequest->mitra)
@@ -61,32 +71,45 @@
                     </table>
                 </div>
             </div>
+
+            {{-- TOMBOL AKSI WARGA (Drop Off) --}}
+            @if ($pickupRequest->isDropOff() && $pickupRequest->status === \App\Models\PickupRequest::STATUS_ACCEPTED)
+                <div class="card card-stat mt-4 border-primary">
+                    <div class="card-body text-center">
+                        <p class="mb-3">
+                            <i class="bi bi-geo-alt-fill text-primary fs-3"></i>
+                            <br>
+                            Sudah sampai di bank sampah?
+                        </p>
+                        <form action="{{ route('user.pickup-requests.arrive', $pickupRequest->pickup_request_id) }}"
+                              method="POST">
+                            @csrf
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-check-circle"></i> Saya Sudah Sampai
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            @endif
+
+            @if ($pickupRequest->isDropOff() && $pickupRequest->status === \App\Models\PickupRequest::STATUS_WAITING_VERIFICATION)
+                <div class="alert alert-info mt-4">
+                    <i class="bi bi-hourglass-split"></i>
+                    Terima kasih! Mitra akan segera memverifikasi setoranmu.
+                </div>
+            @endif
+
+            @if ($pickupRequest->isPickup() && $pickupRequest->status === \App\Models\PickupRequest::STATUS_IN_PROGRESS)
+                <div class="alert alert-primary mt-4">
+                    <i class="bi bi-truck"></i>
+                    Kurir sedang menuju lokasimu. Mohon standby ya!
+                </div>
+            @endif
         </div>
 
-        {{-- Item & Hasil Verifikasi --}}
+        {{-- Hasil Verifikasi --}}
         <div class="col-md-6">
-            <div class="card card-stat mb-4">
-                <div class="card-header bg-white fw-semibold">Item Sampah</div>
-                <div class="card-body">
-                    <ul class="list-group list-group-flush">
-                        @forelse ($pickupRequest->items as $item)
-                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                                <span>{{ $item->category->name ?? 'Sampah' }}</span>
-                                <span class="text-muted">
-                                    {{ $item->weight ?? 0 }} kg
-                                    @if($item->category->price_per_kg)
-                                        · Rp {{ number_format($item->category->price_per_kg, 0, ',', '.') }}/kg
-                                    @endif
-                                </span>
-                            </li>
-                        @empty
-                            <li class="list-group-item px-0 text-muted">Tidak ada item.</li>
-                        @endforelse
-                    </ul>
-                </div>
-            </div>
-
-            @if($pickupRequest->status === 'completed')
+            @if ($pickupRequest->status === \App\Models\PickupRequest::STATUS_COMPLETED)
                 <div class="card card-stat border-success">
                     <div class="card-header bg-success text-white fw-semibold">Hasil Verifikasi</div>
                     <div class="card-body">
@@ -97,7 +120,11 @@
                             </tr>
                             <tr>
                                 <td class="text-muted">Total Harga</td>
-                                <td>: <strong class="text-success">Rp {{ number_format($pickupRequest->total_harga ?? 0, 0, ',', '.') }}</strong></td>
+                                <td>:
+                                    <strong class="text-success">
+                                        Rp {{ number_format($pickupRequest->total_harga ?? 0, 0, ',', '.') }}
+                                    </strong>
+                                </td>
                             </tr>
                             <tr>
                                 <td class="text-muted">XP Didapat</td>
@@ -108,10 +135,23 @@
                                 <td>: <span class="badge bg-warning text-dark">+{{ $pickupRequest->points_earned ?? 0 }} Poin</span></td>
                             </tr>
                             <tr>
+                                <td class="text-muted">CO₂ Saved</td>
+                                <td>: {{ $pickupRequest->co2_saved ?? 0 }} kg</td>
+                            </tr>
+                            <tr>
                                 <td class="text-muted">Diverifikasi</td>
                                 <td>: {{ optional($pickupRequest->verified_at)->format('d M Y H:i') ?? '-' }}</td>
                             </tr>
                         </table>
+                    </div>
+                </div>
+            @else
+                <div class="card card-stat">
+                    <div class="card-header bg-white fw-semibold">Info</div>
+                    <div class="card-body">
+                        <p class="text-muted mb-0">
+                            Hasil verifikasi akan muncul di sini setelah setoran selesai.
+                        </p>
                     </div>
                 </div>
             @endif

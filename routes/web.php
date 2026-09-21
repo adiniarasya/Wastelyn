@@ -123,20 +123,31 @@ Route::middleware(['auth', 'role:mitra'])->prefix('mitra')->name('mitra.')->grou
 
     Route::get('/dashboard', [MitraController::class, 'dashboard'])->name('dashboard');
 
+    Route::get('/laporan', [MitraController::class, 'laporan'])->name('laporan');
     // Pickup Requests
     Route::get('/pickup-requests', [PickupRequestController::class, 'mitraIndex'])->name('pickup-requests.index');
+        Route::get('/pickup-requests/export-pdf', [PickupRequestController::class, 'exportSetoranPdf'])->name('pickup-requests.export-pdf');
     Route::get('/pickup-requests/{pickupRequest}', [PickupRequestController::class, 'mitraShow'])->name('pickup-requests.show');
     Route::put('/pickup-requests/{pickupRequest}/status', [PickupRequestController::class, 'updateStatus'])->name('pickup-requests.status');
-
+    // Alur Pickup/DropOff (baru)
+    Route::post('/pickup-requests/{id}/take', [\App\Http\Controllers\PickupFlowController::class, 'take'])->name('pickup-requests.take');
+    Route::post('/pickup-requests/{id}/start', [\App\Http\Controllers\PickupFlowController::class, 'start'])->name('pickup-requests.start');
+    Route::post('/pickup-requests/{id}/receive', [\App\Http\Controllers\PickupFlowController::class, 'receive'])->name('pickup-requests.receive');
+    Route::post('/pickup-requests/{id}/verify', [\App\Http\Controllers\PickupFlowController::class, 'verify'])->name('pickup-requests.verify');
+    Route::post('/pickup-requests/{id}/reject', [\App\Http\Controllers\PickupFlowController::class, 'reject'])->name('pickup-requests.reject');
     // Transactions
+
     Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
+    Route::get('/transactions/export-pdf', [TransactionController::class, 'exportPdf'])->name('transactions.export-pdf');
     Route::get('/transactions/{id}', [TransactionController::class, 'show'])->name('transactions.show');
     Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');
-    Route::put('/transactions/{id}/status', [TransactionController::class, 'updateStatus'])->name('transactions.status');
     Route::get('/statistics', [MitraController::class, 'statistics'])->name('statistics');
     Route::get('/profile', [MitraController::class, 'profile'])->name('profile');
     Route::put('/profile', [MitraController::class, 'updateProfile'])->name('profile.update');
-
+        // Kelola Harga Sampah
+    Route::get('/harga-sampah', [\App\Http\Controllers\MitraWastePriceController::class, 'index'])->name('harga-sampah.index');
+    Route::put('/harga-sampah/{categoryId}', [\App\Http\Controllers\MitraWastePriceController::class, 'update'])->name('harga-sampah.update');
+    Route::delete('/harga-sampah/{categoryId}', [\App\Http\Controllers\MitraWastePriceController::class, 'destroy'])->name('harga-sampah.destroy');
     //mision reward
     Route::get('/missions', [MissionController::class, 'mitraIndex'])->name('missions.index');
     Route::get('/missions/create', [MissionController::class, 'mitraCreate'])->name('missions.create');
@@ -145,7 +156,16 @@ Route::middleware(['auth', 'role:mitra'])->prefix('mitra')->name('mitra.')->grou
     Route::get('/missions/{mission}/edit', [MissionController::class, 'mitraEdit'])->name('missions.edit');
     Route::put('/missions/{mission}', [MissionController::class, 'mitraUpdate'])->name('missions.update');
     Route::delete('/missions/{mission}', [MissionController::class, 'mitraDestroy'])->name('missions.destroy');
-
+        //rewards
+    Route::get('/rewards', [RewardController::class, 'mitraIndex'])->name('rewards.index');
+    Route::get('/rewards/redemptions', [RewardController::class, 'mitraRedemptions'])->name('rewards.redemptions');
+    Route::put('/rewards/redemptions/{id}', [RewardController::class, 'mitraUpdateRedemption'])->name('rewards.redemptions.update');
+    Route::get('/rewards/create', [RewardController::class, 'mitraCreate'])->name('rewards.create');
+    Route::post('/rewards', [RewardController::class, 'mitraStore'])->name('rewards.store');
+    Route::get('/rewards/{reward}', [RewardController::class, 'mitraShow'])->name('rewards.show');
+    Route::get('/rewards/{reward}/edit', [RewardController::class, 'mitraEdit'])->name('rewards.edit');
+    Route::put('/rewards/{reward}', [RewardController::class, 'mitraUpdate'])->name('rewards.update');
+    Route::delete('/rewards/{reward}', [RewardController::class, 'mitraDestroy'])->name('rewards.destroy');
     //rewards
     Route::get('/rewards', [RewardController::class, 'mitraIndex'])->name('rewards.index');
     Route::get('/rewards/create', [RewardController::class, 'mitraCreate'])->name('rewards.create');
@@ -154,7 +174,14 @@ Route::middleware(['auth', 'role:mitra'])->prefix('mitra')->name('mitra.')->grou
     Route::get('/rewards/{reward}/edit', [RewardController::class, 'mitraEdit'])->name('rewards.edit');
     Route::put('/rewards/{reward}', [RewardController::class, 'mitraUpdate'])->name('rewards.update');
     Route::delete('/rewards/{reward}', [RewardController::class, 'mitraDestroy'])->name('rewards.destroy');
+
+        // Notifikasi Mitra
+    Route::get('/notifications', [\App\Http\Controllers\MitraNotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{id}/read', [\App\Http\Controllers\MitraNotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/mark-all-read', [\App\Http\Controllers\MitraNotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
+    Route::delete('/notifications/{id}', [\App\Http\Controllers\MitraNotificationController::class, 'destroy'])->name('notifications.destroy');
 });
+
 
 //user
 Route::middleware('role:warga')->prefix('user')->name('user.')->group(function () {
@@ -173,10 +200,11 @@ Route::middleware('role:warga')->prefix('user')->name('user.')->group(function (
     Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
     Route::get('/transactions/{id}', [TransactionController::class, 'show'])->name('transactions.show');
     Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');
-
-    Route::get('/rewards', [RewardController::class, 'index'])->name('rewards.index');
-    Route::get('/rewards/{id}', [RewardController::class, 'show'])->name('rewards.show');
-
+    //rewards (warga)
+    Route::get('/rewards', [RewardController::class, 'userIndex'])->name('rewards.index');
+    Route::get('/rewards/{id}', [RewardController::class, 'userShow'])->name('rewards.show');
+    Route::post('/rewards/{id}/redeem', [RewardController::class, 'userRedeem'])->name('rewards.redeem');
+    
     Route::get('/user-missions', [UserMissionController::class, 'index'])->name('user-missions.index');
     Route::post('/user-missions', [UserMissionController::class, 'store'])->name('user-missions.store');
     Route::put('/user-missions/{id}', [UserMissionController::class, 'update'])->name('user-missions.update');
@@ -196,5 +224,7 @@ Route::middleware('role:warga')->prefix('user')->name('user.')->group(function (
 
     Route::delete('/ai-chat-sessions/{sessionId}/messages/{messageId}', [AiChatMessageController::class, 'destroy'])
         ->name('ai-chat-messages.destroy');
+
+        Route::post('/pickup-requests/{id}/arrive', [\App\Http\Controllers\DropOffController::class, 'arrive'])->name('pickup-requests.arrive');
 
 });

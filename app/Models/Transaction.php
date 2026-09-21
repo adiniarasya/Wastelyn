@@ -12,21 +12,26 @@ class Transaction extends Model
     protected $primaryKey = 'transaction_id';
 
     protected $fillable = [
-        'user_id',
-        'mitra_id',
-        'category_id',
-        'weight',
-        'price_per_kg',
-        'total_price',
-        'xp_earned',
-        'points_earned',
-        'status',
-        'pickup_address',
-        'pickup_date',
-        'pickup_time',
-        'notes',
-        'verified_at',
-    ];
+    'user_id',
+    'pickup_request_id',
+    'mitra_id',
+    'redemption_id',
+    'category_id',
+    'weight',
+    'price_per_kg',
+    'total_price',
+    'xp_earned',
+    'points',
+    'points_earned',
+    'type',
+    'description',
+    'status',
+    'pickup_address',
+    'pickup_date',
+    'pickup_time',
+    'notes',
+    'verified_at',
+];
 
     public function user()
     {
@@ -36,5 +41,9 @@ class Transaction extends Model
     public function mitra()
     {
         return $this->belongsTo(Mitra::class, 'mitra_id', 'mitra_id');
+    }
+        public function pickupRequest()
+    {
+        return $this->belongsTo(PickupRequest::class, 'pickup_request_id', 'pickup_request_id');
     }
 }

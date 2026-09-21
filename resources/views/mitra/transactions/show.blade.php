@@ -27,35 +27,54 @@
                     <td class="text-muted">Poin</td>
                     <td>: +{{ $transaction->points }}</td>
                 </tr>
+                @if(isset($transaction->xp_earned) && $transaction->xp_earned > 0)
+                    <tr>
+                        <td class="text-muted">XP</td>
+                        <td>: <span class="badge bg-primary">+{{ $transaction->xp_earned }} XP</span></td>
+                    </tr>
+                @endif
                 <tr>
                     <td class="text-muted">Deskripsi</td>
                     <td>: {{ $transaction->description ?? '-' }}</td>
                 </tr>
                 <tr>
                     <td class="text-muted">Status</td>
-                    <td>: <span class="badge bg-secondary text-capitalize">{{ $transaction->status ?? 'completed' }}</span></td>
+                    <td>: <span class="badge bg-success text-capitalize">Selesai</span></td>
                 </tr>
                 @if ($transaction->pickupRequest)
                     <tr>
                         <td class="text-muted">Setoran Terkait</td>
                         <td>
-                            : {{ $transaction->pickupRequest->jenis_sampah ?? '-' }}
+                            : 
+                            {{ $transaction->pickupRequest->wasteCategory->name ?? $transaction->pickupRequest->jenis_sampah ?? '-' }}
                             ({{ $transaction->pickupRequest->berat_aktual ?? 0 }} kg)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Harga per Kg</td>
+                        <td>
+                            : Rp {{ number_format($transaction->pickupRequest->price_per_kg ?? 0, 0, ',', '.') }}
+                            @if($transaction->pickupRequest->price_per_kg == $transaction->pickupRequest->wasteCategory->price_per_kg)
+                                <span class="badge bg-secondary">Default Admin</span>
+                            @else
+                                <span class="badge bg-success">Harga Mitra</span>
+                            @endif
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Total Harga</td>
+                        <td>
+                            : <strong class="text-success">
+                                Rp {{ number_format($transaction->pickupRequest->total_harga ?? 0, 0, ',', '.') }}
+                            </strong>
                         </td>
                     </tr>
                 @endif
             </table>
 
-            <form action="{{ route('mitra.transactions.status', $transaction->transaction_id) }}" method="POST" class="d-flex gap-2">
-                @csrf
-                @method('PUT')
-                <select name="status" class="form-select">
-                    @foreach (['pending','completed','failed','cancelled'] as $s)
-                        <option value="{{ $s }}" @selected($transaction->status === $s)>{{ ucfirst($s) }}</option>
-                    @endforeach
-                </select>
-                <button type="submit" class="btn btn-outline-success">Update Status</button>
-            </form>
+            <a href="{{ route('mitra.transactions.index') }}" class="btn btn-secondary w-100">
+                Kembali
+            </a>
         </div>
     </div>
 @endsection

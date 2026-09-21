@@ -31,4 +31,8 @@ class AiChatMessage extends Model
     {
         return $this->sender === 'user';
     }
+        public function mitraWastePrices()
+    {
+        return $this->hasMany(MitraWastePrice::class, 'mitra_id', 'user_id');
+    }
 }

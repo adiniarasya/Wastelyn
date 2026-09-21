@@ -82,4 +82,28 @@ class TransactionController extends Controller
         $transaction = Transaction::with('user')->findOrFail($id);
         return view('mitra.transactions.show', compact('transaction'));
     }
+        /**
+     * Export PDF riwayat transaksi mitra.
+     */
+       public function exportPdf(Request $request)
+    {
+        $mitraId = Auth::id();
+
+        $transactions = Transaction::with(['user', 'pickupRequest.wasteCategory'])
+            ->where(function ($q) use ($mitraId) {
+                $q->where('mitra_id', $mitraId)
+                  ->orWhereHas('pickupRequest', function ($q2) use ($mitraId) {
+                      $q2->where('mitra_id', $mitraId);
+                  });
+            })
+            ->latest()
+            ->get();
+
+        $mitra = Auth::user();
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('mitra.transactions.pdf', compact('transactions', 'mitra'))
+            ->setPaper('a4', 'landscape');
+
+        return $pdf->download('riwayat-setoran-' . now()->format('Y-m-d') . '.pdf');
+    }
 }

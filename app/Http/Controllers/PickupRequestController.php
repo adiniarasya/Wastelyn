@@ -144,21 +144,62 @@ class PickupRequestController extends Controller
         return redirect()->back()->with('success', 'Pickup berhasil diassign ke mitra');
     }
 
-    public function mitraIndex()
+           public function mitraIndex(Request $request)
     {
-        $available = PickupRequest::with('user', 'wasteBank', 'wasteCategory')
+
+        $filterTanggalDari = $request->input('tanggal_dari');
+        $filterTanggalSampai = $request->input('tanggal_sampai');
+        $filterKategori = $request->input('kategori_id');
+        $filterMetode = $request->input('metode');
+
+        $applyFilter = function ($query) use ($filterTanggalDari, $filterTanggalSampai, $filterKategori, $filterMetode) {
+            if ($filterTanggalDari) {
+                $query->whereDate('created_at', '>=', $filterTanggalDari);
+            }
+            if ($filterTanggalSampai) {
+                $query->whereDate('created_at', '<=', $filterTanggalSampai);
+            }
+            if ($filterKategori) {
+                $query->where('waste_category_id', $filterKategori);
+            }
+            if ($filterMetode) {
+                $query->where('pickup_method', $filterMetode);
+            }
+            return $query;
+        };
+
+
+        $availableQuery = PickupRequest::with('user', 'wasteBank', 'wasteCategory')
             ->whereNull('mitra_id')
-            ->where('status', 'pending')
-            ->latest()
-            ->paginate(10, ['*'], 'available_page');
+            ->where('status', PickupRequest::STATUS_PENDING);
+        $applyFilter($availableQuery);
+        $available = $availableQuery->latest()->paginate(10, ['*'], 'available_page')->withQueryString();
 
-        $mine = PickupRequest::with('user', 'wasteBank', 'wasteCategory')
+        $mineQuery = PickupRequest::with('user', 'wasteBank', 'wasteCategory')
             ->where('mitra_id', auth()->id())
-            ->whereIn('status', ['accepted', 'scheduled'])
-            ->latest()
-            ->paginate(10, ['*'], 'mine_page');
+            ->whereIn('status', [
+                PickupRequest::STATUS_ACCEPTED,
+                PickupRequest::STATUS_SCHEDULED,
+                PickupRequest::STATUS_IN_PROGRESS,
+                PickupRequest::STATUS_WAITING_VERIFICATION,
+            ]);
+        $applyFilter($mineQuery);
+        $mine = $mineQuery->latest()->paginate(10, ['*'], 'mine_page')->withQueryString();
 
-        return view('mitra.pickups.index', compact('available', 'mine'));
+        $rejectedQuery = PickupRequest::with('user', 'wasteBank', 'wasteCategory')
+            ->where('mitra_id', auth()->id())
+            ->where('status', PickupRequest::STATUS_REJECTED);
+        $applyFilter($rejectedQuery);
+        $rejected = $rejectedQuery->latest()->paginate(10, ['*'], 'rejected_page')->withQueryString();
+
+        $kategoris = WasteCategory::orderBy('name')->get();
+
+        return view('mitra.pickups.index', compact(
+            'available', 'mine', 'rejected',
+            'kategoris',
+            'filterTanggalDari', 'filterTanggalSampai',
+            'filterKategori', 'filterMetode'
+        ));
     }
 
     public function mitraShow(PickupRequest $pickupRequest)
@@ -215,7 +256,7 @@ class PickupRequestController extends Controller
         ]);
 
         try {
-            PickupRequest::create([
+            $pickup = PickupRequest::create([
                 'user_id' => Auth::id(),
                 'bank_id' => $request->bank_id,
                 'waste_category_id' => $request->waste_category_id,
@@ -228,6 +269,20 @@ class PickupRequestController extends Controller
                 'status' => 'pending',
             ]);
 
+            $bank = \App\Models\WasteBank::find($request->bank_id);
+            if ($bank && $bank->mitra_id) {
+                \App\Models\Notification::create([
+                    'user_id' => $bank->mitra_id,
+                    'title' => 'Setoran Baru Masuk',
+                    'message' => 'Warga ' . Auth::user()->name . ' mengajukan setoran ' .
+                                 ($request->pickup_method === 'pickup' ? 'penjemputan' : 'antar sendiri') .
+                                 '. Segera ambil permintaan di Kelola Setoran.',
+                    'type' => 'info',
+                    'link' => route('mitra.pickup-requests.index'),
+                    'is_read' => false,
+                ]);
+            }
+
             return redirect()
                 ->route('user.pickup-requests.index')
                 ->with('success', 'Setoran berhasil diajukan! Tunggu verifikasi mitra.');
@@ -235,6 +290,7 @@ class PickupRequestController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal: ' . $e->getMessage())->withInput();
         }
+    
     }
 
     public function userShow(PickupRequest $pickupRequest)
@@ -263,5 +319,45 @@ class PickupRequestController extends Controller
         return redirect()
             ->route('user.pickup-requests.index')
             ->with('success', 'Pengajuan setoran berhasil dibatalkan.');
+    }
+        public function exportSetoranPdf(Request $request)
+    {
+        $mitraId = auth()->id();
+
+        $filterTanggalDari = $request->input('tanggal_dari');
+        $filterTanggalSampai = $request->input('tanggal_sampai');
+        $filterKategori = $request->input('kategori_id');
+        $filterMetode = $request->input('metode');
+
+        $query = PickupRequest::with('user', 'wasteCategory', 'wasteBank')
+            ->where('mitra_id', $mitraId);
+
+        if ($filterTanggalDari) {
+            $query->whereDate('created_at', '>=', $filterTanggalDari);
+        }
+        if ($filterTanggalSampai) {
+            $query->whereDate('created_at', '<=', $filterTanggalSampai);
+        }
+        if ($filterKategori) {
+            $query->where('waste_category_id', $filterKategori);
+        }
+        if ($filterMetode) {
+            $query->where('pickup_method', $filterMetode);
+        }
+
+        $setoran = $query->latest()->get();
+        $mitra = auth()->user();
+
+        $filterInfo = [
+            'tanggal_dari' => $filterTanggalDari,
+            'tanggal_sampai' => $filterTanggalSampai,
+            'kategori' => $filterKategori ? WasteCategory::find($filterKategori)?->name : null,
+            'metode' => $filterMetode,
+        ];
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('mitra.pickups.pdf', compact('setoran', 'mitra', 'filterInfo'))
+            ->setPaper('a4', 'landscape');
+
+        return $pdf->download('setoran-mitra-' . now()->format('Y-m-d') . '.pdf');
     }
 }

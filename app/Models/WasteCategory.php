@@ -25,4 +25,8 @@ class WasteCategory extends Model
     {
         return $this->hasMany(PickupItem::class, 'category_id', 'category_id');
     }
+        public function mitraPrices()
+    {
+        return $this->hasMany(MitraWastePrice::class, 'category_id', 'category_id');
+    }
 }
