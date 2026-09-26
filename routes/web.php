@@ -126,7 +126,7 @@ Route::middleware(['auth', 'role:mitra'])->prefix('mitra')->name('mitra.')->grou
     Route::get('/laporan', [MitraController::class, 'laporan'])->name('laporan');
     // Pickup Requests
     Route::get('/pickup-requests', [PickupRequestController::class, 'mitraIndex'])->name('pickup-requests.index');
-        Route::get('/pickup-requests/export-pdf', [PickupRequestController::class, 'exportSetoranPdf'])->name('pickup-requests.export-pdf');
+    Route::get('/pickup-requests/export-pdf', [PickupRequestController::class, 'exportSetoranPdf'])->name('pickup-requests.export-pdf');
     Route::get('/pickup-requests/{pickupRequest}', [PickupRequestController::class, 'mitraShow'])->name('pickup-requests.show');
     Route::put('/pickup-requests/{pickupRequest}/status', [PickupRequestController::class, 'updateStatus'])->name('pickup-requests.status');
     // Alur Pickup/DropOff (baru)
@@ -144,7 +144,7 @@ Route::middleware(['auth', 'role:mitra'])->prefix('mitra')->name('mitra.')->grou
     Route::get('/statistics', [MitraController::class, 'statistics'])->name('statistics');
     Route::get('/profile', [MitraController::class, 'profile'])->name('profile');
     Route::put('/profile', [MitraController::class, 'updateProfile'])->name('profile.update');
-        // Kelola Harga Sampah
+    // Kelola Harga Sampah
     Route::get('/harga-sampah', [\App\Http\Controllers\MitraWastePriceController::class, 'index'])->name('harga-sampah.index');
     Route::put('/harga-sampah/{categoryId}', [\App\Http\Controllers\MitraWastePriceController::class, 'update'])->name('harga-sampah.update');
     Route::delete('/harga-sampah/{categoryId}', [\App\Http\Controllers\MitraWastePriceController::class, 'destroy'])->name('harga-sampah.destroy');
@@ -156,7 +156,7 @@ Route::middleware(['auth', 'role:mitra'])->prefix('mitra')->name('mitra.')->grou
     Route::get('/missions/{mission}/edit', [MissionController::class, 'mitraEdit'])->name('missions.edit');
     Route::put('/missions/{mission}', [MissionController::class, 'mitraUpdate'])->name('missions.update');
     Route::delete('/missions/{mission}', [MissionController::class, 'mitraDestroy'])->name('missions.destroy');
-        //rewards
+    //rewards
     Route::get('/rewards', [RewardController::class, 'mitraIndex'])->name('rewards.index');
     Route::get('/rewards/redemptions', [RewardController::class, 'mitraRedemptions'])->name('rewards.redemptions');
     Route::put('/rewards/redemptions/{id}', [RewardController::class, 'mitraUpdateRedemption'])->name('rewards.redemptions.update');
@@ -175,7 +175,7 @@ Route::middleware(['auth', 'role:mitra'])->prefix('mitra')->name('mitra.')->grou
     Route::put('/rewards/{reward}', [RewardController::class, 'mitraUpdate'])->name('rewards.update');
     Route::delete('/rewards/{reward}', [RewardController::class, 'mitraDestroy'])->name('rewards.destroy');
 
-        // Notifikasi Mitra
+    // Notifikasi Mitra
     Route::get('/notifications', [\App\Http\Controllers\MitraNotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{id}/read', [\App\Http\Controllers\MitraNotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifications/mark-all-read', [\App\Http\Controllers\MitraNotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
@@ -190,6 +190,7 @@ Route::middleware('role:warga')->prefix('user')->name('user.')->group(function (
 
     Route::get('/waste-banks', [WasteBankController::class, 'userIndex'])->name('waste-banks.index');
     Route::get('/waste-banks/{wasteBank}', [WasteBankController::class, 'userShow'])->name('waste-banks.show');
+    Route::post('/waste-banks/set-preferred', [WasteBankController::class, 'setPreferred'])->name('waste-banks.set-preferred');
 
     Route::get('/pickup-requests', [PickupRequestController::class, 'userIndex'])->name('pickup-requests.index');
     Route::get('/pickup-requests/create', [PickupRequestController::class, 'userCreate'])->name('pickup-requests.create');
@@ -204,7 +205,7 @@ Route::middleware('role:warga')->prefix('user')->name('user.')->group(function (
     Route::get('/rewards', [RewardController::class, 'userIndex'])->name('rewards.index');
     Route::get('/rewards/{id}', [RewardController::class, 'userShow'])->name('rewards.show');
     Route::post('/rewards/{id}/redeem', [RewardController::class, 'userRedeem'])->name('rewards.redeem');
-    
+
     Route::get('/user-missions', [UserMissionController::class, 'index'])->name('user-missions.index');
     Route::post('/user-missions', [UserMissionController::class, 'store'])->name('user-missions.store');
     Route::put('/user-missions/{id}', [UserMissionController::class, 'update'])->name('user-missions.update');
@@ -225,6 +226,6 @@ Route::middleware('role:warga')->prefix('user')->name('user.')->group(function (
     Route::delete('/ai-chat-sessions/{sessionId}/messages/{messageId}', [AiChatMessageController::class, 'destroy'])
         ->name('ai-chat-messages.destroy');
 
-        Route::post('/pickup-requests/{id}/arrive', [\App\Http\Controllers\DropOffController::class, 'arrive'])->name('pickup-requests.arrive');
+    Route::post('/pickup-requests/{id}/arrive', [\App\Http\Controllers\DropOffController::class, 'arrive'])->name('pickup-requests.arrive');
 
 });

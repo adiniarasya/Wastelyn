@@ -8,48 +8,21 @@ use Illuminate\Http\Request;
 
 class WasteBankController extends Controller
 {
-    /**
-     * ADMIN — daftar semua bank sampah + mitra
-     */
     public function index()
     {
         $wasteBanks = WasteBank::with('mitra')->get();
         return view('admin.waste-banks.index', compact('wasteBanks'));
     }
 
-    /**
-     * WARGA — daftar bank sampah
-     */
-    public function userIndex()
-    {
-        $wasteBanks = WasteBank::all();
-        return view('user.waste-banks.index', compact('wasteBanks'));
-    }
-
-    /**
-     * WARGA — detail bank sampah
-     */
-    public function userShow(WasteBank $wasteBank)
-    {
-        $wasteBank->load('pickupRequests');
-        return view('user.waste-banks.show', compact('wasteBank'));
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         $mitras = User::where('role', 'mitra')->get();
         return view('admin.waste-banks.create', compact('mitras'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'mitra_id' => 'nullable|exists:users,user_id',
             'name' => 'required|string|max:255',
             'address' => 'required|string',
@@ -58,37 +31,31 @@ class WasteBankController extends Controller
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
             'opening_hours' => 'nullable|string|max:255',
-            'status' => 'required|in:active,inactive',
+            'status' => 'required|in:pending,active,inactive',
         ]);
 
-        WasteBank::create($request->all());
-        return redirect()->route('admin.waste-banks.index')->with('success', 'Bank sampah berhasil ditambahkan');
+        WasteBank::create($validated);
+
+        return redirect()
+            ->route('admin.waste-banks.index')
+            ->with('success', 'Bank sampah berhasil ditambahkan');
     }
 
-    /**
-     * Display the specified resource (ADMIN).
-     */
     public function show(WasteBank $wasteBank)
     {
         $wasteBank->load('mitra', 'pickupRequests');
         return view('admin.waste-banks.show', compact('wasteBank'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(WasteBank $wasteBank)
     {
         $mitras = User::where('role', 'mitra')->get();
         return view('admin.waste-banks.edit', compact('wasteBank', 'mitras'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, WasteBank $wasteBank)
     {
-        $request->validate([
+        $validated = $request->validate([
             'mitra_id' => 'nullable|exists:users,user_id',
             'name' => 'required|string|max:255',
             'address' => 'required|string',
@@ -97,19 +64,75 @@ class WasteBankController extends Controller
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
             'opening_hours' => 'nullable|string|max:255',
-            'status' => 'required|in:active,inactive',
+            'status' => 'required|in:pending,active,inactive',
         ]);
 
-        $wasteBank->update($request->all());
-        return redirect()->route('admin.waste-banks.index')->with('success', 'Bank sampah berhasil diupdate');
+        $wasteBank->update($validated);
+
+        return redirect()
+            ->route('admin.waste-banks.index')
+            ->with('success', 'Bank sampah berhasil diupdate');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(WasteBank $wasteBank)
     {
         $wasteBank->delete();
-        return redirect()->route('admin.waste-banks.index')->with('success', 'Bank sampah berhasil dihapus');
+
+        return redirect()
+            ->route('admin.waste-banks.index')
+            ->with('success', 'Bank sampah berhasil dihapus');
+    }
+
+    public function userIndex()
+    {
+        $wasteBanks = WasteBank::where('status', 'active')
+            ->orderBy('name')
+            ->get();
+
+        $mapMarkers = $wasteBanks
+            ->filter(fn($b) => $b->latitude !== null && $b->longitude !== null)
+            ->map(fn($b) => [
+                'bank_id' => $b->bank_id,
+                'name' => $b->name,
+                'address' => $b->address,
+                'phone' => $b->phone,
+                'hours' => $b->opening_hours,
+                'lat' => (float) $b->latitude,
+                'lng' => (float) $b->longitude,
+            ])
+            ->values();
+
+        return view('user.waste-banks.index', compact('wasteBanks', 'mapMarkers'));
+    }
+
+    public function userShow(WasteBank $wasteBank)
+    {
+        $wasteBank->load('pickupRequests');
+        return view('user.waste-banks.show', compact('wasteBank'));
+    }
+
+    public function setPreferred(Request $request)
+    {
+        $request->validate([
+            'bank_id' => ['required', 'exists:waste_banks,bank_id'],
+        ]);
+
+        $bank = WasteBank::where('bank_id', $request->bank_id)
+            ->where('status', 'active')
+            ->first();
+
+        if (!$bank) {
+            return response()->json([
+                'ok' => false,
+                'error' => 'Bank sampah tidak tersedia atau belum di-approve.',
+            ], 422);
+        }
+
+        $request->user()->update([
+            'preferred_bank_id' => $bank->bank_id,
+            'preferred_bank_set_at' => now(),
+        ]);
+
+        return response()->json(['ok' => true]);
     }
 }

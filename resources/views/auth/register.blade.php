@@ -2,7 +2,7 @@
 
     <div class="mb-8 text-center">
         <h2 class="text-2xl font-bold" style="color:#1a2330;">
-            Buat Akun Baru 
+            Buat Akun Baru
         </h2>
         <p class="mt-2 text-sm" style="color:#6b7a8c;">
             Mulai perjalanan hijau kamu bersama WasteLyn
@@ -19,7 +19,7 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('register') }}" class="space-y-4">
+    <form method="POST" action="{{ route('register') }}" class="space-y-4" id="register-form">
         @csrf
 
         <div>
@@ -53,10 +53,8 @@
             </label>
 
             <div class="grid grid-cols-2 gap-3">
-
                 <label class="relative cursor-pointer">
-                    <input type="radio" name="role" value="warga" class="peer sr-only" {{ old('role') === 'warga' ? 'checked' : '' }} required>
-
+                    <input type="radio" name="role" value="warga" class="peer sr-only" {{ old('role') === 'mitra' ? '' : 'checked' }}>
                     <div class="p-3 border-2 border-gray-200 rounded-xl transition-all
                                 peer-checked:border-green-700 peer-checked:bg-green-50
                                 hover:border-green-300">
@@ -78,7 +76,6 @@
 
                 <label class="relative cursor-pointer">
                     <input type="radio" name="role" value="mitra" class="peer sr-only" {{ old('role') === 'mitra' ? 'checked' : '' }}>
-
                     <div class="p-3 border-2 border-gray-200 rounded-xl transition-all
                                 peer-checked:border-green-700 peer-checked:bg-green-50
                                 hover:border-green-300">
@@ -97,7 +94,6 @@
                         </div>
                     </div>
                 </label>
-
             </div>
 
             <div class="flex items-start gap-2 mt-3 p-2.5 rounded-lg" style="background:#f6faf6;">
@@ -114,6 +110,65 @@
             @error('role')
                 <p class="mt-2 text-xs text-red-600">{{ $message }}</p>
             @enderror
+        </div>
+
+        <div id="mitra-fields" class="space-y-4 {{ old('role') === 'mitra' ? '' : 'hidden' }}">
+            <div>
+                <label for="phone" class="block mb-2 text-sm font-medium" style="color:#1a2330;">
+                    No. Telepon
+                </label>
+                <input id="phone" type="text" name="phone" value="{{ old('phone') }}" placeholder="08xxxxxxxxxx"
+                    class="w-full rounded-xl border px-4 py-3 text-sm outline-none transition"
+                    style="border-color:#e6e9ee;color:#1a2330;background:#fff;">
+                @error('phone')
+                    <p class="mt-2 text-xs text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div>
+                <label for="address" class="block mb-2 text-sm font-medium" style="color:#1a2330;">
+                    Alamat Bank Sampah
+                </label>
+                <input id="address" type="text" name="address" value="{{ old('address') }}"
+                    placeholder="Ketik alamat, atau cari di kotak pencarian peta"
+                    class="w-full rounded-xl border px-4 py-3 text-sm outline-none transition"
+                    style="border-color:#e6e9ee;color:#1a2330;background:#fff;">
+                <p class="mt-1 text-xs" style="color:#6b7a8c;">
+                    Ketik di kotak pencarian peta di bawah, atau klik langsung di peta untuk pilih manual.
+                </p>
+                @error('address')
+                    <p class="mt-2 text-xs text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div>
+                <label class="block mb-2 text-sm font-medium" style="color:#1a2330;">
+                    Titik Lokasi di Peta
+                </label>
+
+                <div style="position: relative; border-radius: .75rem; overflow: hidden; border: 1px solid #e6e9ee;">
+                    <div id="search-container"
+                        style="position: absolute; top: 10px; left: 50%; transform: translateX(-50%); z-index: 5; width: 90%; max-width: 400px;">
+                    </div>
+                    <div id="map" style="height: 380px; width: 100%;"></div>
+                </div>
+
+                <div class="mt-2 flex items-center justify-between gap-2">
+                    <p class="text-xs" style="color:#6b7a8c;">
+                        Koordinat: <span id="coords-display" class="font-mono">-</span>
+                    </p>
+                    <p class="text-xs text-right" style="color:#6b7a8c;">
+                        <span id="alamat-terpilih">-</span>
+                    </p>
+                </div>
+
+                @error('latitude')
+                    <p class="mt-2 text-xs text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <input type="hidden" id="latitude" name="latitude" value="{{ old('latitude') }}">
+            <input type="hidden" id="longitude" name="longitude" value="{{ old('longitude') }}">
         </div>
 
         <div>
@@ -154,5 +209,229 @@
         </div>
 
     </form>
+
+    <style>
+        gmp-place-autocomplete {
+            width: 100%;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+
+    <script>
+        let mapInstance = null;
+        let markerInstance = null;
+        let geocoder = null;
+        let mapInitialized = false;
+        let mapsLoadRetry = null;
+
+        function toggleMitraFields() {
+            const selected = document.querySelector('input[name="role"]:checked');
+            const isMitra = selected && selected.value === 'mitra';
+            const mitraFields = document.getElementById('mitra-fields');
+            const phoneEl = document.getElementById('phone');
+            const addressEl = document.getElementById('address');
+            const latEl = document.getElementById('latitude');
+            const lngEl = document.getElementById('longitude');
+            const coordsEl = document.getElementById('coords-display');
+            const alamatEl = document.getElementById('alamat-terpilih');
+
+            if (isMitra) {
+                mitraFields.classList.remove('hidden');
+                if (phoneEl) phoneEl.required = true;
+                if (addressEl) addressEl.required = true;
+                ensureMapInit();
+            } else {
+                mitraFields.classList.add('hidden');
+                if (phoneEl) phoneEl.required = false;
+                if (addressEl) addressEl.required = false;
+                if (latEl) latEl.value = '';
+                if (lngEl) lngEl.value = '';
+                if (coordsEl) coordsEl.textContent = '-';
+                if (alamatEl) alamatEl.textContent = '-';
+            }
+        }
+
+        function ensureMapInit() {
+            if (mapInitialized) return;
+            if (window.googleMapsReady) {
+                initMapPicker();
+                return;
+            }
+            if (mapsLoadRetry) return;
+            let tries = 0;
+            mapsLoadRetry = setInterval(() => {
+                tries++;
+                if (window.googleMapsReady) {
+                    clearInterval(mapsLoadRetry);
+                    mapsLoadRetry = null;
+                    initMapPicker();
+                } else if (tries > 33) {
+                    clearInterval(mapsLoadRetry);
+                    mapsLoadRetry = null;
+                    console.warn('Google Maps gagal dimuat setelah 10 detik.');
+                }
+            }, 300);
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('input[name="role"]').forEach(r => {
+                r.addEventListener('change', toggleMitraFields);
+            });
+            toggleMitraFields();
+        });
+
+        function onGoogleMapsReady() {
+            window.googleMapsReady = true;
+            geocoder = new google.maps.Geocoder();
+
+            const selected = document.querySelector('input[name="role"]:checked');
+            if (selected && selected.value === 'mitra') {
+                initMapPicker();
+            }
+        }
+
+        function initMapPicker() {
+            if (mapInitialized || !window.googleMapsReady) return;
+            const mapEl = document.getElementById('map');
+            if (!mapEl) return;
+
+            mapInitialized = true;
+
+            const oldLat = parseFloat(document.getElementById('latitude').value);
+            const oldLng = parseFloat(document.getElementById('longitude').value);
+            const hasOld = !isNaN(oldLat) && !isNaN(oldLng);
+            const defaultCenter = hasOld ? { lat: oldLat, lng: oldLng } : { lat: -6.1754, lng: 106.8272 };
+
+            mapInstance = new google.maps.Map(mapEl, {
+                center: defaultCenter,
+                zoom: hasOld ? 16 : 13,
+                mapTypeControl: false,
+                streetViewControl: false,
+                fullscreenControl: false,
+            });
+
+            markerInstance = new google.maps.Marker({
+                position: defaultCenter,
+                map: mapInstance,
+                draggable: true,
+                title: 'Lokasi Bank Sampah',
+            });
+
+            if (hasOld) {
+                setCoords(oldLat, oldLng);
+                updateAlamatDisplay();
+            }
+
+            markerInstance.addListener('dragend', (e) => {
+                const lat = e.latLng.lat();
+                const lng = e.latLng.lng();
+                setCoords(lat, lng);
+                updateAlamatDisplay();
+            });
+
+            mapInstance.addListener('click', (e) => {
+                const lat = e.latLng.lat();
+                const lng = e.latLng.lng();
+                markerInstance.setPosition({ lat, lng });
+                setCoords(lat, lng);
+                updateAlamatDisplay();
+            });
+
+            try {
+                const placeAutocomplete = new google.maps.places.PlaceAutocompleteElement();
+                document.getElementById('search-container').appendChild(placeAutocomplete);
+
+                placeAutocomplete.addEventListener('gmp-select', async ({ placePrediction }) => {
+                    const place = placePrediction.toPlace();
+                    await place.fetchFields({
+                        fields: ['location', 'formattedAddress', 'displayName']
+                    });
+
+                    if (!place.location) {
+                        alert('Tidak ada detail lokasi yang tersedia.');
+                        return;
+                    }
+
+                    const lat = place.location.lat();
+                    const lng = place.location.lng();
+
+                    mapInstance.setCenter(place.location);
+                    mapInstance.setZoom(17);
+                    markerInstance.setPosition(place.location);
+                    markerInstance.setVisible(true);
+
+                    setCoords(lat, lng);
+
+                    const alamat = place.formattedAddress || place.displayName || '';
+                    document.getElementById('address').value = alamat;
+                    document.getElementById('alamat-terpilih').textContent = alamat;
+                });
+            } catch (err) {
+                console.warn('PlaceAutocompleteElement tidak tersedia:', err);
+            }
+
+            if (navigator.geolocation && !hasOld) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const pos = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude,
+                        };
+                        mapInstance.setCenter(pos);
+                        mapInstance.setZoom(16);
+                        markerInstance.setPosition(pos);
+                        setCoords(pos.lat, pos.lng);
+                        updateAlamatDisplay();
+                    },
+                    () => console.warn('Akses lokasi ditolak. Menggunakan lokasi cadangan.')
+                );
+            }
+        }
+
+        function updateAlamatDisplay() {
+            const pos = markerInstance.getPosition();
+            const lat = pos.lat();
+            const lng = pos.lng();
+
+            const alamatDariInput = document.getElementById('address').value.trim();
+
+            geocoder.geocode({ location: pos }, (results, status) => {
+                let alamat = '';
+
+                if (alamatDariInput && alamatDariInput.length > 5) {
+                    alamat = alamatDariInput;
+                } else if (status === 'OK' && results[0]) {
+                    alamat = results[0].formatted_address;
+                    const addressField = document.getElementById('address');
+                    if (!addressField.value.trim()) {
+                        addressField.value = alamat;
+                    }
+                } else {
+                    alamat = 'Lokasi di sekitar ' + lat.toFixed(4) + ', ' + lng.toFixed(4);
+                }
+
+                document.getElementById('alamat-terpilih').textContent = alamat;
+
+                console.log('Geocoder status:', status);
+                if (status !== 'OK') {
+                    console.warn('Reverse geocode gagal:', status, results);
+                }
+            });
+        }
+
+        function setCoords(lat, lng) {
+            document.getElementById('latitude').value = lat.toFixed(8);
+            document.getElementById('longitude').value = lng.toFixed(8);
+            document.getElementById('coords-display').textContent =
+                lat.toFixed(6) + ', ' + lng.toFixed(6);
+        }
+    </script>
+
+    <script
+        src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.key') }}&libraries=places&callback=onGoogleMapsReady&v=weekly"
+        async defer>
+        </script>
 
 </x-guest-layout>
