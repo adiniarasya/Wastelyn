@@ -25,6 +25,8 @@ class User extends Authenticatable
         'xp',
         'points',
         'level',
+        'waste_bank_id',
+        'onboarding_completed',
     ];
 
     protected $hidden = [
@@ -50,14 +52,19 @@ class User extends Authenticatable
         return $this->role === 'mitra';
     }
 
+    public function wasteBank()
+    {
+        return $this->belongsTo(WasteBank::class, 'waste_bank_id', 'bank_id');
+    }
+
     public function isWarga()
     {
         return $this->role === 'warga';
     }
 
-    public function wasteBanks()
+    public function managedWasteBank()
     {
-        return $this->hasMany(WasteBank::class, 'mitra_id', 'user_id');
+        return $this->hasOne(WasteBank::class, 'mitra_id', 'user_id');
     }
 
     public function isPending()

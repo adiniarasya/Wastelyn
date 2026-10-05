@@ -224,7 +224,7 @@
                         </li>
 
                         <li class="sidebar-item">
-                            <a href="{#}"
+                            <a href="#"
                                 class="sidebar-link {{ request()->routeIs('user.eco-habit.*') ? 'active' : '' }}">
                                 <i class="bi bi-trophy"></i>
                                 <span>Eco Habit Score</span>

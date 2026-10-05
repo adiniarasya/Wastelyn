@@ -20,18 +20,16 @@ class MitraController extends Controller
         try {
             $mitraId = auth()->id();
 
-            // Ambil semua pickup request milik mitra ini
-            // Menggunakan mitra_id sesuai model
             $totalPickups = PickupRequest::where('mitra_id', $mitraId)->count();
-            
+
             $totalBerat = PickupRequest::where('mitra_id', $mitraId)
                 ->where('status', 'completed')
                 ->sum('berat_aktual') ?? 0;
-                
+
             $totalPendapatan = PickupRequest::where('mitra_id', $mitraId)
                 ->where('status', 'completed')
                 ->sum('total_harga') ?? 0;
-                
+
             $totalNasabah = PickupRequest::where('mitra_id', $mitraId)
                 ->distinct('user_id')
                 ->count('user_id');
@@ -78,7 +76,6 @@ class MitraController extends Controller
                     ->sum('total_harga') ?? 0;
             }
 
-            // Permintaan Masuk (pending)
             $pendingPickups = PickupRequest::where('mitra_id', $mitraId)
                 ->where('status', 'pending')
                 ->with('user')
@@ -86,7 +83,6 @@ class MitraController extends Controller
                 ->limit(5)
                 ->get();
 
-            // Riwayat Setoran Terbaru
             $recentPickups = PickupRequest::where('mitra_id', $mitraId)
                 ->whereIn('status', ['accepted', 'completed'])
                 ->with('user')
@@ -94,7 +90,6 @@ class MitraController extends Controller
                 ->limit(10)
                 ->get();
 
-            // Grafik 7 Hari
             $chartLabels = [];
             $chartData = [];
             for ($i = 6; $i >= 0; $i--) {
@@ -167,7 +162,7 @@ class MitraController extends Controller
     {
         try {
             $mitraId = auth()->id();
-            
+
             $pickup = PickupRequest::where('pickup_request_id', $id)
                 ->where('mitra_id', $mitraId)
                 ->with('user')
@@ -188,45 +183,57 @@ class MitraController extends Controller
     {
         try {
             $request->validate([
-                'status' => 'required|in:pending,accepted,completed,cancelled',
+                'status' => 'required|in:pending,accepted,scheduled,completed,rejected',
                 'berat_aktual' => 'nullable|numeric|min:0',
                 'total_harga' => 'nullable|numeric|min:0',
             ]);
 
             $mitraId = auth()->id();
-            
+
             $pickup = PickupRequest::where('pickup_request_id', $id)
                 ->where('mitra_id', $mitraId)
                 ->firstOrFail();
 
+            $oldStatus = $pickup->status;
             $pickup->status = $request->status;
 
             if ($request->status == 'completed') {
                 $pickup->berat_aktual = $request->berat_aktual ?? 0;
                 $pickup->total_harga = $request->total_harga ?? 0;
 
-                // Tambah XP dan Poin ke User
-                $user = User::where('user_id', $pickup->user_id)->first();
-                if ($user) {
-                    $xpEarned = ($request->berat_aktual ?? 0) * 20; // 20 XP per kg
-                    $pointsEarned = ($request->berat_aktual ?? 0) * 10; // 10 Poin per kg
+                // Kasih reward HANYA kalau transisi pertama kali ke 'completed'
+                if ($oldStatus !== 'completed' && $pickup->user_mission_id) {
+                    $userMission = \App\Models\UserMission::find($pickup->user_mission_id);
 
-                    $user->xp = ($user->xp ?? 0) + $xpEarned;
-                    $user->points = ($user->points ?? 0) + $pointsEarned;
-                    $user->save();
-
-                    // Catat transaksi
-                    try {
-                        Transaction::create([
-                            'user_id' => $pickup->user_id,
-                            'mitra_id' => $mitraId,
-                            'pickup_request_id' => $pickup->pickup_request_id,
-                            'type' => 'earn',
-                            'points' => $pointsEarned,
-                            'description' => "Setoran sampah {$request->berat_aktual}kg",
+                    if ($userMission && $userMission->status !== 'completed') {
+                        // Update status misi warga
+                        $userMission->update([
+                            'status' => 'completed',
+                            'picked_up_at' => now(),
+                            'completed_at' => now(),
                         ]);
-                    } catch (\Exception $e) {
-                        // Skip jika tabel transactions belum ada
+
+                        // Kasih reward ke warga
+                        $mission = $userMission->mission;
+                        $user = $userMission->user;
+
+                        if ($mission && $user) {
+                            $user->addXp($mission->reward_xp);
+                            $user->addPoints($mission->reward_points);
+
+                            try {
+                                Transaction::create([
+                                    'user_id' => $user->user_id,
+                                    'mitra_id' => $mitraId,
+                                    'pickup_request_id' => $pickup->pickup_request_id,
+                                    'type' => 'earn',
+                                    'points' => $mission->reward_points,
+                                    'description' => "Misi selesai: {$mission->title}",
+                                ]);
+                            } catch (\Exception $e) {
+                                // skip kalau tabel transactions bermasalah
+                            }
+                        }
                     }
                 }
             }
@@ -307,6 +314,12 @@ class MitraController extends Controller
             $totalSemuaPendapatan = $sampahPerJenis->sum('total_pendapatan');
 
             // ===== GRAFIK 12 BULAN TERAKHIR =====
+            $sampahPerJenis = PickupRequest::where('mitra_id', $mitraId)
+                ->where('status', 'completed')
+                ->select('jenis_sampah', DB::raw('SUM(berat_aktual) as total_berat'), DB::raw('COUNT(*) as total_transaksi'))
+                ->groupBy('jenis_sampah')
+                ->get();
+
             $bulanLabels = [];
             $bulanData = [];
             for ($i = 11; $i >= 0; $i--) {
@@ -385,16 +398,17 @@ class MitraController extends Controller
         try {
             $request->validate([
                 'name' => 'required|string|max:255',
-                'email' => 'required|email|max:255|unique:users,email,' . auth()->id(),
-                'no_telepon' => 'nullable|string|max:15',
-                'alamat' => 'nullable|string',
+                'email' => 'required|email|max:255|unique:users,email,' . auth()->id() . ',user_id',
+                'phone' => 'nullable|string|max:15',
+                'address' => 'nullable|string',
             ]);
 
+            /** @var \App\Models\User $user */
             $user = auth()->user();
             $user->name = $request->name;
             $user->email = $request->email;
-            $user->no_telepon = $request->no_telepon;
-            $user->alamat = $request->alamat;
+            $user->phone = $request->phone;
+            $user->address = $request->address;
             $user->save();
 
             return redirect()->back()->with('success', 'Profil berhasil diperbarui');

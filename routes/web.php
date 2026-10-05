@@ -18,6 +18,7 @@ use App\Http\Controllers\AiChatMessageController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\SubmissionController;
+use App\Http\Controllers\Warga\OnboardingController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -184,7 +185,7 @@ Route::middleware(['auth', 'role:mitra'])->prefix('mitra')->name('mitra.')->grou
 
 
 //user
-Route::middleware('role:warga')->prefix('user')->name('user.')->group(function () {
+Route::middleware(['role:warga', 'onboarding'])->prefix('user')->name('user.')->group(function () {
 
     Route::get('/dashboard', [UserController::class, 'dashboard'])->name('dashboard');
 
@@ -228,4 +229,9 @@ Route::middleware('role:warga')->prefix('user')->name('user.')->group(function (
 
     Route::post('/pickup-requests/{id}/arrive', [\App\Http\Controllers\DropOffController::class, 'arrive'])->name('pickup-requests.arrive');
 
+});
+
+Route::middleware('auth')->prefix('warga')->name('warga.')->group(function () {
+    Route::get('/onboarding', [OnboardingController::class, 'index'])->name('onboarding.index');
+    Route::post('/onboarding', [OnboardingController::class, 'store'])->name('onboarding.store');
 });
