@@ -10,15 +10,27 @@ class EnsureOnboardingCompleted
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $user = auth()->user();
+        $user = $request->user();
 
-        if ($user 
-            && $user->role === 'warga' 
-            && !$user->onboarding_completed
-            && !$request->routeIs('warga.onboarding.*')
-            && !$request->routeIs('logout')
-        ) {
-            return redirect()->route('warga.onboarding.index');
+        if (!$user || $user->role !== 'warga') {
+            return $next($request);
+        }
+
+        if ($request->routeIs('user.dashboard') || $request->routeIs('logout')) {
+            return $next($request);
+        }
+
+        if (!$user->onboarding_completed || !$user->waste_bank_id) {
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Onboarding belum selesai.',
+                    'action' => 'select_waste_bank',
+                    'redirect' => route('user.dashboard'),
+                ], 403);
+            }
+
+            return redirect()->route('user.dashboard');
         }
 
         return $next($request);

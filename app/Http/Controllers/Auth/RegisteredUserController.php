@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\WasteBank;
-use App\Providers\RouteServiceProvider;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -53,21 +52,20 @@ class RegisteredUserController extends Controller
             'xp' => 0,
             'points' => 0,
             'level' => 1,
+            'onboarding_completed' => false,
         ]);
 
         if ($user->role === 'mitra') {
-            // 1. PRIORITAS: koordinat dari peta
+
             $lat = $validated['latitude'] ?? null;
             $lng = $validated['longitude'] ?? null;
 
-            // 2. FALLBACK: geocode dari alamat kalau user tidak pilih titik di peta
             if (!$lat || !$lng) {
                 $coords = $this->geocodeAddress($validated['address']);
                 $lat = $coords['lat'];
                 $lng = $coords['lng'];
             }
 
-            // 3. Kalau tetap tidak dapat, rollback user dan tolak registrasi
             if (!$lat || !$lng) {
                 $user->delete();
 
@@ -99,7 +97,9 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect(RouteServiceProvider::HOME);
+        return redirect()
+            ->route('user.dashboard')
+            ->with('success', 'Akun berhasil dibuat! Yuk pilih bank sampah terdekat dulu 🌱');
     }
 
     private function geocodeAddress(string $address): array
@@ -121,7 +121,11 @@ class RegisteredUserController extends Controller
 
                 $data = $response->json();
 
-                if (($data['status'] ?? null) === 'OK' && !empty($data['results'][0]['geometry']['location'])) {
+                if (
+                    ($data['status'] ?? null) === 'OK'
+                    && !empty($data['results'][0]['geometry']['location'])
+                ) {
+
                     $loc = $data['results'][0]['geometry']['location'];
 
                     return [
@@ -130,14 +134,11 @@ class RegisteredUserController extends Controller
                     ];
                 }
             } catch (\Throwable $e) {
-                // lanjut ke query berikutnya
+                //
             }
         }
 
-        return [
-            'lat' => null,
-            'lng' => null,
-        ];
+        return ['lat' => null, 'lng' => null];
     }
 
     private function simplifyAddress(string $address, int $lastParts): string

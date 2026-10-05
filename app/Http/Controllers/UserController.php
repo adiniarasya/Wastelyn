@@ -8,6 +8,8 @@ use App\Models\Transaction;
 use App\Models\RewardRedemption;
 use App\Models\UserMission;
 use App\Models\Notification;
+use App\Models\User;
+use App\Models\XpLog;
 
 class UserController extends Controller
 {
@@ -27,6 +29,8 @@ class UserController extends Controller
         $completedMissions = UserMission::where('user_id', $user->user_id)
             ->where('status', 'completed')
             ->count();
+
+        $userXp = $user->getXpForBank($user->waste_bank_id);
 
         $userMissions = UserMission::where('user_id', $user->user_id)
             ->with('mission')
@@ -49,7 +53,35 @@ class UserController extends Controller
             ->where('is_read', false)
             ->count();
 
+        $mitras = collect();
+        $mitrasJson = collect();
+
+        if (!$user->onboarding_completed || !$user->waste_bank_id) {
+
+            $mitras = User::where('role', 'mitra')
+                ->where('status', 'active')
+                ->with('managedWasteBank')
+                ->get()
+                ->filter(
+                    fn($m) =>
+                    $m->managedWasteBank &&
+                    $m->managedWasteBank->latitude &&
+                    $m->managedWasteBank->longitude
+                )
+                ->values();
+
+            $mitrasJson = $mitras->map(fn($m) => [
+                'bank_id' => $m->managedWasteBank->bank_id,
+                'name' => $m->managedWasteBank->name ?? $m->name,
+                'address' => $m->managedWasteBank->address,
+                'latitude' => (float) $m->managedWasteBank->latitude,
+                'longitude' => (float) $m->managedWasteBank->longitude,
+            ])->values();
+        }
+
         return view('user.dashboard', compact(
+            'user',
+            'userXp',
             'totalPickups',
             'pendingPickups',
             'totalTransactions',
@@ -61,7 +93,27 @@ class UserController extends Controller
             'recentPickups',
             'recentTransactions',
             'unreadNotifications',
-            'userMissions'
+            'userMissions',
+            'mitras',
+            'mitrasJson'
         ));
+    }
+
+    public function ecoHabit()
+    {
+        $user = auth()->user();
+
+        if (!$user->waste_bank_id) {
+            return redirect()->route('user.dashboard');
+        }
+
+        $userXp = $user->getXpForBank($user->waste_bank_id);
+
+        $logs = XpLog::where('user_id', $user->user_id)
+            ->where('bank_id', $user->waste_bank_id)
+            ->latest()
+            ->paginate(20);
+
+        return view('user.eco-habit', compact('user', 'userXp', 'logs'));
     }
 }

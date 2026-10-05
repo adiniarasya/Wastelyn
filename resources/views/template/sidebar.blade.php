@@ -105,7 +105,7 @@
                             </a>
                         </li>
 
-                                        @elseif(auth()->user()->role == 'mitra')
+                    @elseif(auth()->user()->role == 'mitra')
 
                         <li class="sidebar-title">Menu Mitra</li>
 
@@ -223,9 +223,8 @@
                             </a>
                         </li>
 
-                        <li class="sidebar-item">
-                            <a href="#"
-                                class="sidebar-link {{ request()->routeIs('user.eco-habit.*') ? 'active' : '' }}">
+                        <li class="sidebar-item {{ request()->routeIs('user.eco-habit.*') ? 'active' : '' }}">
+                            <a href="{{ route('user.eco-habit.index') }}" class="sidebar-link">
                                 <i class="bi bi-trophy"></i>
                                 <span>Eco Habit Score</span>
                             </a>

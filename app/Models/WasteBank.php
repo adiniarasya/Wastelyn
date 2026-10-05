@@ -19,13 +19,31 @@ class WasteBank extends Model
         'email',
         'latitude',
         'longitude',
-        'opening_hours',   
+        'opening_hours',
         'status',
     ];
 
+    protected $casts = [
+        'latitude'  => 'float',
+        'longitude' => 'float',
+    ];
+
+    // ============ Relasi ============
+
+    /**
+     * Mitra (user) yang mengelola bank sampah ini.
+     */
     public function mitra()
     {
         return $this->belongsTo(User::class, 'mitra_id', 'user_id');
+    }
+
+    /**
+     * Warga yang memilih bank sampah ini.
+     */
+    public function wargas()
+    {
+        return $this->hasMany(User::class, 'waste_bank_id', 'bank_id');
     }
 
     public function missions()
@@ -38,4 +56,47 @@ class WasteBank extends Model
         return $this->hasMany(PickupRequest::class, 'bank_id', 'bank_id');
     }
 
+    // ============ Scopes ============
+
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
+
+    public function scopeHasCoordinates($query)
+    {
+        return $query->whereNotNull('latitude')
+                     ->whereNotNull('longitude');
+    }
+
+    /**
+     * Cari bank sampah terdekat dari lat/lng user.
+     * Haversine formula → hasil dalam KM.
+     */
+    public function scopeNearby($query, float $lat, float $lng)
+    {
+        return $query->selectRaw("
+            *,
+            (6371 * acos(
+                LEAST(1, GREATEST(-1,
+                    cos(radians(?)) * cos(radians(latitude)) *
+                    cos(radians(longitude) - radians(?)) +
+                    sin(radians(?)) * sin(radians(latitude))
+                ))
+            )) AS jarak_km
+        ", [$lat, $lng, $lat])
+        ->orderBy('jarak_km');
+    }
+
+    // ============ Helpers ============
+
+    public function hasCoordinates(): bool
+    {
+        return !is_null($this->latitude) && !is_null($this->longitude);
+    }
+
+    public function isActive(): bool
+    {
+        return $this->status === 'active';
+    }
 }

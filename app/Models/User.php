@@ -27,6 +27,7 @@ class User extends Authenticatable
         'level',
         'waste_bank_id',
         'onboarding_completed',
+        'onboarding_completed_at',
     ];
 
     protected $hidden = [
@@ -39,17 +40,64 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'onboarding_completed' => 'boolean',
+            'onboarding_completed_at' => 'datetime',
+            'xp' => 'integer',
+            'points' => 'integer',
+            'level' => 'integer',
         ];
     }
 
-    public function isAdmin()
+    public function isAdmin(): bool
     {
         return $this->role === 'admin';
     }
 
-    public function isMitra()
+    public function isMitra(): bool
     {
         return $this->role === 'mitra';
+    }
+
+    public function isWarga(): bool
+    {
+        return $this->role === 'warga';
+    }
+
+    public function isPending(): bool
+    {
+        return $this->status === 'pending';
+    }
+
+    public function isApproved(): bool
+    {
+        return $this->status === 'approved';
+    }
+
+    public function isOnboarded(): bool
+    {
+        return (bool) $this->onboarding_completed && !is_null($this->waste_bank_id);
+    }
+
+    public function needsOnboarding(): bool
+    {
+        return $this->isWarga() && !$this->isOnboarded();
+    }
+
+    public function homeRoute(): string
+    {
+        if ($this->isWarga()) {
+            return 'user.dashboard';
+        }
+
+        if ($this->isMitra()) {
+            return 'mitra.dashboard';
+        }
+
+        if ($this->isAdmin()) {
+            return 'admin.dashboard';
+        }
+
+        return 'home';
     }
 
     public function wasteBank()
@@ -57,31 +105,31 @@ class User extends Authenticatable
         return $this->belongsTo(WasteBank::class, 'waste_bank_id', 'bank_id');
     }
 
-    public function isWarga()
-    {
-        return $this->role === 'warga';
-    }
-
     public function managedWasteBank()
     {
         return $this->hasOne(WasteBank::class, 'mitra_id', 'user_id');
     }
 
-    public function isPending()
+    public function userXp()
     {
-        return $this->status === 'pending';
+        return $this->hasMany(UserXp::class, 'user_id', 'user_id');
     }
 
-    public function isApproved()
+    public function xpLogs()
     {
-        return $this->status === 'approved';
+        return $this->hasMany(XpLog::class, 'user_id', 'user_id');
     }
 
-    public function addXp($amount)
+    public function getXpForBank(int $bankId): ?UserXp
     {
-        $this->xp += $amount;
-        $this->updateLevel();
-        $this->save();
+        return $this->userXp()->where('bank_id', $bankId)->first();
+    }
+
+    public function getActiveXpAttribute(): ?UserXp
+    {
+        if (!$this->waste_bank_id)
+            return null;
+        return $this->getXpForBank($this->waste_bank_id);
     }
 
     public function addPoints($amount)
@@ -101,24 +149,7 @@ class User extends Authenticatable
         return false;
     }
 
-    public function updateLevel()
-    {
-        if ($this->xp >= 1000) {
-            $this->level = 5;
-        } elseif ($this->xp >= 801) {
-            $this->level = 4;
-        } elseif ($this->xp >= 501) {
-            $this->level = 3;
-        } elseif ($this->xp >= 201) {
-            $this->level = 2;
-        } else {
-            $this->level = 1;
-        }
-
-        $this->save();
-    }
-
-    public function getLevelNameAttribute()
+    public function getLevelNameAttribute(): string
     {
         $levels = [
             1 => 'Green Newbie',

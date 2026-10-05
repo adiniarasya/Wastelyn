@@ -8,10 +8,10 @@
             <div class="row align-items-center">
                 <div class="col-12 col-md-6 order-md-1 order-last">
                     <h3 class="fw-bold">
-                        Selamat datang, {{ auth()->user()->name }}! 👋
+                        Selamat datang, {{ auth()->user()->name }}! 🌿
                     </h3>
                     <p class="text-subtitle text-muted">
-                        Yuk lanjutkan kebiasaan baikmu untuk lingkungan 🌱
+                        Yuk lanjutkan kebiasaan baikmu untuk lingkungan hari ini.
                     </p>
                 </div>
                 <div class="col-12 col-md-6 order-md-2 order-first">
@@ -26,11 +26,7 @@
 
         <section class="section">
 
-            {{-- ========================= --}}
-            {{-- XP & POIN --}}
-            {{-- ========================= --}}
             <div class="row g-3">
-                {{-- ECO HABIT SCORE --}}
                 <div class="col-12 col-lg-8">
                     <div class="card shadow-sm border-0 rounded-4 h-100">
                         <div class="card-body">
@@ -42,14 +38,11 @@
                                 </div>
                                 <div class="col">
                                     @php
-                                        $xp = auth()->user()->xp ?? 0;
-                                        // max XP untuk hitung persen
-                                        if ($xp >= 1000) $nextXp = 1000;
-                                        elseif ($xp >= 801) $nextXp = 1000;
-                                        elseif ($xp >= 501) $nextXp = 800;
-                                        elseif ($xp >= 201) $nextXp = 500;
-                                        else $nextXp = 200;
-                                        $xpProgress = $nextXp > 0 ? min(100, round(($xp / $nextXp) * 100)) : 0;
+                                        $xp = $userXp->xp ?? 0;
+                                        $level = $userXp->level ?? 1;
+                                        $levelName = $userXp->level_name ?? 'Green Newbie';
+                                        $nextXp = $userXp->next_level_xp ?? null;
+                                        $progress = $userXp->progress_percent ?? 0;
                                     @endphp
 
                                     <div class="d-flex justify-content-between align-items-center">
@@ -64,32 +57,48 @@
                                         </div>
                                         <div class="text-end">
                                             <div class="fs-5 fw-bold text-success">
-                                                {{ $xpProgress }}%
+                                                {{ $progress }}%
                                             </div>
                                             <small class="text-secondary">progress</small>
                                         </div>
                                     </div>
 
                                     <div class="progress mt-3" style="height: 9px;">
-                                        <div class="progress-bar bg-success"
-                                            role="progressbar"
-                                            style="width: {{ $xpProgress }}%">
+                                        <div class="progress-bar bg-success" role="progressbar"
+                                            style="width: {{ $progress }}%">
                                         </div>
                                     </div>
 
-                                    <div class="mt-3">
+                                    <div class="mt-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
                                         <span class="badge bg-success bg-opacity-10 text-success px-3 py-2">
                                             <i class="bi bi-trophy-fill me-1"></i>
-                                            {{ auth()->user()->level_name ?? 'Green Newbie' }}
+                                            {{ $levelName }}
                                         </span>
+
+                                        @if($nextXp)
+                                            <small class="text-muted">
+                                                {{ number_format($xp) }} / {{ number_format($nextXp) }} XP
+                                                menuju level berikutnya
+                                            </small>
+                                        @else
+                                            <small class="text-muted">🎉 Level maksimal tercapai</small>
+                                        @endif
                                     </div>
+
+                                    @if(auth()->user()->wasteBank)
+                                        <div class="mt-2">
+                                            <small class="text-muted">
+                                                <i class="bi bi-shop"></i>
+                                                XP dari <strong>{{ auth()->user()->wasteBank->name }}</strong>
+                                            </small>
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {{-- POIN --}}
                 <div class="col-12 col-lg-4">
                     <div class="card shadow-sm border-0 rounded-4 h-100">
                         <div class="card-body d-flex align-items-center gap-3">
@@ -112,9 +121,6 @@
                 </div>
             </div>
 
-            {{-- ========================= --}}
-            {{-- WASTE MISSION --}}
-            {{-- ========================= --}}
             <div class="row mt-4">
                 <div class="col-12">
                     <div class="card shadow-sm border-0 rounded-4">
@@ -155,8 +161,7 @@
                                                 </small>
 
                                                 <div class="progress mt-2" style="height: 6px;">
-                                                    <div class="progress-bar bg-success"
-                                                        style="width: {{ $percent }}%"></div>
+                                                    <div class="progress-bar bg-success" style="width: {{ $percent }}%"></div>
                                                 </div>
                                                 <small class="text-muted">
                                                     Progress {{ $um->progress }} / {{ $mission->target }}
@@ -166,7 +171,7 @@
                                             </div>
                                             <div class="text-end">
                                                 <span class="badge bg-success">
-                                                    +{{ $mission->reward_xp }} XP
+                                                    +10 XP
                                                 </span>
                                                 <br>
                                                 <span class="badge bg-warning text-dark mt-1">
@@ -179,8 +184,7 @@
                             @empty
                                 <div class="text-center py-4">
                                     <p class="text-muted mb-2">Kamu belum ikut misi apapun.</p>
-                                    <a href="{{ route('user.user-missions.index') }}"
-                                        class="btn btn-sm btn-success">
+                                    <a href="{{ route('user.user-missions.index') }}" class="btn btn-sm btn-success">
                                         Lihat Misi Tersedia
                                     </a>
                                 </div>
@@ -192,4 +196,8 @@
 
         </section>
     </div>
+
+    @if(!$user->onboarding_completed || !$user->waste_bank_id)
+        @include('user.onboarding.popup')
+    @endif
 @endsection

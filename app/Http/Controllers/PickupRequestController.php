@@ -6,8 +6,10 @@ use App\Models\PickupRequest;
 use App\Models\User;
 use App\Models\WasteBank;
 use App\Models\WasteCategory;
+use App\Services\XpService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class PickupRequestController extends Controller
 {
@@ -76,7 +78,7 @@ class PickupRequestController extends Controller
         return redirect()->route('admin.pickup-requests.index')->with('success', 'Pickup request berhasil dihapus');
     }
 
-    public function updateStatus(Request $request, $id)
+    public function updateStatus(Request $request, $id, XpService $xpService)
     {
         $request->validate([
             'status' => 'required|in:pending,accepted,scheduled,completed,rejected',
@@ -111,17 +113,29 @@ class PickupRequestController extends Controller
                 if ($pickup->status !== 'completed') {
                     $pickup->status = 'completed';
 
-                    $xpGained = 20 * ($pickup->weight_kg ?? 0);
+                    DB::transaction(function () use ($pickup, $xpService) {
 
-                    if ($pickup->user) {
-                        $pickup->user->addXp($xpGained);
-                    }
+                        if ($pickup->user && $pickup->bank_id) {
 
-                    if ($pickup->user) {
-                        $pickup->user->addPoints(100 * ($pickup->weight_kg ?? 0));
-                    }
+                            $weight = (float) ($pickup->weight_kg ?? 0);
+
+                            if ($weight > 0) {
+                                $xpService->addXpFromPickup(
+                                    $pickup->user,
+                                    $pickup->bank_id,
+                                    $weight,
+                                    $pickup->id
+                                );
+
+                                $pickup->points_earned = 100 * $weight;
+                            }
+
+                            $pickup->user->addPoints(100 * $weight);
+                        }
+                    });
                 }
                 break;
+
             default:
                 $pickup->status = $request->status;
                 break;
@@ -144,9 +158,8 @@ class PickupRequestController extends Controller
         return redirect()->back()->with('success', 'Pickup berhasil diassign ke mitra');
     }
 
-           public function mitraIndex(Request $request)
+    public function mitraIndex(Request $request)
     {
-
         $filterTanggalDari = $request->input('tanggal_dari');
         $filterTanggalSampai = $request->input('tanggal_sampai');
         $filterKategori = $request->input('kategori_id');
@@ -167,7 +180,6 @@ class PickupRequestController extends Controller
             }
             return $query;
         };
-
 
         $availableQuery = PickupRequest::with('user', 'wasteBank', 'wasteCategory')
             ->whereNull('mitra_id')
@@ -195,10 +207,14 @@ class PickupRequestController extends Controller
         $kategoris = WasteCategory::orderBy('name')->get();
 
         return view('mitra.pickups.index', compact(
-            'available', 'mine', 'rejected',
+            'available',
+            'mine',
+            'rejected',
             'kategoris',
-            'filterTanggalDari', 'filterTanggalSampai',
-            'filterKategori', 'filterMetode'
+            'filterTanggalDari',
+            'filterTanggalSampai',
+            'filterKategori',
+            'filterMetode'
         ));
     }
 
@@ -269,14 +285,14 @@ class PickupRequestController extends Controller
                 'status' => 'pending',
             ]);
 
-            $bank = \App\Models\WasteBank::find($request->bank_id);
+            $bank = WasteBank::find($request->bank_id);
             if ($bank && $bank->mitra_id) {
                 \App\Models\Notification::create([
                     'user_id' => $bank->mitra_id,
                     'title' => 'Setoran Baru Masuk',
                     'message' => 'Warga ' . Auth::user()->name . ' mengajukan setoran ' .
-                                 ($request->pickup_method === 'pickup' ? 'penjemputan' : 'antar sendiri') .
-                                 '. Segera ambil permintaan di Kelola Setoran.',
+                        ($request->pickup_method === 'pickup' ? 'penjemputan' : 'antar sendiri') .
+                        '. Segera ambil permintaan di Kelola Setoran.',
                     'type' => 'info',
                     'link' => route('mitra.pickup-requests.index'),
                     'is_read' => false,
@@ -290,7 +306,6 @@ class PickupRequestController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal: ' . $e->getMessage())->withInput();
         }
-    
     }
 
     public function userShow(PickupRequest $pickupRequest)
@@ -320,7 +335,8 @@ class PickupRequestController extends Controller
             ->route('user.pickup-requests.index')
             ->with('success', 'Pengajuan setoran berhasil dibatalkan.');
     }
-        public function exportSetoranPdf(Request $request)
+
+    public function exportSetoranPdf(Request $request)
     {
         $mitraId = auth()->id();
 
