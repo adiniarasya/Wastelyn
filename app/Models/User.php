@@ -48,6 +48,12 @@ class User extends Authenticatable
         ];
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Role & Status Helpers
+    |--------------------------------------------------------------------------
+    */
+
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
@@ -100,6 +106,12 @@ class User extends Authenticatable
         return 'home';
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Relations
+    |--------------------------------------------------------------------------
+    */
+
     public function wasteBank()
     {
         return $this->belongsTo(WasteBank::class, 'waste_bank_id', 'bank_id');
@@ -120,48 +132,6 @@ class User extends Authenticatable
         return $this->hasMany(XpLog::class, 'user_id', 'user_id');
     }
 
-    public function getXpForBank(int $bankId): ?UserXp
-    {
-        return $this->userXp()->where('bank_id', $bankId)->first();
-    }
-
-    public function getActiveXpAttribute(): ?UserXp
-    {
-        if (!$this->waste_bank_id)
-            return null;
-        return $this->getXpForBank($this->waste_bank_id);
-    }
-
-    public function addPoints($amount)
-    {
-        $this->points += $amount;
-        $this->save();
-    }
-
-    public function deductPoints($amount)
-    {
-        if ($this->points >= $amount) {
-            $this->points -= $amount;
-            $this->save();
-            return true;
-        }
-
-        return false;
-    }
-
-    public function getLevelNameAttribute(): string
-    {
-        $levels = [
-            1 => 'Green Newbie',
-            2 => 'Green Explorer',
-            3 => 'Green Warrior',
-            4 => 'Green Master',
-            5 => 'Eco Legend',
-        ];
-
-        return $levels[$this->level] ?? 'Green Newbie';
-    }
-
     public function aiChatSessions()
     {
         return $this->hasMany(AiChatSession::class, 'user_id', 'user_id');
@@ -177,5 +147,116 @@ class User extends Authenticatable
             'user_id',
             'session_id'
         );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | XP & Level System
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Ambil data XP user untuk bank sampah tertentu.
+     * Return null kalau bankId null atau data tidak ada.
+     */
+    public function getXpForBank(?int $bankId): ?UserXp
+    {
+        if (is_null($bankId)) {
+            return null;
+        }
+
+        return $this->userXp()->where('bank_id', $bankId)->first();
+    }
+
+    /**
+     * Accessor: $user->active_xp
+     * Otomatis ambil XP dari waste_bank_id aktif.
+     */
+    public function getActiveXpAttribute(): ?UserXp
+    {
+        if (!$this->waste_bank_id) {
+            return null;
+        }
+
+        return $this->getXpForBank($this->waste_bank_id);
+    }
+
+    /**
+     * Tambah XP ke user, lalu update level otomatis.
+     */
+    public function addXp(int $amount)
+    {
+        $this->xp += $amount;
+        $this->save();
+
+        $this->updateLevel();
+
+        return $this->xp;
+    }
+
+    /**
+     * Update level user berdasarkan total XP.
+     * Aturan: setiap 100 XP naik 1 level, maksimal level 5.
+     */
+    public function updateLevel()
+    {
+        $totalXp = $this->xp ?? 0;
+
+        // 0-99 = Lv1, 100-199 = Lv2, dst.
+        $newLevel = (int) floor($totalXp / 100) + 1;
+
+        // Batasi 1 s/d 5
+        $newLevel = max(1, min($newLevel, 5));
+
+        if ($this->level !== $newLevel) {
+            $this->level = $newLevel;
+            $this->save();
+        }
+
+        return $this->level;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Points System
+    |--------------------------------------------------------------------------
+    */
+
+    public function addPoints($amount)
+    {
+        $this->points += $amount;
+        $this->save();
+
+        return $this->points;
+    }
+
+    public function deductPoints($amount)
+    {
+        if ($this->points >= $amount) {
+            $this->points -= $amount;
+            $this->save();
+            return true;
+        }
+
+        return false;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Accessors
+    |--------------------------------------------------------------------------
+    */
+
+    public function getLevelNameAttribute(): string
+    {
+        $levels = [
+            1 => 'Green Newbie',
+            2 => 'Green Explorer',
+            3 => 'Green Warrior',
+            4 => 'Green Master',
+            5 => 'Eco Legend',
+        ];
+
+        return $levels[$this->level] ?? 'Green Newbie';
     }
 }

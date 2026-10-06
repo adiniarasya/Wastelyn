@@ -30,7 +30,8 @@ class UserController extends Controller
             ->where('status', 'completed')
             ->count();
 
-        $userXp = $user->getXpForBank($user->waste_bank_id);
+        // Default null — diisi kalau user sudah onboarding
+        $userXp = null;
 
         $userMissions = UserMission::where('user_id', $user->user_id)
             ->with('mission')
@@ -57,7 +58,7 @@ class UserController extends Controller
         $mitrasJson = collect();
 
         if (!$user->onboarding_completed || !$user->waste_bank_id) {
-
+            // === Belum onboarding: tampilkan pilihan mitra ===
             $mitras = User::where('role', 'mitra')
                 ->where('status', 'active')
                 ->with('managedWasteBank')
@@ -77,6 +78,9 @@ class UserController extends Controller
                 'latitude' => (float) $m->managedWasteBank->latitude,
                 'longitude' => (float) $m->managedWasteBank->longitude,
             ])->values();
+        } else {
+            // === Sudah onboarding: baru ambil data XP ===
+            $userXp = $user->getXpForBank($user->waste_bank_id);
         }
 
         return view('user.dashboard', compact(
