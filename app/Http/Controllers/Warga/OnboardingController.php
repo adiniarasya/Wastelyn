@@ -52,39 +52,33 @@ class OnboardingController extends Controller
         $lat = (float) $data['lat'];
         $lng = (float) $data['lng'];
 
-        $bank = WasteBank::where('status', 'active')
-            ->whereNotNull('latitude')
-            ->whereNotNull('longitude')
-            ->selectRaw("
-                bank_id, name, address, latitude, longitude,
-                (6371 * acos(
-                    LEAST(1, GREATEST(-1,
-                        cos(radians(?)) * cos(radians(latitude)) *
-                        cos(radians(longitude) - radians(?)) +
-                        sin(radians(?)) * sin(radians(latitude))
-                    ))
-                )) AS jarak_km
-            ", [$lat, $lng, $lat])
-            ->orderBy('jarak_km')
-            ->first();
+        $banks = WasteBank::query()
+            ->withActiveMitra()
+            ->hasCoordinates()
+            ->nearby($lat, $lng)
+            ->limit(50)
+            ->get();
 
-        if (!$bank) {
+        if ($banks->isEmpty()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Belum ada bank sampah terdaftar.',
+                'data' => [],
             ]);
         }
 
+        $formatted = $banks->map(fn($bank) => [
+            'bank_id' => $bank->bank_id,
+            'name' => $bank->name,
+            'address' => $bank->address,
+            'latitude' => (float) $bank->latitude,
+            'longitude' => (float) $bank->longitude,
+            'jarak_km' => round($bank->jarak_km, 2),
+        ])->values();
+
         return response()->json([
             'success' => true,
-            'data' => [
-                'bank_id' => $bank->bank_id,
-                'name' => $bank->name,
-                'address' => $bank->address,
-                'latitude' => (float) $bank->latitude,
-                'longitude' => (float) $bank->longitude,
-                'jarak_km' => round($bank->jarak_km, 2),
-            ],
+            'data' => $formatted,
         ]);
     }
 

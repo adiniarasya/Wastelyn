@@ -24,23 +24,15 @@ class WasteBank extends Model
     ];
 
     protected $casts = [
-        'latitude'  => 'float',
+        'latitude' => 'float',
         'longitude' => 'float',
     ];
 
-    // ============ Relasi ============
-
-    /**
-     * Mitra (user) yang mengelola bank sampah ini.
-     */
     public function mitra()
     {
         return $this->belongsTo(User::class, 'mitra_id', 'user_id');
     }
 
-    /**
-     * Warga yang memilih bank sampah ini.
-     */
     public function wargas()
     {
         return $this->hasMany(User::class, 'waste_bank_id', 'bank_id');
@@ -56,8 +48,6 @@ class WasteBank extends Model
         return $this->hasMany(PickupRequest::class, 'bank_id', 'bank_id');
     }
 
-    // ============ Scopes ============
-
     public function scopeActive($query)
     {
         return $query->where('status', 'active');
@@ -66,13 +56,16 @@ class WasteBank extends Model
     public function scopeHasCoordinates($query)
     {
         return $query->whereNotNull('latitude')
-                     ->whereNotNull('longitude');
+            ->whereNotNull('longitude');
     }
 
-    /**
-     * Cari bank sampah terdekat dari lat/lng user.
-     * Haversine formula → hasil dalam KM.
-     */
+    public function scopeWithActiveMitra($query)
+    {
+        return $query->whereHas('mitra', function ($q) {
+            $q->where('role', 'mitra')->where('status', 'active');
+        });
+    }
+
     public function scopeNearby($query, float $lat, float $lng)
     {
         return $query->selectRaw("
@@ -85,10 +78,8 @@ class WasteBank extends Model
                 ))
             )) AS jarak_km
         ", [$lat, $lng, $lat])
-        ->orderBy('jarak_km');
+            ->orderBy('jarak_km');
     }
-
-    // ============ Helpers ============
 
     public function hasCoordinates(): bool
     {
@@ -98,5 +89,10 @@ class WasteBank extends Model
     public function isActive(): bool
     {
         return $this->status === 'active';
+    }
+
+    public function isMitraActive(): bool
+    {
+        return $this->mitra && $this->mitra->status === 'active';
     }
 }
