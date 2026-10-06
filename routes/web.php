@@ -4,6 +4,9 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AdminNotificationController;
 use App\Http\Controllers\AdminSettingsController;
+use App\Http\Controllers\AdminTransactionController;
+use App\Http\Controllers\AdminMissionController;
+use App\Http\Controllers\AdminRewardController;
 use App\Http\Controllers\MitraController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WasteBankController;
@@ -79,31 +82,20 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::put('/waste-categories/{wasteCategory}', [WasteCategoryController::class, 'update'])->name('waste-categories.update');
     Route::delete('/waste-categories/{wasteCategory}', [WasteCategoryController::class, 'destroy'])->name('waste-categories.destroy');
 
-    Route::get('/missions', [MissionController::class, 'index'])->name('missions.index');
-    Route::get('/missions/create', [MissionController::class, 'create'])->name('missions.create');
-    Route::post('/missions', [MissionController::class, 'store'])->name('missions.store');
-    Route::get('/missions/{mission}', [MissionController::class, 'show'])->name('missions.show');
-    Route::get('/missions/{mission}/edit', [MissionController::class, 'edit'])->name('missions.edit');
-    Route::put('/missions/{mission}', [MissionController::class, 'update'])->name('missions.update');
-    Route::delete('/missions/{mission}', [MissionController::class, 'destroy'])->name('missions.destroy');
+    Route::get('/missions', [AdminMissionController::class, 'index'])->name('missions.index');
+    Route::get('/missions-export-pdf', [AdminMissionController::class, 'exportPdf'])->name('missions.export.pdf');
+    Route::get('/missions/{mission}', [AdminMissionController::class, 'show'])->name('missions.show');
 
-    Route::get('/rewards', [RewardController::class, 'index'])->name('rewards.index');
-    Route::get('/rewards/create', [RewardController::class, 'create'])->name('rewards.create');
-    Route::post('/rewards', [RewardController::class, 'store'])->name('rewards.store');
-    Route::get('/rewards/{reward}', [RewardController::class, 'show'])->name('rewards.show');
-    Route::get('/rewards/{reward}/edit', [RewardController::class, 'edit'])->name('rewards.edit');
-    Route::put('/rewards/{reward}', [RewardController::class, 'update'])->name('rewards.update');
-    Route::delete('/rewards/{reward}', [RewardController::class, 'destroy'])->name('rewards.destroy');
+    Route::get('/rewards', [AdminRewardController::class, 'index'])->name('rewards.index');
+    Route::get('/rewards-export-pdf', [AdminRewardController::class, 'exportPdf'])->name('rewards.export.pdf');
+    Route::get('/rewards/{id}', [AdminRewardController::class, 'show'])->name('rewards.show');
 
-    Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
-    Route::get('/transactions/create', [TransactionController::class, 'create'])->name('transactions.create');
-    Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');
-    Route::get('/transactions/{id}', [TransactionController::class, 'show'])->name('transactions.show');
-    Route::get('/transactions/{id}/edit', [TransactionController::class, 'edit'])->name('transactions.edit');
-    Route::put('/transactions/{id}', [TransactionController::class, 'update'])->name('transactions.update');
-    Route::delete('/transactions/{id}', [TransactionController::class, 'destroy'])->name('transactions.destroy');
+    Route::get('/transactions', [AdminTransactionController::class, 'index'])->name('transactions.index');
+    Route::get('/transactions/{id}', [AdminTransactionController::class, 'show'])->name('transactions.show');
+    Route::get('/transactions/{id}/pdf', [AdminTransactionController::class, 'exportPdf'])->name('transactions.pdf');
 
     Route::get('/laporan', [AdminController::class, 'laporan'])->name('laporan');
+    Route::get('/laporan-export-pdf', [AdminController::class, 'laporanPdf'])->name('laporan.export.pdf');
 
     Route::get('/notifications', [AdminNotificationController::class, 'index'])->name('notifications.index');
     Route::get('/notifications/create', [AdminNotificationController::class, 'create'])->name('notifications.create');

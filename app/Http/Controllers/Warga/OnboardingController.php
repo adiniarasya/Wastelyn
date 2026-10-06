@@ -39,7 +39,7 @@ class OnboardingController extends Controller
             'longitude' => (float) $m->managedWasteBank->longitude,
         ])->values();
 
-        return view('user.onboarding.index', compact('mitras', 'mitrasJson', 'user'));
+        return view('user.onboarding.popup', compact('mitras', 'mitrasJson', 'user'));
     }
 
     public function nearby(Request $request)

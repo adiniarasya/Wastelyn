@@ -36,20 +36,47 @@ body {
     line-height: 1.6;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
     font-family: 'Poppins', sans-serif !important;
     color: var(--wl-text);
     font-weight: 600;
 }
 
-h1 { font-size: 28px; font-weight: 700; }
-h2 { font-size: 22px; font-weight: 600; }
-h3 { font-size: 18px; font-weight: 600; }
-h4 { font-size: 16px; }
-h5 { font-size: 15px; }
-h6 { font-size: 14px; }
+h1 {
+    font-size: 28px;
+    font-weight: 700;
+}
 
-.text-muted { color: var(--wl-text-muted) !important; }
+h2 {
+    font-size: 22px;
+    font-weight: 600;
+}
+
+h3 {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+h4 {
+    font-size: 16px;
+}
+
+h5 {
+    font-size: 15px;
+}
+
+h6 {
+    font-size: 14px;
+}
+
+.text-muted {
+    color: var(--wl-text-muted) !important;
+}
 
 /* ============================================
    SIDEBAR
@@ -59,13 +86,26 @@ h6 { font-size: 14px; }
 }
 
 #sidebar .sidebar-header {
-    background: transparent;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 16px 14px;
 }
 
-#sidebar .sidebar-header .logo img {
-    filter: brightness(0) invert(1);
+#sidebar .sidebar-header .logo {
+    max-width: 100%;
+    overflow: hidden;
+}
+
+#sidebar .sidebar-header .logo a {
+    display: block;
+}
+
+#sidebar .sidebar-header .sidebar-logo {
+    width: 100%;
+    max-width: 160px;
+    height: auto;
     max-height: 40px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+    display: block;
 }
 
 #sidebar .sidebar-title {
@@ -237,12 +277,29 @@ h6 { font-size: 14px; }
     font-size: 12px;
 }
 
-.badge.bg-success { background-color: var(--wl-primary-light) !important; }
-.badge.bg-primary { background-color: var(--wl-primary) !important; }
-.badge.bg-warning { background-color: var(--wl-warning) !important; }
-.badge.bg-danger { background-color: var(--wl-danger) !important; }
-.badge.bg-info { background-color: var(--wl-info) !important; }
-.badge.bg-secondary { background-color: #6C757D !important; }
+.badge.bg-success {
+    background-color: var(--wl-primary-light) !important;
+}
+
+.badge.bg-primary {
+    background-color: var(--wl-primary) !important;
+}
+
+.badge.bg-warning {
+    background-color: var(--wl-warning) !important;
+}
+
+.badge.bg-danger {
+    background-color: var(--wl-danger) !important;
+}
+
+.badge.bg-info {
+    background-color: var(--wl-info) !important;
+}
+
+.badge.bg-secondary {
+    background-color: #6C757D !important;
+}
 
 /* ============================================
    FORM
@@ -383,14 +440,33 @@ a:hover {
 /* ============================================
    UTILITY
    ============================================ */
-.text-primary { color: var(--wl-primary) !important; }
-.text-success { color: var(--wl-primary-light) !important; }
-.text-info    { color: var(--wl-accent) !important; }
-.bg-primary   { background-color: var(--wl-primary) !important; }
-.bg-success   { background-color: var(--wl-primary-light) !important; }
+.text-primary {
+    color: var(--wl-primary) !important;
+}
 
-.rounded-3 { border-radius: var(--wl-radius) !important; }
-.rounded-4 { border-radius: var(--wl-radius) !important; }
+.text-success {
+    color: var(--wl-primary-light) !important;
+}
+
+.text-info {
+    color: var(--wl-accent) !important;
+}
+
+.bg-primary {
+    background-color: var(--wl-primary) !important;
+}
+
+.bg-success {
+    background-color: var(--wl-primary-light) !important;
+}
+
+.rounded-3 {
+    border-radius: var(--wl-radius) !important;
+}
+
+.rounded-4 {
+    border-radius: var(--wl-radius) !important;
+}
 
 /* ============================================
    SCROLLBAR

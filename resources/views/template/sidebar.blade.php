@@ -4,8 +4,9 @@
             <div class="d-flex justify-content-between align-items-center w-100">
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
                 <div class="logo">
-                    <a href="{{ url('/') }}" class="d-flex align-items-center">
+                    <a href="{{ url('/') }}" class="d-flex align-items-center gap-2">
                         <img src="{{ asset('assets/logo.png') }}" alt="Logo" class="sidebar-logo">
+                        <span class="sidebar-brand">WasteLyn</span>
                     </a>
                 </div>
                 <div class="toggler">
@@ -79,29 +80,6 @@
                             <a href="{{ route('admin.laporan') }}" class="sidebar-link">
                                 <i class="bi bi-file-earmark-text"></i>
                                 <span>Laporan</span>
-                            </a>
-                        </li>
-
-                        <li class="sidebar-title">Sistem</li>
-
-                        <li class="sidebar-item {{ request()->routeIs('admin.notifications.*') ? 'active' : '' }}">
-                            <a href="{{ route('admin.notifications.index') }}" class="sidebar-link">
-                                <i class="bi bi-bell"></i>
-                                <span>Notifikasi</span>
-                            </a>
-                        </li>
-
-                        <li class="sidebar-item {{ request()->routeIs('admin.profile') ? 'active' : '' }}">
-                            <a href="{{ route('admin.profile') }}" class="sidebar-link">
-                                <i class="bi bi-person"></i>
-                                <span>Profil</span>
-                            </a>
-                        </li>
-
-                        <li class="sidebar-item {{ request()->routeIs('admin.settings') ? 'active' : '' }}">
-                            <a href="{{ route('admin.settings') }}" class="sidebar-link">
-                                <i class="bi bi-gear"></i>
-                                <span>Pengaturan</span>
                             </a>
                         </li>
 
