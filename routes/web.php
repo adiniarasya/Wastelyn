@@ -121,6 +121,8 @@ Route::middleware(['auth', 'role:mitra'])->prefix('mitra')->name('mitra.')->grou
     Route::get('/pickup-requests/export-pdf', [PickupRequestController::class, 'exportSetoranPdf'])->name('pickup-requests.export-pdf');
     Route::get('/pickup-requests/{pickupRequest}', [PickupRequestController::class, 'mitraShow'])->name('pickup-requests.show');
     Route::put('/pickup-requests/{pickupRequest}/status', [PickupRequestController::class, 'updateStatus'])->name('pickup-requests.status');
+    Route::post('/pickup-requests/{id}/accept', [PickupRequestController::class, 'mitraAccept'])
+        ->name('pickup-requests.accept');
 
     Route::post('/pickup-requests/{id}/take', [\App\Http\Controllers\PickupFlowController::class, 'take'])->name('pickup-requests.take');
     Route::post('/pickup-requests/{id}/start', [\App\Http\Controllers\PickupFlowController::class, 'start'])->name('pickup-requests.start');
@@ -212,4 +214,5 @@ Route::middleware(['auth', 'role:warga'])->prefix('user')->name('user.')->group(
         Route::delete('/ai-chat-sessions/{sessionId}/messages/{messageId}', [AiChatMessageController::class, 'destroy'])
             ->name('ai-chat-messages.destroy');
     });
+
 });

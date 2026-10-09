@@ -16,27 +16,27 @@
                 {{-- NOTIFIKASI --}}
                 <li class="nav-item dropdown me-3">
                     <a class="nav-link position-relative" href="#" data-bs-toggle="dropdown" aria-expanded="false"
-                       style="padding: 6px 10px;">
+                        style="padding: 6px 10px;">
                         <i class="bi bi-bell" style="font-size: 20px; color: #5a6474;"></i>
 
                         @php
-                            $notifCount = 0;
-                            if (auth()->user()->role === 'admin') {
-                                $notifCount = \App\Models\User::where('status', 'pending')->count()
-                                    + \App\Models\PickupRequest::where('status', 'pending')->count();
-                            } elseif (auth()->user()->role === 'mitra') {
-                                $notifCount = \App\Models\PickupRequest::where('status', 'pending')
-                                    ->whereNull('mitra_id')->count();
-                            } elseif (auth()->user()->role === 'warga') {
-                                $notifCount = \App\Models\PickupRequest::where('user_id', auth()->id())
-                                    ->whereIn('status', ['completed', 'rejected'])
-                                    ->whereDate('updated_at', '>=', now()->subDays(7))
-                                    ->count();
-                            }
+                        $notifCount = 0;
+                        if (auth()->user()->role === 'admin') {
+                        $notifCount = \App\Models\User::where('status', 'pending')->count()
+                        + \App\Models\PickupRequest::where('status', 'pending')->count();
+                        } elseif (auth()->user()->role === 'mitra') {
+                        $notifCount = \App\Models\PickupRequest::where('status', 'pending')
+                        ->where('mitra_id', auth()->id())->count();
+                        } elseif (auth()->user()->role === 'warga') {
+                        $notifCount = \App\Models\PickupRequest::where('user_id', auth()->id())
+                        ->whereIn('status', ['completed', 'rejected'])
+                        ->whereDate('updated_at', '>=', now()->subDays(7))
+                        ->count();
+                        }
                         @endphp
 
                         @if($notifCount > 0)
-                            <span class="position-absolute" style="
+                        <span class="position-absolute" style="
                                 top: 4px;
                                 right: 4px;
                                 min-width: 18px;
@@ -62,88 +62,88 @@
                         </li>
 
                         @if(auth()->user()->role === 'admin')
-                            @php
-                                $pendingUsers = \App\Models\User::where('status', 'pending')->latest()->take(3)->get();
-                                $pendingPickups = \App\Models\PickupRequest::where('status', 'pending')->latest()->take(3)->get();
-                            @endphp
+                        @php
+                        $pendingUsers = \App\Models\User::where('status', 'pending')->latest()->take(3)->get();
+                        $pendingPickups = \App\Models\PickupRequest::where('status', 'pending')->latest()->take(3)->get();
+                        @endphp
 
-                            @forelse($pendingUsers as $u)
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('admin.users.index') }}" style="padding: 10px 16px; font-size: 13px;">
-                                        <i class="bi bi-person-plus text-warning me-2"></i>
-                                        <strong>{{ $u->name }}</strong> menunggu approval
-                                    </a>
-                                </li>
-                            @empty
-                            @endforelse
+                        @forelse($pendingUsers as $u)
+                        <li>
+                            <a class="dropdown-item" href="{{ route('admin.users.index') }}" style="padding: 10px 16px; font-size: 13px;">
+                                <i class="bi bi-person-plus text-warning me-2"></i>
+                                <strong>{{ $u->name }}</strong> menunggu approval
+                            </a>
+                        </li>
+                        @empty
+                        @endforelse
 
-                            @forelse($pendingPickups as $p)
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('admin.transactions.index') }}" style="padding: 10px 16px; font-size: 13px;">
-                                        <i class="bi bi-box-seam text-info me-2"></i>
-                                        Setoran <strong>{{ $p->user->name ?? 'Warga' }}</strong> menunggu
-                                    </a>
-                                </li>
-                            @empty
-                            @endforelse
+                        @forelse($pendingPickups as $p)
+                        <li>
+                            <a class="dropdown-item" href="{{ route('admin.transactions.index') }}" style="padding: 10px 16px; font-size: 13px;">
+                                <i class="bi bi-box-seam text-info me-2"></i>
+                                Setoran <strong>{{ $p->user->name ?? 'Warga' }}</strong> menunggu
+                            </a>
+                        </li>
+                        @empty
+                        @endforelse
 
-                            @if($pendingUsers->isEmpty() && $pendingPickups->isEmpty())
-                                <li style="padding: 20px 16px; text-align: center; font-size: 12px; color: #8a94a6;">
-                                    Tidak ada notifikasi baru
-                                </li>
-                            @endif
+                        @if($pendingUsers->isEmpty() && $pendingPickups->isEmpty())
+                        <li style="padding: 20px 16px; text-align: center; font-size: 12px; color: #8a94a6;">
+                            Tidak ada notifikasi baru
+                        </li>
+                        @endif
 
                         @elseif(auth()->user()->role === 'mitra')
-                            @php
-                                $pendingPickups = \App\Models\PickupRequest::where('status', 'pending')
-                                    ->whereNull('mitra_id')->latest()->take(5)->get();
-                            @endphp
+                        @php
+                        $pendingPickups = \App\Models\PickupRequest::where('status', 'pending')
+                        ->whereNull('mitra_id')->latest()->take(5)->get();
+                        @endphp
 
-                            @forelse($pendingPickups as $p)
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('mitra.pickup-requests.show', $p->pickup_request_id) }}" style="padding: 10px 16px; font-size: 13px;">
-                                        <i class="bi bi-truck text-success me-2"></i>
-                                        Setoran baru dari <strong>{{ $p->user->name ?? 'Warga' }}</strong>
-                                    </a>
-                                </li>
-                            @empty
-                                <li style="padding: 20px 16px; text-align: center; font-size: 12px; color: #8a94a6;">
-                                    Tidak ada setoran baru
-                                </li>
-                            @endforelse
+                        @forelse($pendingPickups as $p)
+                        <li>
+                            <a class="dropdown-item" href="{{ route('mitra.pickup-requests.show', $p->pickup_request_id) }}" style="padding: 10px 16px; font-size: 13px;">
+                                <i class="bi bi-truck text-success me-2"></i>
+                                Setoran baru dari <strong>{{ $p->user->name ?? 'Warga' }}</strong>
+                            </a>
+                        </li>
+                        @empty
+                        <li style="padding: 20px 16px; text-align: center; font-size: 12px; color: #8a94a6;">
+                            Tidak ada setoran baru
+                        </li>
+                        @endforelse
 
                         @elseif(auth()->user()->role === 'warga')
-                            @php
-                                $myUpdates = \App\Models\PickupRequest::where('user_id', auth()->id())
-                                    ->whereIn('status', ['completed', 'rejected'])
-                                    ->latest('updated_at')->take(5)->get();
-                            @endphp
+                        @php
+                        $myUpdates = \App\Models\PickupRequest::where('user_id', auth()->id())
+                        ->whereIn('status', ['completed', 'rejected'])
+                        ->latest('updated_at')->take(5)->get();
+                        @endphp
 
-                            @forelse($myUpdates as $p)
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('user.pickup-requests.show', $p->pickup_request_id) }}" style="padding: 10px 16px; font-size: 13px;">
-                                        @if($p->status === 'completed')
-                                            <i class="bi bi-check-circle text-success me-2"></i>
-                                            Setoran <strong>{{ $p->wasteCategory->name ?? 'sampah' }}</strong> diverifikasi
-                                        @else
-                                            <i class="bi bi-x-circle text-danger me-2"></i>
-                                            Setoran <strong>{{ $p->wasteCategory->name ?? 'sampah' }}</strong> ditolak
-                                        @endif
-                                    </a>
-                                </li>
-                            @empty
-                                <li style="padding: 20px 16px; text-align: center; font-size: 12px; color: #8a94a6;">
-                                    Tidak ada notifikasi baru
-                                </li>
-                            @endforelse
+                        @forelse($myUpdates as $p)
+                        <li>
+                            <a class="dropdown-item" href="{{ route('user.pickup-requests.show', $p->pickup_request_id) }}" style="padding: 10px 16px; font-size: 13px;">
+                                @if($p->status === 'completed')
+                                <i class="bi bi-check-circle text-success me-2"></i>
+                                Setoran <strong>{{ $p->wasteCategory->name ?? 'sampah' }}</strong> diverifikasi
+                                @else
+                                <i class="bi bi-x-circle text-danger me-2"></i>
+                                Setoran <strong>{{ $p->wasteCategory->name ?? 'sampah' }}</strong> ditolak
+                                @endif
+                            </a>
+                        </li>
+                        @empty
+                        <li style="padding: 20px 16px; text-align: center; font-size: 12px; color: #8a94a6;">
+                            Tidak ada notifikasi baru
+                        </li>
+                        @endforelse
                         @endif
 
                         @if(auth()->user()->role === 'mitra')
-                            <li style="padding: 10px 16px; text-align: center; border-top: 1px solid #f4f6f9; background: #fafbfc;">
-                                <a href="{{ route('mitra.notifications.index') }}" class="text-success" style="font-size: 12px; font-weight: 600;">
-                                    Lihat Semua Notifikasi →
-                                </a>
-                            </li>
+                        <li style="padding: 10px 16px; text-align: center; border-top: 1px solid #f4f6f9; background: #fafbfc;">
+                            <a href="{{ route('mitra.notifications.index') }}" class="text-success" style="font-size: 12px; font-weight: 600;">
+                                Lihat Semua Notifikasi →
+                            </a>
+                        </li>
                         @endif
                     </ul>
                 </li>
@@ -151,7 +151,7 @@
                 {{-- USER --}}
                 <li class="nav-item dropdown">
                     <a href="#" class="nav-link d-flex align-items-center" data-bs-toggle="dropdown" aria-expanded="false"
-                       style="padding: 6px 10px; gap: 10px;">
+                        style="padding: 6px 10px; gap: 10px;">
                         <div class="user-name text-end d-none d-md-block" style="line-height: 1.2;">
                             <h6 class="mb-0" style="font-size: 13px; font-weight: 600; color: #1a2330;">
                                 {{ auth()->user()->name }}
@@ -162,16 +162,16 @@
                         </div>
 
                         @php
-                            $nameParts = explode(' ', trim(auth()->user()->name));
-                            $initials = count($nameParts) >= 2
-                                ? strtoupper(substr($nameParts[0], 0, 1) . substr($nameParts[1], 0, 1))
-                                : strtoupper(substr($nameParts[0], 0, 2));
-                            $bgColor = match (auth()->user()->role) {
-                                'admin' => '#1A237E',
-                                'mitra' => '#2E7D32',
-                                'warga' => '#4CAF50',
-                                default => '#6C757D',
-                            };
+                        $nameParts = explode(' ', trim(auth()->user()->name));
+                        $initials = count($nameParts) >= 2
+                        ? strtoupper(substr($nameParts[0], 0, 1) . substr($nameParts[1], 0, 1))
+                        : strtoupper(substr($nameParts[0], 0, 2));
+                        $bgColor = match (auth()->user()->role) {
+                        'admin' => '#1A237E',
+                        'mitra' => '#2E7D32',
+                        'warga' => '#4CAF50',
+                        default => '#6C757D',
+                        };
                         @endphp
 
                         <div style="
@@ -203,31 +203,33 @@
                         </li>
 
                         @if(auth()->user()->role == 'admin')
-                            <li>
-                                <a class="dropdown-item" href="{{ route('admin.profile') }}" style="padding: 9px 16px; font-size: 13px;">
-                                    <i class="bi bi-person me-2"></i> Profil
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="{{ route('admin.settings') }}" style="padding: 9px 16px; font-size: 13px;">
-                                    <i class="bi bi-gear me-2"></i> Pengaturan
-                                </a>
-                            </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ route('admin.profile') }}" style="padding: 9px 16px; font-size: 13px;">
+                                <i class="bi bi-person me-2"></i> Profil
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ route('admin.settings') }}" style="padding: 9px 16px; font-size: 13px;">
+                                <i class="bi bi-gear me-2"></i> Pengaturan
+                            </a>
+                        </li>
                         @elseif(auth()->user()->role == 'mitra')
-                            <li>
-                                <a class="dropdown-item" href="{{ route('mitra.profile') }}" style="padding: 9px 16px; font-size: 13px;">
-                                    <i class="bi bi-person me-2"></i> Profil Mitra
-                                </a>
-                            </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ route('mitra.profile') }}" style="padding: 9px 16px; font-size: 13px;">
+                                <i class="bi bi-person me-2"></i> Profil Mitra
+                            </a>
+                        </li>
                         @elseif(auth()->user()->role == 'warga')
-                            <li>
-                                <a class="dropdown-item" href="{{ route('user.dashboard') }}" style="padding: 9px 16px; font-size: 13px;">
-                                    <i class="bi bi-speedometer2 me-2"></i> Dashboard
-                                </a>
-                            </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ route('user.dashboard') }}" style="padding: 9px 16px; font-size: 13px;">
+                                <i class="bi bi-speedometer2 me-2"></i> Dashboard
+                            </a>
+                        </li>
                         @endif
 
-                        <li><hr class="dropdown-divider mx-3 my-2"></li>
+                        <li>
+                            <hr class="dropdown-divider mx-3 my-2">
+                        </li>
 
                         <li>
                             <form method="POST" action="{{ route('logout') }}">

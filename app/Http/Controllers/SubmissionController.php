@@ -7,6 +7,8 @@ use App\Models\Submission;
 use App\Models\UserMission;
 use App\Models\MissionProgressLog;
 use App\Services\GeminiService;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class SubmissionController extends Controller
 {
@@ -26,6 +28,17 @@ class SubmissionController extends Controller
         // 1. simpan file
         $path = $request->file('photo')->store('submissions', 'public');
         $fullPath = storage_path('app/public/' . $path);
+
+        // ⬇️ KOMPRES FOTO (TAMBAH INI)
+        try {
+            $manager = new ImageManager(new Driver());
+            $manager->read($fullPath)
+                ->scale(width: 1024)
+                ->save($fullPath, quality: 70);
+        } catch (\Exception $e) {
+            // Kalau kompres gagal, lanjut pakai file asli
+        }
+        // ⬆️ KOMPRES FOTO
 
         // 2. cek duplikat (hash)
         $hash = md5_file($fullPath);
@@ -54,8 +67,10 @@ class SubmissionController extends Controller
         ]);
 
         if (!$valid) {
-            return back()->with('error',
-                'AI tidak bisa validasi: ' . ($ai['reason'] ?? 'coba foto lebih jelas'));
+            return back()->with(
+                'error',
+                'AI tidak bisa validasi: ' . ($ai['reason'] ?? 'coba foto lebih jelas')
+            );
         }
 
         // 5. hitung progress
@@ -83,8 +98,10 @@ class SubmissionController extends Controller
 
         $userMission->save();
 
-        return back()->with('success',
+        return back()->with(
+            'success',
             "Berhasil! +{$increment} {$mission->unit}. " .
-            "Progress: {$progressAfter}/{$mission->target}");
+                "Progress: {$progressAfter}/{$mission->target}"
+        );
     }
 }

@@ -190,6 +190,7 @@ class PickupRequestController extends Controller
         $mineQuery = PickupRequest::with('user', 'wasteBank', 'wasteCategory')
             ->where('mitra_id', auth()->id())
             ->whereIn('status', [
+                PickupRequest::STATUS_PENDING,
                 PickupRequest::STATUS_ACCEPTED,
                 PickupRequest::STATUS_SCHEDULED,
                 PickupRequest::STATUS_IN_PROGRESS,
@@ -228,6 +229,27 @@ class PickupRequestController extends Controller
         return view('mitra.pickups.show', compact('pickupRequest'));
     }
 
+    public function mitraAccept($id)
+    {
+        $pickup = PickupRequest::findOrFail($id);
+
+        // Pastiin setoran ini milik mitra yang login
+        if ($pickup->mitra_id !== auth()->id()) {
+            abort(403, 'Anda tidak berhak memproses setoran ini.');
+        }
+
+        // Pastiin statusnya masih pending
+        if ($pickup->status !== PickupRequest::STATUS_PENDING) {
+            return back()->with('error', 'Setoran ini sudah diproses.');
+        }
+
+        $pickup->update([
+            'status' => PickupRequest::STATUS_ACCEPTED,
+        ]);
+
+        return back()->with('success', 'Setoran berhasil diterima. Silakan mulai penjemputan.');
+    }
+
     public function userIndex()
     {
         $pickups = PickupRequest::where('user_id', Auth::id())
@@ -261,7 +283,6 @@ class PickupRequestController extends Controller
     public function userStore(Request $request)
     {
         $request->validate([
-            'bank_id' => 'required|exists:waste_banks,bank_id',
             'waste_category_id' => 'required|exists:waste_categories,category_id',
             'weight_kg' => 'required|numeric|min:0.1|max:1000',
             'pickup_method' => 'required|in:pickup,dropoff',
@@ -272,9 +293,16 @@ class PickupRequestController extends Controller
         ]);
 
         try {
+            $user = Auth::user();
+            $bankId = $user->waste_bank_id;
+
+            // ⬇️ AMBIL BANK DULU SEBELUM CREATE
+            $bank = WasteBank::find($bankId);
+
             $pickup = PickupRequest::create([
-                'user_id' => Auth::id(),
-                'bank_id' => $request->bank_id,
+                'user_id' => $user->user_id,
+                'bank_id' => $bankId,
+                'mitra_id' => $bank?->mitra_id,  // ← sekarang $bank udah ada
                 'waste_category_id' => $request->waste_category_id,
                 'weight_kg' => $request->weight_kg,
                 'pickup_method' => $request->pickup_method,
@@ -285,12 +313,12 @@ class PickupRequestController extends Controller
                 'status' => 'pending',
             ]);
 
-            $bank = WasteBank::find($request->bank_id);
+            // Notif ke mitra
             if ($bank && $bank->mitra_id) {
                 \App\Models\Notification::create([
                     'user_id' => $bank->mitra_id,
                     'title' => 'Setoran Baru Masuk',
-                    'message' => 'Warga ' . Auth::user()->name . ' mengajukan setoran ' .
+                    'message' => 'Warga ' . $user->name . ' mengajukan setoran ' .
                         ($request->pickup_method === 'pickup' ? 'penjemputan' : 'antar sendiri') .
                         '. Segera ambil permintaan di Kelola Setoran.',
                     'type' => 'info',
@@ -302,7 +330,6 @@ class PickupRequestController extends Controller
             return redirect()
                 ->route('user.pickup-requests.index')
                 ->with('success', 'Setoran berhasil diajukan! Tunggu verifikasi mitra.');
-
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal: ' . $e->getMessage())->withInput();
         }

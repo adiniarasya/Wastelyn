@@ -119,7 +119,6 @@ class MitraController extends Controller
                 'pendapatanLabels',
                 'pendapatanData'
             ));
-
         } catch (\Exception $e) {
             return view('mitra.dashboard', [
                 'totalPickups' => 0,
@@ -149,7 +148,6 @@ class MitraController extends Controller
                 ->paginate(15);
 
             return view('mitra.kelola-setoran', compact('pickups'));
-
         } catch (\Exception $e) {
             return view('mitra.kelola-setoran', ['pickups' => collect(), 'error' => $e->getMessage()]);
         }
@@ -169,7 +167,6 @@ class MitraController extends Controller
                 ->firstOrFail();
 
             return view('mitra.detail-setoran', compact('pickup'));
-
         } catch (\Exception $e) {
             return redirect()->route('mitra.kelola-setoran')
                 ->with('error', 'Data tidak ditemukan');
@@ -241,7 +238,6 @@ class MitraController extends Controller
             $pickup->save();
 
             return redirect()->back()->with('success', 'Status setoran berhasil diperbarui');
-
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal memperbarui status: ' . $e->getMessage());
         }
@@ -262,7 +258,6 @@ class MitraController extends Controller
                 ->paginate(15);
 
             return view('mitra.riwayat-setoran', compact('riwayat'));
-
         } catch (\Exception $e) {
             return view('mitra.riwayat-setoran', ['riwayat' => collect(), 'error' => $e->getMessage()]);
         }
@@ -291,7 +286,7 @@ class MitraController extends Controller
 
             if ($bulan && $tahun) {
                 $baseQuery->whereYear('created_at', $tahun)
-                          ->whereMonth('created_at', $bulan);
+                    ->whereMonth('created_at', $bulan);
             }
 
             // ===== STATISTIK PER JENIS SAMPAH =====
@@ -359,7 +354,6 @@ class MitraController extends Controller
                 'listPeriode',
                 'periode'
             ));
-
         } catch (\Exception $e) {
             return view('mitra.statistics', [
                 'sampahPerJenis' => collect(),
@@ -384,7 +378,6 @@ class MitraController extends Controller
         try {
             $mitra = auth()->user();
             return view('mitra.profile', compact('mitra'));
-
         } catch (\Exception $e) {
             return view('mitra.profile', ['mitra' => auth()->user()]);
         }
@@ -412,12 +405,11 @@ class MitraController extends Controller
             $user->save();
 
             return redirect()->back()->with('success', 'Profil berhasil diperbarui');
-
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal memperbarui profil: ' . $e->getMessage());
         }
     }
-        /**
+    /**
      * Laporan Bulanan Mitra
      */
     public function laporan(Request $request)
@@ -463,18 +455,33 @@ class MitraController extends Controller
             ->withQueryString();
 
         $listBulan = [
-            1 => 'Januari', 2 => 'Februari', 3 => 'Maret',
-            4 => 'April', 5 => 'Mei', 6 => 'Juni',
-            7 => 'Juli', 8 => 'Agustus', 9 => 'September',
-            10 => 'Oktober', 11 => 'November', 12 => 'Desember',
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juni',
+            7 => 'Juli',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember',
         ];
         $listTahun = range(now()->year - 3, now()->year);
 
         return view('mitra.laporan.index', compact(
-            'bulan', 'tahun',
-            'listBulan', 'listTahun',
-            'totalTransaksi', 'totalBerat', 'totalPoin', 'totalPendapatan', 'totalXp',
-            'chartLabels', 'chartData',
+            'bulan',
+            'tahun',
+            'listBulan',
+            'listTahun',
+            'totalTransaksi',
+            'totalBerat',
+            'totalPoin',
+            'totalPendapatan',
+            'totalXp',
+            'chartLabels',
+            'chartData',
             'transaksi'
         ));
     }

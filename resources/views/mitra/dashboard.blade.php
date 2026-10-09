@@ -3,6 +3,7 @@
 @section('title', 'Dashboard Mitra - WasteLyn')
 
 @section('content')
+
 <div class="page-heading">
     <div class="page-title mb-3">
         <h4 class="fw-bold mb-1">Dashboard</h4>

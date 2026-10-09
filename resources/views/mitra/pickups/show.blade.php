@@ -77,6 +77,7 @@
                 <div class="card-body">
 
                     @if (is_null($pickupRequest->mitra_id))
+                        {{-- BELUM ADA MITRA: Ambil --}}
                         <form action="{{ route('mitra.pickup-requests.take', $pickupRequest->pickup_request_id) }}" method="POST">
                             @csrf
                             <button type="submit" class="btn btn-success w-100">Ambil Permintaan Ini</button>
@@ -84,7 +85,22 @@
 
                     @elseif ($pickupRequest->mitra_id === auth()->id())
 
-                        @if ($pickupRequest->isPickup() && $pickupRequest->status === \App\Models\PickupRequest::STATUS_ACCEPTED)
+                        {{-- ⬇️ STATUS PENDING: Terima Setoran --}}
+                        @if ($pickupRequest->status === \App\Models\PickupRequest::STATUS_PENDING)
+                            <div class="alert alert-warning mb-3">
+                                <i class="bi bi-bell me-2"></i>
+                                <strong>Setoran Baru Masuk!</strong><br>
+                                <small>Warga {{ $pickupRequest->user->name }} mengajukan setoran. Klik tombol di bawah untuk menerima.</small>
+                            </div>
+                            <form action="{{ route('mitra.pickup-requests.accept', $pickupRequest->pickup_request_id) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="btn btn-success w-100">
+                                    <i class="bi bi-check-circle me-1"></i> Terima Setoran
+                                </button>
+                            </form>
+
+                        {{-- ⬇️ STATUS ACCEPTED + PICKUP: Mulai Penjemputan --}}
+                        @elseif ($pickupRequest->isPickup() && $pickupRequest->status === \App\Models\PickupRequest::STATUS_ACCEPTED)
                             <form action="{{ route('mitra.pickup-requests.start', $pickupRequest->pickup_request_id) }}" method="POST">
                                 @csrf
                                 <div class="mb-3">
@@ -103,21 +119,33 @@
                                                value="{{ $pickupRequest->pickup_time }}">
                                     </div>
                                 </div>
-                                <button type="submit" class="btn btn-primary w-100">Mulai Penjemputan</button>
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-truck me-1"></i> Mulai Penjemputan
+                                </button>
                             </form>
 
+                        {{-- ⬇️ STATUS IN_PROGRESS + PICKUP: Sampah Diterima --}}
                         @elseif ($pickupRequest->isPickup() && $pickupRequest->status === \App\Models\PickupRequest::STATUS_IN_PROGRESS)
+                            <div class="alert alert-info mb-3">
+                                <i class="bi bi-truck me-2"></i>
+                                <strong>Kurir sedang OTW!</strong><br>
+                                <small>Klik tombol di bawah kalau sampah sudah diterima.</small>
+                            </div>
                             <form action="{{ route('mitra.pickup-requests.receive', $pickupRequest->pickup_request_id) }}" method="POST">
                                 @csrf
-                                <p class="text-muted">Kurir sedang menuju lokasi. Klik tombol di bawah jika sampah sudah diterima.</p>
-                                <button type="submit" class="btn btn-primary w-100">Sampah Diterima</button>
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-check-circle me-1"></i> Sampah Diterima
+                                </button>
                             </form>
 
+                        {{-- ⬇️ STATUS ACCEPTED + DROPOFF: Menunggu Warga --}}
                         @elseif ($pickupRequest->isDropOff() && $pickupRequest->status === \App\Models\PickupRequest::STATUS_ACCEPTED)
                             <div class="alert alert-info mb-0">
+                                <i class="bi bi-hourglass-split me-2"></i>
                                 Menunggu warga tiba di bank sampah. Warga akan konfirmasi lewat aplikasi.
                             </div>
 
+                        {{-- ⬇️ STATUS WAITING_VERIFICATION: Verifikasi --}}
                         @elseif ($pickupRequest->status === \App\Models\PickupRequest::STATUS_WAITING_VERIFICATION)
                             <form action="{{ route('mitra.pickup-requests.verify', $pickupRequest->pickup_request_id) }}" method="POST">
                                 @csrf
@@ -153,7 +181,7 @@
                             </form>
                         @endif
 
-                        {{-- Tombol Tolak --}}
+                        {{-- Tombol Tolak (kalau accepted) --}}
                         @if (in_array($pickupRequest->status, [
                             \App\Models\PickupRequest::STATUS_ACCEPTED,
                         ]))
