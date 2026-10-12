@@ -129,8 +129,7 @@ class WasteBankController extends Controller
         }
 
         $request->user()->update([
-            'preferred_bank_id' => $bank->bank_id,
-            'preferred_bank_set_at' => now(),
+            'waste_bank_id' => $bank->bank_id,
         ]);
 
         return response()->json(['ok' => true]);

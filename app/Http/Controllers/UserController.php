@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use App\Models\PickupRequest;
 use App\Models\Transaction;
 use App\Models\RewardRedemption;
@@ -30,7 +32,6 @@ class UserController extends Controller
             ->where('status', 'completed')
             ->count();
 
-        // ⬇️ TAMBAH: Statistik lingkungan
         $totalUang = PickupRequest::where('user_id', $user->user_id)
             ->where('status', 'completed')
             ->sum('total_harga') ?? 0;
@@ -42,9 +43,7 @@ class UserController extends Controller
         $totalBerat = PickupRequest::where('user_id', $user->user_id)
             ->where('status', 'completed')
             ->sum('weight_kg') ?? 0;
-        // ⬆️ TAMBAH
 
-        // Default null — diisi kalau user sudah onboarding
         $userXp = null;
 
         $userMissions = UserMission::where('user_id', $user->user_id)
@@ -79,8 +78,8 @@ class UserController extends Controller
                 ->filter(
                     fn($m) =>
                     $m->managedWasteBank &&
-                        $m->managedWasteBank->latitude &&
-                        $m->managedWasteBank->longitude
+                    $m->managedWasteBank->latitude &&
+                    $m->managedWasteBank->longitude
                 )
                 ->values();
 
@@ -112,9 +111,9 @@ class UserController extends Controller
             'userMissions',
             'mitras',
             'mitrasJson',
-            'totalUang',    // ← TAMBAH
-            'totalCo2',     // ← TAMBAH
-            'totalBerat'    // ← TAMBAH
+            'totalUang',
+            'totalCo2',
+            'totalBerat'
         ));
     }
 
@@ -134,5 +133,50 @@ class UserController extends Controller
             ->paginate(20);
 
         return view('user.eco-habit', compact('user', 'userXp', 'logs'));
+    }
+
+    public function profile()
+    {
+        $user = Auth::user();
+
+        return view('user.profile', compact('user'));
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user();
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->user_id . ',user_id',
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string',
+            'password' => 'nullable|min:8|confirmed',
+        ]);
+
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->phone = $request->phone;
+        $user->address = $request->address;
+
+        $passwordChanged = false;
+
+        if ($request->filled('password')) {
+            $user->password = Hash::make($request->password);
+            $passwordChanged = true;
+        }
+
+        $user->save();
+
+        if ($passwordChanged) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login')
+                ->with('success', 'Password berhasil diubah. Silakan login kembali.');
+        }
+
+        return back()->with('success', 'Profil berhasil diperbarui.');
     }
 }

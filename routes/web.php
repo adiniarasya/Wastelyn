@@ -207,12 +207,11 @@ Route::middleware(['auth', 'role:warga'])->prefix('user')->name('user.')->group(
         Route::put('/ai-chat-sessions/{id}', [AiChatSessionController::class, 'update'])->name('ai-chat-sessions.update');
         Route::delete('/ai-chat-sessions/{id}', [AiChatSessionController::class, 'destroy'])->name('ai-chat-sessions.destroy');
 
-        Route::post('/ai-chat-sessions/{sessionId}/messages', [AiChatMessageController::class, 'store'])
-            ->middleware('throttle:20,1')
-            ->name('ai-chat-messages.store');
+        Route::post('/ai-chat-sessions/{sessionId}/messages', [AiChatMessageController::class, 'store'])->middleware('throttle:20,1')->name('ai-chat-messages.store');
+        Route::delete('/ai-chat-sessions/{sessionId}/messages/{messageId}', [AiChatMessageController::class, 'destroy'])->name('ai-chat-messages.destroy');
 
-        Route::delete('/ai-chat-sessions/{sessionId}/messages/{messageId}', [AiChatMessageController::class, 'destroy'])
-            ->name('ai-chat-messages.destroy');
+        Route::get('/profile', [UserController::class, 'profile'])->name('profile');
+        Route::put('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
     });
 
 });

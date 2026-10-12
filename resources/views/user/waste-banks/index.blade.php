@@ -1,29 +1,29 @@
 @extends('template.layout')
 
-@section('title', 'Bank Sampah')
+@section('title', 'Ganti Bank Sampah')
 
 @section('content')
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="mb-0"><i class="bi bi-shop"></i> Daftar Bank Sampah</h3>
+        <h3 class="mb-0"><i class="bi bi-shop"></i> Ganti Bank Sampah</h3>
         <a href="{{ route('user.pickup-requests.index') }}" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left"></i> Kembali
         </a>
     </div>
 
-    @if(!auth()->user()->preferred_bank_id)
+    @if(!auth()->user()->waste_bank_id)
         <div class="alert alert-info d-flex align-items-center gap-2 mb-4">
             <i class="bi bi-info-circle fs-5"></i>
             <div>
                 <strong>Pilih bank sampah tujuanmu.</strong>
-                Klik salah satu marker di peta, lalu klik tombol <em>Pilih Bank Sampah Ini</em>.
+                Klik salah satu marker di peta, lalu klik tombol <em>Ganti ke Bank Ini</em>.
             </div>
         </div>
     @else
         <div class="alert alert-success d-flex align-items-center gap-2 mb-4">
             <i class="bi bi-check-circle fs-5"></i>
             <div>
-                Bank sampah utamamu:
-                <strong>{{ optional($wasteBanks->firstWhere('bank_id', auth()->user()->preferred_bank_id))->name ?? '-' }}</strong>
+                Bank sampahmu saat ini:
+                <strong>{{ optional($wasteBanks->firstWhere('bank_id', auth()->user()->waste_bank_id))->name ?? '-' }}</strong>
             </div>
         </div>
     @endif
@@ -38,11 +38,11 @@
         @forelse ($wasteBanks as $bank)
             <div class="col-md-4">
                 <div
-                    class="card card-stat h-100 {{ auth()->user()->preferred_bank_id == $bank->bank_id ? 'border-success border-2' : '' }}">
+                    class="card card-stat h-100 {{ auth()->user()->waste_bank_id == $bank->bank_id ? 'border-success border-2' : '' }}">
                     <div class="card-body">
-                        @if(auth()->user()->preferred_bank_id == $bank->bank_id)
+                        @if(auth()->user()->waste_bank_id == $bank->bank_id)
                             <span class="badge bg-success mb-2">
-                                <i class="bi bi-star-fill"></i> Bank Sampah Utamamu
+                                <i class="bi bi-star-fill"></i> Bank Sampah Saat Ini
                             </span>
                         @endif
 
@@ -67,10 +67,10 @@
                                 Lihat Detail
                             </a>
 
-                            @if(auth()->user()->preferred_bank_id != $bank->bank_id)
+                            @if(auth()->user()->waste_bank_id != $bank->bank_id)
                                 <button type="button" class="btn btn-sm btn-success"
                                     onclick="pilihBank({{ $bank->bank_id }}, '{{ addslashes($bank->name) }}')">
-                                    Pilih
+                                    Ganti ke Bank Ini
                                 </button>
                             @endif
                         </div>
@@ -91,7 +91,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         const banks = @json($mapMarkers);
-        const preferredBankId = {{ auth()->user()->preferred_bank_id ?? 'null' }};
+        const preferredBankId = {{ auth()->user()->waste_bank_id ?? 'null' }};
         let mapInstance = null;
         let infoWindowInstance = null;
         let markersById = {};
@@ -162,14 +162,14 @@
 
                 let tombolHtml = '';
                 if (isPreferred) {
-                    tombolHtml = '<div style="color:#2E7D32;margin-top:8px;font-weight:600;">✓ Bank sampah utamamu</div>';
+                    tombolHtml = '<div style="color:#2E7D32;margin-top:8px;font-weight:600;">✓ Bank sampahmu saat ini</div>';
                 } else {
                     tombolHtml =
                         '<button type="button" ' +
                         'onclick="pilihBank(' + bank.bank_id + ', \'' + escapedNama + '\')" ' +
                         'style="background-color:#2E7D32;color:white;border:none;padding:10px 12px;' +
                         'border-radius:6px;cursor:pointer;width:100%;margin-top:8px;font-weight:600;">' +
-                        'Pilih Bank Sampah Ini</button>';
+                        'Ganti ke Bank Ini</button>';
                 }
 
                 const content =
@@ -191,11 +191,11 @@
 
         window.pilihBank = async function (bankId, bankName) {
             const result = await Swal.fire({
-                title: 'Pilih Bank Sampah?',
-                html: 'Jadikan <strong>' + (bankName || 'bank sampah ini') + '</strong> sebagai bank sampah utamamu?',
+                title: 'Ganti Bank Sampah?',
+                html: 'Pindah ke <strong>' + (bankName || 'bank sampah ini') + '</strong>?<br><small style="color:#8a94a6;">XP di bank lama tetap tersimpan.</small>',
                 icon: 'question',
                 showCancelButton: true,
-                confirmButtonText: 'Ya, Pilih',
+                confirmButtonText: 'Ya, Ganti',
                 cancelButtonText: 'Batal',
                 confirmButtonColor: '#2E7D32',
                 cancelButtonColor: '#6c757d',
@@ -227,7 +227,7 @@
                     await Swal.fire({
                         icon: 'success',
                         title: 'Berhasil!',
-                        text: 'Bank sampah berhasil dipilih.',
+                        text: 'Bank sampah berhasil diganti.',
                         timer: 1200,
                         showConfirmButton: false,
                     });

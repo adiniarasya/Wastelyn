@@ -37,22 +37,22 @@
 
                         @if($notifCount > 0)
                             <span class="position-absolute" style="
-                                    top: 4px;
-                                    right: 4px;
-                                    min-width: 18px;
-                                    height: 18px;
-                                    padding: 0 5px;
-                                    background: #e53935;
-                                    color: #fff;
-                                    font-size: 10px;
-                                    font-weight: 600;
-                                    border-radius: 9px;
-                                    display: inline-flex;
-                                    align-items: center;
-                                    justify-content: center;
-                                    border: 2px solid #fff;
-                                    line-height: 1;
-                                ">{{ $notifCount }}</span>
+                                        top: 4px;
+                                        right: 4px;
+                                        min-width: 18px;
+                                        height: 18px;
+                                        padding: 0 5px;
+                                        background: #e53935;
+                                        color: #fff;
+                                        font-size: 10px;
+                                        font-weight: 600;
+                                        border-radius: 9px;
+                                        display: inline-flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        border: 2px solid #fff;
+                                        line-height: 1;
+                                    ">{{ $notifCount }}</span>
                         @endif
                     </a>
 
@@ -237,6 +237,12 @@
                                 <a class="dropdown-item" href="{{ route('user.dashboard') }}"
                                     style="padding: 9px 16px; font-size: 13px;">
                                     <i class="bi bi-speedometer2 me-2"></i> Dashboard
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{{ route('user.profile') }}"
+                                    style="padding: 9px 16px; font-size: 13px;">
+                                    <i class="bi bi-person me-2"></i> Profil
                                 </a>
                             </li>
                         @endif
