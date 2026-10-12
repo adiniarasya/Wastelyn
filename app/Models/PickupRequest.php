@@ -28,6 +28,7 @@ class PickupRequest extends Model
         'status',
         'estimasi_berat',
         'berat_aktual',
+        'xp_earned',
         'total_harga',
         'alamat',
         'jadwal_penjemputan',

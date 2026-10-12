@@ -128,6 +128,7 @@ class PickupRequestController extends Controller
                                 );
 
                                 $pickup->points_earned = 100 * $weight;
+                                $pickup->xp_earned = (int) (20 * $weight);
                             }
 
                             $pickup->user->addPoints(100 * $weight);
@@ -233,12 +234,10 @@ class PickupRequestController extends Controller
     {
         $pickup = PickupRequest::findOrFail($id);
 
-        // Pastiin setoran ini milik mitra yang login
         if ($pickup->mitra_id !== auth()->id()) {
             abort(403, 'Anda tidak berhak memproses setoran ini.');
         }
 
-        // Pastiin statusnya masih pending
         if ($pickup->status !== PickupRequest::STATUS_PENDING) {
             return back()->with('error', 'Setoran ini sudah diproses.');
         }
@@ -296,13 +295,12 @@ class PickupRequestController extends Controller
             $user = Auth::user();
             $bankId = $user->waste_bank_id;
 
-            // ⬇️ AMBIL BANK DULU SEBELUM CREATE
             $bank = WasteBank::find($bankId);
 
             $pickup = PickupRequest::create([
                 'user_id' => $user->user_id,
                 'bank_id' => $bankId,
-                'mitra_id' => $bank?->mitra_id,  // ← sekarang $bank udah ada
+                'mitra_id' => $bank?->mitra_id,
                 'waste_category_id' => $request->waste_category_id,
                 'weight_kg' => $request->weight_kg,
                 'pickup_method' => $request->pickup_method,
@@ -313,7 +311,6 @@ class PickupRequestController extends Controller
                 'status' => 'pending',
             ]);
 
-            // Notif ke mitra
             if ($bank && $bank->mitra_id) {
                 \App\Models\Notification::create([
                     'user_id' => $bank->mitra_id,
