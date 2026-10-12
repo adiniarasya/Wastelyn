@@ -89,6 +89,28 @@
 
         {{-- KOLOM KANAN --}}
         <div class="col-md-6">
+            {{-- Gambar Mission (BARU) --}}
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-3">Gambar Mission</h6>
+
+                    @if($mission->image)
+                        <img src="{{ asset('storage/' . $mission->image) }}"
+                             alt="{{ $mission->title }}"
+                             class="rounded border w-100"
+                             style="max-height:280px; object-fit:cover;">
+                    @else
+                        <div class="rounded border bg-light d-flex align-items-center justify-content-center"
+                             style="height:180px;">
+                            <div class="text-center text-muted">
+                                <i class="bi bi-image fs-1 d-block mb-2"></i>
+                                <span class="small">Belum ada gambar</span>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
             {{-- Deskripsi --}}
             <div class="card border-0 shadow-sm mb-3">
                 <div class="card-body">

@@ -8,7 +8,7 @@
         <p class="text-muted small mb-0">Perbarui data mission</p>
     </div>
 
-    <form action="{{ route('mitra.missions.update', $mission->mission_id) }}" method="POST">
+    <form action="{{ route('mitra.missions.update', $mission->mission_id) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
 
@@ -52,6 +52,44 @@
                         @error('description')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- SECTION 1.5: Gambar Mission --}}
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body">
+                <h6 class="fw-bold mb-3">Gambar Mission</h6>
+
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <label class="form-label small text-muted">Ganti Gambar</label>
+                        <input type="file" name="image" id="imageInput"
+                               class="form-control form-control-sm @error('image') is-invalid @enderror"
+                               accept="image/*">
+                        <small class="text-muted">Kosongkan kalau gak mau ganti. Format: JPG, PNG, WEBP. Maks 2MB.</small>
+                        @error('image')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label small text-muted d-block">Preview</label>
+
+                        {{-- Preview gambar lama --}}
+                        <img id="imagePreview"
+                             src="{{ $mission->image ? asset('storage/' . $mission->image) : '#' }}"
+                             alt="Preview"
+                             class="rounded border {{ $mission->image ? '' : 'd-none' }}"
+                             style="width:100%; max-height:120px; object-fit:cover;">
+
+                        {{-- Placeholder kalau belum ada gambar --}}
+                        <div id="imagePlaceholder"
+                             class="rounded border bg-light d-flex align-items-center justify-content-center {{ $mission->image ? 'd-none' : '' }}"
+                             style="height:120px; width:100%;">
+                            <i class="bi bi-image text-muted fs-3"></i>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -238,5 +276,22 @@
             btn.classList.add('btn-outline-secondary');
         }, 1500);
     }
+
+    // Preview gambar sebelum upload
+    document.getElementById('imageInput')?.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        const preview = document.getElementById('imagePreview');
+        const placeholder = document.getElementById('imagePlaceholder');
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                preview.src = ev.target.result;
+                preview.classList.remove('d-none');
+                placeholder.classList.add('d-none');
+            };
+            reader.readAsDataURL(file);
+        }
+    });
 </script>
 @endpush

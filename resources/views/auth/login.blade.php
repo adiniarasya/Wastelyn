@@ -1,4 +1,4 @@
-<x-guest-layout>
+<x-guest-layout title="Masuk">
 
     <div class="mb-8 text-center">
         <h2 class="text-2xl font-bold" style="color:#1a2330;">

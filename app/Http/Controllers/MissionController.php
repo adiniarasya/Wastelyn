@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Mission;
 use App\Models\WasteBank;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class MissionController extends Controller
 {
@@ -29,10 +30,11 @@ class MissionController extends Controller
 
     public function mitraStore(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'bank_id' => 'required|exists:waste_banks,bank_id',
             'title' => 'required|string|max:255',
             'description' => 'required|string',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'target' => 'required|integer|min:1',
             'unit' => 'required|string|max:20',
             'type' => 'required|in:quantitative,qualitative',
@@ -46,7 +48,11 @@ class MissionController extends Controller
 
         abort_if(!in_array($request->bank_id, $this->getMyBankIds()), 403, 'Bank sampah bukan milik kamu.');
 
-        Mission::create($request->all());
+        if ($request->hasFile('image')) {
+            $validated['image'] = $request->file('image')->store('missions', 'public');
+        }
+
+        Mission::create($validated);
 
         return redirect()
             ->route('mitra.missions.index')
@@ -75,10 +81,11 @@ class MissionController extends Controller
     {
         $this->authorizeMission($mission);
 
-        $request->validate([
+        $validated = $request->validate([
             'bank_id' => 'required|exists:waste_banks,bank_id',
             'title' => 'required|string|max:255',
             'description' => 'required|string',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'target' => 'required|integer|min:1',
             'unit' => 'required|string|max:20',
             'type' => 'required|in:quantitative,qualitative',
@@ -92,7 +99,14 @@ class MissionController extends Controller
 
         abort_if(!in_array($request->bank_id, $this->getMyBankIds()), 403, 'Bank sampah bukan milik kamu.');
 
-        $mission->update($request->all());
+        if ($request->hasFile('image')) {
+            if ($mission->image) {
+                Storage::disk('public')->delete($mission->image);
+            }
+            $validated['image'] = $request->file('image')->store('missions', 'public');
+        }
+
+        $mission->update($validated);
 
         return redirect()
             ->route('mitra.missions.index')
@@ -103,20 +117,16 @@ class MissionController extends Controller
     {
         $this->authorizeMission($mission);
 
+        if ($mission->image) {
+            Storage::disk('public')->delete($mission->image);
+        }
+
         $mission->delete();
 
         return redirect()
             ->route('mitra.missions.index')
             ->with('success', 'Misi berhasil dihapus');
-    }
-
-    // ============================================================
-    // HELPER
-    // ============================================================
-
-    /**
-     * Ambil semua bank_id milik mitra yang login.
-     */
+    } 
     private function getMyBankIds(): array
     {
         return WasteBank::where('mitra_id', auth()->id())
@@ -124,9 +134,6 @@ class MissionController extends Controller
             ->toArray();
     }
 
-    /**
-     * Pastikan misi milik mitra yang login.
-     */
     private function authorizeMission(Mission $mission): void
     {
         abort_if(!in_array($mission->bank_id, $this->getMyBankIds()), 403, 'Misi bukan milik kamu.');

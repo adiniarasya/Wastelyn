@@ -444,7 +444,7 @@
                 </ul>
                 <div class="d-flex flex-column flex-lg-row gap-2">
                     <a href="{{ route('login') }}" class="btn btn-wl-outline btn-sm px-3 py-2">Masuk</a>
-                    <a href="{{ route('register') }}" class="wl-cta-btn">Daftar Gratis</a>
+                   <a href="{{ route('register') }}" class="wl-cta-btn" style="text-decoration:none;">Daftar Gratis</a>
                 </div>
             </div>
         </div>

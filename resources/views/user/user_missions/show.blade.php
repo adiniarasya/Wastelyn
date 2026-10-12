@@ -28,6 +28,17 @@
                 </div>
 
                 <div class="card-body">
+
+                    {{-- Gambar Mission (BARU) --}}
+                    @if($mission->image)
+                        <div class="mb-4">
+                            <img src="{{ asset('storage/' . $mission->image) }}"
+                                 alt="{{ $mission->title }}"
+                                 class="rounded-3 w-100"
+                                 style="max-height: 320px; object-fit: cover;">
+                        </div>
+                    @endif
+
                     <div class="mb-4">
                         <h6 class="text-muted mb-2">Deskripsi Misi</h6>
                         <p class="mb-0">{{ $mission->description }}</p>

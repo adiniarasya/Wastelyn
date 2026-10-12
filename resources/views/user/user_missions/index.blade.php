@@ -33,9 +33,16 @@
             <div class="card-body p-4">
                 <div class="row align-items-center">
                     <div class="col-auto">
-                        <div class="bg-success bg-opacity-10 text-success rounded-3 p-3">
-                            <i class="bi bi-recycle fs-1"></i>
-                        </div>
+                        @if($mission->image)
+                            <img src="{{ asset('storage/' . $mission->image) }}"
+                                 alt="{{ $mission->title }}"
+                                 class="rounded-3"
+                                 style="width:72px; height:72px; object-fit:cover;">
+                        @else
+                            <div class="bg-success bg-opacity-10 text-success rounded-3 p-3">
+                                <i class="bi bi-recycle fs-1"></i>
+                            </div>
+                        @endif
                     </div>
 
                     <div class="col">
