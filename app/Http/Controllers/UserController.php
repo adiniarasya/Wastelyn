@@ -30,6 +30,20 @@ class UserController extends Controller
             ->where('status', 'completed')
             ->count();
 
+        // ⬇️ TAMBAH: Statistik lingkungan
+        $totalUang = PickupRequest::where('user_id', $user->user_id)
+            ->where('status', 'completed')
+            ->sum('total_harga') ?? 0;
+
+        $totalCo2 = PickupRequest::where('user_id', $user->user_id)
+            ->where('status', 'completed')
+            ->sum('co2_saved') ?? 0;
+
+        $totalBerat = PickupRequest::where('user_id', $user->user_id)
+            ->where('status', 'completed')
+            ->sum('weight_kg') ?? 0;
+        // ⬆️ TAMBAH
+
         // Default null — diisi kalau user sudah onboarding
         $userXp = null;
 
@@ -58,7 +72,6 @@ class UserController extends Controller
         $mitrasJson = collect();
 
         if (!$user->onboarding_completed || !$user->waste_bank_id) {
-            // === Belum onboarding: tampilkan pilihan mitra ===
             $mitras = User::where('role', 'mitra')
                 ->where('status', 'active')
                 ->with('managedWasteBank')
@@ -66,8 +79,8 @@ class UserController extends Controller
                 ->filter(
                     fn($m) =>
                     $m->managedWasteBank &&
-                    $m->managedWasteBank->latitude &&
-                    $m->managedWasteBank->longitude
+                        $m->managedWasteBank->latitude &&
+                        $m->managedWasteBank->longitude
                 )
                 ->values();
 
@@ -79,7 +92,6 @@ class UserController extends Controller
                 'longitude' => (float) $m->managedWasteBank->longitude,
             ])->values();
         } else {
-            // === Sudah onboarding: baru ambil data XP ===
             $userXp = $user->getXpForBank($user->waste_bank_id);
         }
 
@@ -99,7 +111,10 @@ class UserController extends Controller
             'unreadNotifications',
             'userMissions',
             'mitras',
-            'mitrasJson'
+            'mitrasJson',
+            'totalUang',    // ← TAMBAH
+            'totalCo2',     // ← TAMBAH
+            'totalBerat'    // ← TAMBAH
         ));
     }
 

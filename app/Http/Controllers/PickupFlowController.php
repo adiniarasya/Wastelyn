@@ -128,7 +128,13 @@ class PickupFlowController extends Controller
 
             $user = User::find($pickup->user_id);
             if ($user) {
-                $user->xp = ($user->xp ?? 0) + $xpEarned;
+                app(\App\Services\XpService::class)->addXpFromPickup(
+                    $user,
+                    $pickup->bank_id,
+                    $berat,
+                    $pickup->pickup_request_id
+                );
+
                 $user->points = ($user->points ?? 0) + $pointsEarned;
                 $user->updateLevel();
                 $user->save();
@@ -157,14 +163,13 @@ class PickupFlowController extends Controller
             return redirect()
                 ->route('mitra.pickup-requests.index')
                 ->with('success', "Setoran berhasil diverifikasi! +{$xpEarned} XP, +{$pointsEarned} Poin untuk warga.");
-
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Gagal verifikasi: ' . $e->getMessage());
         }
     }
 
-       public function reject(Request $request, $id)
+    public function reject(Request $request, $id)
     {
         $request->validate([
             'rejection_reason' => 'nullable|string|max:500',
