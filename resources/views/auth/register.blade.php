@@ -47,6 +47,19 @@
             @enderror
         </div>
 
+        {{-- NO. TELEPON: sekarang selalu tampil untuk Warga & Mitra --}}
+        <div>
+            <label for="phone" class="block mb-2 text-sm font-medium" style="color:#1a2330;">
+                No. Telepon
+            </label>
+            <input id="phone" type="text" name="phone" value="{{ old('phone') }}" required placeholder="08xxxxxxxxxx"
+                class="w-full rounded-xl border px-4 py-3 text-sm outline-none transition"
+                style="border-color:#e6e9ee;color:#1a2330;background:#fff;">
+            @error('phone')
+                <p class="mt-2 text-xs text-red-600">{{ $message }}</p>
+            @enderror
+        </div>
+
         <div>
             <label class="block mb-2 text-sm font-medium" style="color:#1a2330;">
                 Daftar Sebagai
@@ -112,19 +125,8 @@
             @enderror
         </div>
 
+        {{-- FIELD KHUSUS MITRA: alamat & peta --}}
         <div id="mitra-fields" class="space-y-4 {{ old('role') === 'mitra' ? '' : 'hidden' }}">
-            <div>
-                <label for="phone" class="block mb-2 text-sm font-medium" style="color:#1a2330;">
-                    No. Telepon
-                </label>
-                <input id="phone" type="text" name="phone" value="{{ old('phone') }}" placeholder="08xxxxxxxxxx"
-                    class="w-full rounded-xl border px-4 py-3 text-sm outline-none transition"
-                    style="border-color:#e6e9ee;color:#1a2330;background:#fff;">
-                @error('phone')
-                    <p class="mt-2 text-xs text-red-600">{{ $message }}</p>
-                @enderror
-            </div>
-
             <div>
                 <label for="address" class="block mb-2 text-sm font-medium" style="color:#1a2330;">
                     Alamat Bank Sampah
@@ -230,21 +232,21 @@
             const selected = document.querySelector('input[name="role"]:checked');
             const isMitra = selected && selected.value === 'mitra';
             const mitraFields = document.getElementById('mitra-fields');
-            const phoneEl = document.getElementById('phone');
             const addressEl = document.getElementById('address');
             const latEl = document.getElementById('latitude');
             const lngEl = document.getElementById('longitude');
             const coordsEl = document.getElementById('coords-display');
             const alamatEl = document.getElementById('alamat-terpilih');
 
+            // Catatan: phone TIDAK lagi diubah required-nya di sini.
+            // phone selalu required untuk kedua role (diatur di HTML).
+
             if (isMitra) {
                 mitraFields.classList.remove('hidden');
-                if (phoneEl) phoneEl.required = true;
                 if (addressEl) addressEl.required = true;
                 ensureMapInit();
             } else {
                 mitraFields.classList.add('hidden');
-                if (phoneEl) phoneEl.required = false;
                 if (addressEl) addressEl.required = false;
                 if (latEl) latEl.value = '';
                 if (lngEl) lngEl.value = '';

@@ -28,6 +28,8 @@ class User extends Authenticatable
         'waste_bank_id',
         'onboarding_completed',
         'onboarding_completed_at',
+        'latitude', 
+        'longitude',
     ];
 
     protected $hidden = [

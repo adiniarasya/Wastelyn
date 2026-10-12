@@ -27,11 +27,12 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'role' => ['required', 'in:warga,mitra'],
+            'phone' => ['required', 'string', 'max:20'], // <-- WAJIB untuk warga & mitra
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ];
 
         if ($request->role === 'mitra') {
-            $rules['phone'] = ['required', 'string', 'max:20'];
+            // 'phone' sudah dipindah ke atas, jadi tidak perlu diulang di sini
             $rules['address'] = ['required', 'string'];
             $rules['latitude'] = ['nullable', 'numeric', 'between:-90,90'];
             $rules['longitude'] = ['nullable', 'numeric', 'between:-180,180'];
@@ -47,7 +48,7 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($validated['password']),
             'role' => $validated['role'],
             'status' => $status,
-            'phone' => $validated['phone'] ?? null,
+            'phone' => $validated['phone'],       // <-- sekarang pasti ada
             'address' => $validated['address'] ?? null,
             'xp' => 0,
             'points' => 0,
@@ -125,7 +126,6 @@ class RegisteredUserController extends Controller
                     ($data['status'] ?? null) === 'OK'
                     && !empty($data['results'][0]['geometry']['location'])
                 ) {
-
                     $loc = $data['results'][0]['geometry']['location'];
 
                     return [

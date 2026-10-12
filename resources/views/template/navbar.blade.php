@@ -36,6 +36,7 @@
                         @endphp
 
                         @if($notifCount > 0)
+<<<<<<< Updated upstream
                         <span class="position-absolute" style="
                                 top: 4px;
                                 right: 4px;
@@ -53,10 +54,30 @@
                                 border: 2px solid #fff;
                                 line-height: 1;
                             ">{{ $notifCount }}</span>
+=======
+                            <span class="position-absolute" style="
+                                    top: 4px;
+                                    right: 4px;
+                                    min-width: 18px;
+                                    height: 18px;
+                                    padding: 0 5px;
+                                    background: #e53935;
+                                    color: #fff;
+                                    font-size: 10px;
+                                    font-weight: 600;
+                                    border-radius: 9px;
+                                    display: inline-flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    border: 2px solid #fff;
+                                    line-height: 1;
+                                ">{{ $notifCount }}</span>
+>>>>>>> Stashed changes
                         @endif
                     </a>
 
-                    <ul class="dropdown-menu dropdown-menu-end" style="min-width: 300px; padding: 0; border-radius: 12px; border: 1px solid #eef0f3; box-shadow: 0 8px 24px rgba(15,23,42,0.08);">
+                    <ul class="dropdown-menu dropdown-menu-end"
+                        style="min-width: 300px; padding: 0; border-radius: 12px; border: 1px solid #eef0f3; box-shadow: 0 8px 24px rgba(15,23,42,0.08);">
                         <li style="padding: 12px 16px; border-bottom: 1px solid #f4f6f9;">
                             <span style="font-size: 13px; font-weight: 600; color: #1a2330;">Notifikasi</span>
                         </li>
@@ -67,6 +88,7 @@
                         $pendingPickups = \App\Models\PickupRequest::where('status', 'pending')->latest()->take(3)->get();
                         @endphp
 
+<<<<<<< Updated upstream
                         @forelse($pendingUsers as $u)
                         <li>
                             <a class="dropdown-item" href="{{ route('admin.users.index') }}" style="padding: 10px 16px; font-size: 13px;">
@@ -86,6 +108,29 @@
                         </li>
                         @empty
                         @endforelse
+=======
+                            @forelse($pendingUsers as $u)
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('admin.users.index') }}"
+                                        style="padding: 10px 16px; font-size: 13px;">
+                                        <i class="bi bi-person-plus text-warning me-2"></i>
+                                        <strong>{{ $u->name }}</strong> menunggu approval
+                                    </a>
+                                </li>
+                            @empty
+                            @endforelse
+
+                            @forelse($pendingPickups as $p)
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('admin.transactions.index') }}"
+                                        style="padding: 10px 16px; font-size: 13px;">
+                                        <i class="bi bi-box-seam text-info me-2"></i>
+                                        Setoran <strong>{{ $p->user->name ?? 'Warga' }}</strong> menunggu
+                                    </a>
+                                </li>
+                            @empty
+                            @endforelse
+>>>>>>> Stashed changes
 
                         @if($pendingUsers->isEmpty() && $pendingPickups->isEmpty())
                         <li style="padding: 20px 16px; text-align: center; font-size: 12px; color: #8a94a6;">
@@ -99,6 +144,7 @@
                         ->whereNull('mitra_id')->latest()->take(5)->get();
                         @endphp
 
+<<<<<<< Updated upstream
                         @forelse($pendingPickups as $p)
                         <li>
                             <a class="dropdown-item" href="{{ route('mitra.pickup-requests.show', $p->pickup_request_id) }}" style="padding: 10px 16px; font-size: 13px;">
@@ -111,6 +157,22 @@
                             Tidak ada setoran baru
                         </li>
                         @endforelse
+=======
+                            @forelse($pendingPickups as $p)
+                                <li>
+                                    <a class="dropdown-item"
+                                        href="{{ route('mitra.pickup-requests.show', $p->pickup_request_id) }}"
+                                        style="padding: 10px 16px; font-size: 13px;">
+                                        <i class="bi bi-truck text-success me-2"></i>
+                                        Setoran baru dari <strong>{{ $p->user->name ?? 'Warga' }}</strong>
+                                    </a>
+                                </li>
+                            @empty
+                                <li style="padding: 20px 16px; text-align: center; font-size: 12px; color: #8a94a6;">
+                                    Tidak ada setoran baru
+                                </li>
+                            @endforelse
+>>>>>>> Stashed changes
 
                         @elseif(auth()->user()->role === 'warga')
                         @php
@@ -119,6 +181,7 @@
                         ->latest('updated_at')->take(5)->get();
                         @endphp
 
+<<<<<<< Updated upstream
                         @forelse($myUpdates as $p)
                         <li>
                             <a class="dropdown-item" href="{{ route('user.pickup-requests.show', $p->pickup_request_id) }}" style="padding: 10px 16px; font-size: 13px;">
@@ -144,14 +207,50 @@
                                 Lihat Semua Notifikasi →
                             </a>
                         </li>
+=======
+                            @forelse($myUpdates as $p)
+                                <li>
+                                    <a class="dropdown-item"
+                                        href="{{ route('user.pickup-requests.show', $p->pickup_request_id) }}"
+                                        style="padding: 10px 16px; font-size: 13px;">
+                                        @if($p->status === 'completed')
+                                            <i class="bi bi-check-circle text-success me-2"></i>
+                                            Setoran <strong>{{ $p->wasteCategory->name ?? 'sampah' }}</strong> diverifikasi
+                                        @else
+                                            <i class="bi bi-x-circle text-danger me-2"></i>
+                                            Setoran <strong>{{ $p->wasteCategory->name ?? 'sampah' }}</strong> ditolak
+                                        @endif
+                                    </a>
+                                </li>
+                            @empty
+                                <li style="padding: 20px 16px; text-align: center; font-size: 12px; color: #8a94a6;">
+                                    Tidak ada notifikasi baru
+                                </li>
+                            @endforelse
+                        @endif
+
+                        @if(auth()->user()->role === 'mitra')
+                            <li
+                                style="padding: 10px 16px; text-align: center; border-top: 1px solid #f4f6f9; background: #fafbfc;">
+                                <a href="{{ route('mitra.notifications.index') }}" class="text-success"
+                                    style="font-size: 12px; font-weight: 600;">
+                                    Lihat Semua Notifikasi →
+                                </a>
+                            </li>
+>>>>>>> Stashed changes
                         @endif
                     </ul>
                 </li>
 
                 {{-- USER --}}
                 <li class="nav-item dropdown">
+<<<<<<< Updated upstream
                     <a href="#" class="nav-link d-flex align-items-center" data-bs-toggle="dropdown" aria-expanded="false"
                         style="padding: 6px 10px; gap: 10px;">
+=======
+                    <a href="#" class="nav-link d-flex align-items-center" data-bs-toggle="dropdown"
+                        aria-expanded="false" style="padding: 6px 10px; gap: 10px;">
+>>>>>>> Stashed changes
                         <div class="user-name text-end d-none d-md-block" style="line-height: 1.2;">
                             <h6 class="mb-0" style="font-size: 13px; font-weight: 600; color: #1a2330;">
                                 {{ auth()->user()->name }}
@@ -192,7 +291,8 @@
                         </div>
                     </a>
 
-                    <ul class="dropdown-menu dropdown-menu-end" style="min-width: 220px; padding: 6px 0; border-radius: 12px; border: 1px solid #eef0f3; box-shadow: 0 8px 24px rgba(15,23,42,0.08);">
+                    <ul class="dropdown-menu dropdown-menu-end"
+                        style="min-width: 220px; padding: 6px 0; border-radius: 12px; border: 1px solid #eef0f3; box-shadow: 0 8px 24px rgba(15,23,42,0.08);">
                         <li style="padding: 12px 16px; border-bottom: 1px solid #f4f6f9;">
                             <div style="font-size: 13px; font-weight: 600; color: #1a2330;">
                                 Hai, {{ auth()->user()->name }}
@@ -203,6 +303,7 @@
                         </li>
 
                         @if(auth()->user()->role == 'admin')
+<<<<<<< Updated upstream
                         <li>
                             <a class="dropdown-item" href="{{ route('admin.profile') }}" style="padding: 9px 16px; font-size: 13px;">
                                 <i class="bi bi-person me-2"></i> Profil
@@ -225,6 +326,28 @@
                                 <i class="bi bi-speedometer2 me-2"></i> Dashboard
                             </a>
                         </li>
+=======
+                            <li>
+                                <a class="dropdown-item" href="{{ route('admin.profile') }}"
+                                    style="padding: 9px 16px; font-size: 13px;">
+                                    <i class="bi bi-person me-2"></i> Profil
+                                </a>
+                            </li>
+                        @elseif(auth()->user()->role == 'mitra')
+                            <li>
+                                <a class="dropdown-item" href="{{ route('mitra.profile') }}"
+                                    style="padding: 9px 16px; font-size: 13px;">
+                                    <i class="bi bi-person me-2"></i> Profil Mitra
+                                </a>
+                            </li>
+                        @elseif(auth()->user()->role == 'warga')
+                            <li>
+                                <a class="dropdown-item" href="{{ route('user.dashboard') }}"
+                                    style="padding: 9px 16px; font-size: 13px;">
+                                    <i class="bi bi-speedometer2 me-2"></i> Dashboard
+                                </a>
+                            </li>
+>>>>>>> Stashed changes
                         @endif
 
                         <li>
@@ -234,7 +357,8 @@
                         <li>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
-                                <button type="submit" class="dropdown-item text-danger" style="padding: 9px 16px; font-size: 13px;">
+                                <button type="submit" class="dropdown-item text-danger"
+                                    style="padding: 9px 16px; font-size: 13px;">
                                     <i class="bi bi-box-arrow-right me-2"></i> Logout
                                 </button>
                             </form>

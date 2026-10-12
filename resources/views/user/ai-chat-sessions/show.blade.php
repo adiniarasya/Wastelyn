@@ -3,37 +3,15 @@
 @section('title', 'Bero Asistent')
 
 @section('content')
-    <div class="bero-full">
+    <div class="bero-chat-full">
 
-        {{-- Sidebar kiri --}}
-        <aside class="bero-sidebar">
-            <div class="sidebar-header">
-                <a href="{{ route('user.ai-chat-sessions.index') }}" class="btn-new-chat">
-                    <i class="bi bi-plus-lg"></i> Chat Baru
-                </a>
-            </div>
-
-            <div class="sidebar-section-title">Riwayat Chat</div>
-
-            <div class="sidebar-list">
-                @forelse($sessions ?? [] as $s)
-                    <a href="{{ route('user.ai-chat-sessions.show', $s->session_id) }}"
-                        class="sidebar-item {{ isset($session) && $session->session_id === $s->session_id ? 'active' : '' }}">
-                        <i class="bi bi-chat-text"></i>
-                        <span class="sidebar-item-title">{{ $s->title }}</span>
-                    </a>
-                @empty
-                    <div class="sidebar-empty">Belum ada chat</div>
-                @endforelse
-            </div>
-        </aside>
-
-        {{-- Main chat --}}
         <main class="bero-main">
 
-            {{-- Topbar --}}
             <div class="bero-topbar">
                 <div class="d-flex align-items-center gap-3">
+                    <a href="{{ route('user.ai-chat-sessions.index') }}" class="btn-back" title="Kembali">
+                        <i class="bi bi-arrow-left"></i>
+                    </a>
                     <div class="avatar-bero">
                         <img src="{{ asset('assets/images/bero.png') }}" alt="Bero">
                     </div>
@@ -53,7 +31,6 @@
                 </form>
             </div>
 
-            {{-- Alert --}}
             @if(session('success'))
                 <div class="alert alert-success py-2 mx-4 mt-3 mb-0">{{ session('success') }}</div>
             @endif
@@ -61,7 +38,6 @@
                 <div class="alert alert-danger py-2 mx-4 mt-3 mb-0">{{ session('error') }}</div>
             @endif
 
-            {{-- Messages --}}
             <div id="chat-box" class="bero-messages">
                 @forelse($session->messages as $msg)
                     <div class="d-flex mb-4 {{ $msg->sender === 'user' ? 'justify-content-end' : 'justify-content-start' }}">
@@ -92,7 +68,6 @@
                 @endforelse
             </div>
 
-            {{-- Chips --}}
             <div class="bero-chips">
                 <button type="button" class="chip suggestion-chip">Misi hari ini</button>
                 <button type="button" class="chip suggestion-chip">Bank sampah terdekat</button>
@@ -100,7 +75,6 @@
                 <button type="button" class="chip suggestion-chip">Harga jual sampah</button>
             </div>
 
-            {{-- Input --}}
             <div class="bero-input-wrap">
                 <form id="chatForm" enctype="multipart/form-data" class="d-flex align-items-end gap-2 w-100">
                     @csrf
@@ -129,8 +103,7 @@
     </div>
 
     <style>
-        /* ========= Layout Full ========= */
-        .bero-full {
+        .bero-chat-full {
             display: flex;
             height: calc(100vh - 80px);
             background: #fff;
@@ -139,103 +112,6 @@
             box-shadow: 0 1px 3px rgba(0, 0, 0, .05);
         }
 
-        /* ========= Sidebar ========= */
-        .bero-sidebar {
-            width: 260px;
-            flex-shrink: 0;
-            background: #f9fafb;
-            border-right: 1px solid #eef0f2;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .sidebar-header {
-            padding: 16px;
-        }
-
-        .btn-new-chat {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: #2e7d32;
-            color: #fff;
-            padding: 10px 14px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-size: 13.5px;
-            font-weight: 500;
-            transition: background .15s;
-        }
-
-        .btn-new-chat:hover {
-            background: #1b5e20;
-            color: #fff;
-        }
-
-        .sidebar-section-title {
-            padding: 0 16px 8px;
-            font-size: 11.5px;
-            font-weight: 600;
-            color: #9ca3af;
-            text-transform: uppercase;
-            letter-spacing: .5px;
-        }
-
-        .sidebar-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 0 8px 12px;
-        }
-
-        .sidebar-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 9px 12px;
-            border-radius: 8px;
-            color: #374151;
-            text-decoration: none;
-            font-size: 13.5px;
-            transition: background .12s;
-            margin-bottom: 2px;
-        }
-
-        .sidebar-item i {
-            color: #9ca3af;
-            font-size: 14px;
-            flex-shrink: 0;
-        }
-
-        .sidebar-item-title {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .sidebar-item:hover {
-            background: #eef0f2;
-            color: #111827;
-        }
-
-        .sidebar-item.active {
-            background: #e8f5e9;
-            color: #1b5e20;
-            font-weight: 500;
-        }
-
-        .sidebar-item.active i {
-            color: #2e7d32;
-        }
-
-        .sidebar-empty {
-            padding: 20px 16px;
-            font-size: 12.5px;
-            color: #9ca3af;
-            text-align: center;
-        }
-
-        /* ========= Main ========= */
         .bero-main {
             flex: 1;
             display: flex;
@@ -244,7 +120,6 @@
             background: #fcfcfd;
         }
 
-        /* Topbar */
         .bero-topbar {
             display: flex;
             align-items: center;
@@ -255,11 +130,29 @@
             flex-shrink: 0;
         }
 
+        .btn-back {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #f1f3f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #374151;
+            text-decoration: none;
+            transition: all .15s ease;
+            flex-shrink: 0;
+        }
+
+        .btn-back:hover {
+            background: #e9ecef;
+            color: #111827;
+        }
+
         .topbar-title-form {
             align-items: center;
         }
 
-        /* Messages */
         .bero-messages {
             flex: 1;
             overflow-y: auto;
@@ -276,7 +169,6 @@
             border-radius: 3px;
         }
 
-        /* Chips */
         .bero-chips {
             display: flex;
             gap: 8px;
@@ -310,7 +202,6 @@
             color: #111827;
         }
 
-        /* Input */
         .bero-input-wrap {
             padding: 16px 24px 20px;
             background: #fff;
@@ -376,7 +267,6 @@
             cursor: not-allowed;
         }
 
-        /* ========= Avatar dengan maskot ========= */
         .avatar-bero,
         .avatar-bero-sm,
         .avatar-bero-lg {
@@ -413,7 +303,6 @@
             height: 72px;
         }
 
-        /* ========= Bubble ========= */
         .bubble {
             max-width: 720px;
             padding: 11px 15px;
@@ -479,7 +368,6 @@
             margin-bottom: .35rem;
         }
 
-        /* Typing */
         .typing {
             display: inline-flex;
             gap: 4px;
@@ -516,12 +404,7 @@
             }
         }
 
-        /* Responsive */
         @media (max-width: 900px) {
-            .bero-sidebar {
-                display: none;
-            }
-
             .bero-messages {
                 padding: 20px;
             }
@@ -671,11 +554,11 @@
             const wrap = document.createElement('div');
             wrap.className = 'd-flex mb-4 justify-content-start';
             wrap.innerHTML = `
-                    <div class="avatar-bero-sm me-3">
-                        <img src="${BERO_IMG}" alt="Bero">
-                    </div>
-                    <div class="bubble bubble-bero">${renderMarkdown(text)}</div>
-                `;
+                        <div class="avatar-bero-sm me-3">
+                            <img src="${BERO_IMG}" alt="Bero">
+                        </div>
+                        <div class="bubble bubble-bero">${renderMarkdown(text)}</div>
+                    `;
             chatBox.appendChild(wrap);
             scrollBottom();
         }
@@ -684,15 +567,15 @@
             const wrap = document.createElement('div');
             wrap.className = 'd-flex mb-4 justify-content-start';
             wrap.innerHTML = `
-                    <div class="avatar-bero-sm me-3">
-                        <img src="${BERO_IMG}" alt="Bero">
-                    </div>
-                    <div class="bubble bubble-bero">
-                        <span class="typing">
-                            <span></span><span></span><span></span>
-                        </span>
-                    </div>
-                `;
+                        <div class="avatar-bero-sm me-3">
+                            <img src="${BERO_IMG}" alt="Bero">
+                        </div>
+                        <div class="bubble bubble-bero">
+                            <span class="typing">
+                                <span></span><span></span><span></span>
+                            </span>
+                        </div>
+                    `;
             chatBox.appendChild(wrap);
             scrollBottom();
             return wrap;
