@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Reward;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File; // Tambahkan ini untuk hapus gambar lama
 
 class RewardController extends Controller
 {
+
     public function mitraIndex()
     {
         $rewards = Reward::all();
@@ -20,16 +22,29 @@ class RewardController extends Controller
 
     public function mitraStore(Request $request)
     {
+        // 1. Validasi Input (Ubah validasi image menjadi file)
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'point_required' => 'required|integer|min:1',
             'stock' => 'required|integer|min:0',
-            'image' => 'nullable|string|max:255',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Validasi file gambar max 2MB
             'status' => 'required|in:available,unavailable',
         ]);
 
-        Reward::create($request->all());
+        $data = $request->all();
+
+        // 2. Proses Upload Gambar
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            // Pindahkan ke folder public/assets/images
+            $file->move(public_path('assets/images'), $filename);
+            // Simpan HANYA nama filenya ke database
+            $data['image'] = $filename;
+        }
+
+        Reward::create($data);
 
         return redirect()
             ->route('mitra.rewards.index')
@@ -48,16 +63,32 @@ class RewardController extends Controller
 
     public function mitraUpdate(Request $request, Reward $reward)
     {
+        // 1. Validasi Input (Ubah validasi image menjadi file)
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'point_required' => 'required|integer|min:1',
             'stock' => 'required|integer|min:0',
-            'image' => 'nullable|string|max:255',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'status' => 'required|in:available,unavailable',
         ]);
 
-        $reward->update($request->all());
+        $data = $request->all();
+
+        // 2. Proses Upload Gambar Baru (Jika ada)
+        if ($request->hasFile('image')) {
+            // Hapus gambar lama jika ada
+            if ($reward->image && File::exists(public_path('assets/images/' . $reward->image))) {
+                File::delete(public_path('assets/images/' . $reward->image));
+            }
+
+            $file = $request->file('image');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('assets/images'), $filename);
+            $data['image'] = $filename;
+        }
+
+        $reward->update($data);
 
         return redirect()
             ->route('mitra.rewards.index')
@@ -66,13 +97,23 @@ class RewardController extends Controller
 
     public function mitraDestroy(Reward $reward)
     {
+        // Hapus file gambar dari folder saat data dihapus
+        if ($reward->image && File::exists(public_path('assets/images/' . $reward->image))) {
+            File::delete(public_path('assets/images/' . $reward->image));
+        }
+
         $reward->delete();
 
         return redirect()
             ->route('mitra.rewards.index')
             ->with('success', 'Reward berhasil dihapus');
     }
-        public function userIndex()
+
+    // ============================================================
+    // USER — Reward Center
+    // ============================================================
+
+    public function userIndex()
     {
         $rewards = Reward::where('status', 'available')
             ->orderBy('point_required')
@@ -88,9 +129,7 @@ class RewardController extends Controller
 
         return view('user.rewards.index', compact('rewards', 'user', 'myRedemptions'));
     }
-        /**
-     * Detail reward untuk warga.
-     */
+
     public function userShow($id)
     {
         $reward = Reward::findOrFail($id);
@@ -99,15 +138,11 @@ class RewardController extends Controller
         return view('user.rewards.show', compact('reward', 'user'));
     }
 
-    /**
-     * Warga tukar reward.
-     */
     public function userRedeem($id)
     {
         $user = auth()->user();
         $reward = Reward::findOrFail($id);
 
-        // Cek reward tersedia & stok
         if ($reward->status !== 'available') {
             return back()->with('error', 'Reward ini sedang tidak tersedia.');
         }
@@ -116,22 +151,18 @@ class RewardController extends Controller
             return back()->with('error', 'Stok reward habis.');
         }
 
-        // Cek poin cukup
         if ($user->points < $reward->point_required) {
             return back()->with('error', 'Poin kamu tidak cukup. Butuh ' . number_format($reward->point_required) . ' poin.');
         }
 
         \DB::beginTransaction();
         try {
-            // Kurangi poin warga
             $user->points -= $reward->point_required;
             $user->save();
 
-            // Kurangi stok
             $reward->stock -= 1;
             $reward->save();
 
-            // Catat redemption
             $redemption = \App\Models\RewardRedemption::create([
                 'user_id' => $user->user_id,
                 'reward_id' => $reward->reward_id,
@@ -139,7 +170,6 @@ class RewardController extends Controller
                 'redeemed_at' => now(),
             ]);
 
-            // Catat transaksi
             \App\Models\Transaction::create([
                 'user_id' => $user->user_id,
                 'redemption_id' => $redemption->redemption_id,
@@ -148,7 +178,6 @@ class RewardController extends Controller
                 'description' => 'Tukar reward: ' . $reward->name,
             ]);
 
-            // Notifikasi ke mitra
             $mitras = \App\Models\User::where('role', 'mitra')->get();
             foreach ($mitras as $mitra) {
                 try {
@@ -174,13 +203,11 @@ class RewardController extends Controller
             return back()->with('error', 'Gagal tukar reward: ' . $e->getMessage());
         }
     }
-        // ============================================================
+
+    // ============================================================
     // MITRA — Kelola Penukaran Reward
     // ============================================================
 
-    /**
-     * Daftar penukaran reward yang perlu diproses mitra.
-     */
     public function mitraRedemptions(Request $request)
     {
         $status = $request->input('status', 'all');
@@ -202,9 +229,6 @@ class RewardController extends Controller
         return view('mitra.rewards.redemptions', compact('redemptions', 'stats', 'status'));
     }
 
-    /**
-     * Update status penukaran reward.
-     */
     public function mitraUpdateRedemption(Request $request, $id)
     {
         $request->validate([

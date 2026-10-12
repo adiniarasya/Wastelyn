@@ -3,76 +3,74 @@
 @section('title', 'Detail Reward - WasteLyn')
 
 @section('content')
-    <div class="page-heading">
-        <div class="page-title">
-            <h3>Detail Reward</h3>
-            <p class="text-subtitle text-muted">Informasi lengkap reward</p>
+    <div class="d-flex justify-content-between align-items-start mb-4">
+        <div>
+            <h4 class="fw-bold mb-1">{{ $reward->name }}</h4>
+            <p class="text-muted small mb-0">Detail lengkap reward</p>
         </div>
+        <div class="d-flex gap-2">
+            <a href="{{ route('mitra.rewards.index') }}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i> Kembali
+            </a>
+            <a href="{{ route('mitra.rewards.edit', $reward->reward_id) }}" class="btn btn-success btn-sm">
+                <i class="bi bi-pencil me-1"></i> Edit Reward
+            </a>
+        </div>
+    </div>
 
-        <section class="section">
-            <div class="card">
-                <div class="card-header">
-                    <h4 class="card-title">{{ $reward->name }}</h4>
-                </div>
-
+    <div class="row g-3">
+        {{-- Info --}}
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <table class="table table-borderless">
-                                <tr>
-                                    <th width="180">Nama Reward</th>
-                                    <td>{{ $reward->name }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Poin Dibutuhkan</th>
-                                    <td>{{ number_format($reward->point_required, 0, ',', '.') }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Stok</th>
-                                    <td>{{ $reward->stock }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Status</th>
-                                    <td>
-                                        @if($reward->status == 'available')
-                                            <span class="badge bg-success">Tersedia</span>
-                                        @else
-                                            <span class="badge bg-danger">Tidak Tersedia</span>
-                                        @endif
-                                    </td>
-                                </tr>
-                            </table>
-                        </div>
+                    <h6 class="fw-bold mb-3">Informasi</h6>
 
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <strong>Deskripsi</strong>
-                                <p class="text-muted mt-2">{{ $reward->description ?? '-' }}</p>
-                            </div>
-                            <div>
-                                <strong>Gambar</strong>
-                                <div class="mt-2">
-                                    @if($reward->image)
-                                        <img src="{{ asset($reward->image) }}" alt="{{ $reward->name }}" class="img-fluid rounded"
-                                            style="max-height: 250px;">
-                                    @else
-                                        <p class="text-muted">Tidak ada gambar</p>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
+                    <div class="d-flex justify-content-between py-2 border-bottom">
+                        <span class="text-muted small">Nama Reward</span>
+                        <span class="small fw-semibold">{{ $reward->name }}</span>
                     </div>
-
-                    <div class="d-flex justify-content-end gap-2 mt-3">
-                        <a href="{{ route('mitra.rewards.edit', $reward->reward_id) }}" class="btn btn-warning">
-                            Edit
-                        </a>
-                        <a href="{{ route('mitra.rewards.index') }}" class="btn btn-secondary">
-                            Kembali
-                        </a>
+                    <div class="d-flex justify-content-between py-2 border-bottom">
+                        <span class="text-muted small">Poin Dibutuhkan</span>
+                        <span class="small fw-semibold">{{ number_format($reward->point_required, 0, ',', '.') }} Poin</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-2 border-bottom">
+                        <span class="text-muted small">Stok</span>
+                        <span class="small">{{ $reward->stock }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-2">
+                        <span class="text-muted small">Status</span>
+                        <span>
+                            @if($reward->status == 'available')
+                                <span class="badge bg-success-subtle text-success border border-success-subtle">Tersedia</span>
+                            @else
+                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">Tidak Tersedia</span>
+                            @endif
+                        </span>
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
+
+        {{-- Gambar & Deskripsi --}}
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-3">Deskripsi & Gambar</h6>
+
+                    <p class="small text-muted">{{ $reward->description ?? 'Tidak ada deskripsi.' }}</p>
+
+                    @if($reward->image)
+                        <div class="mt-3">
+                            <img src="{{ asset('assets/images/' . $reward->image) }}"
+                                 alt="{{ $reward->name }}"
+                                 class="img-fluid rounded border"
+                                 style="max-height: 200px;">
+                        </div>
+                    @else
+                        <p class="small text-muted mb-0">Tidak ada gambar.</p>
+                    @endif
+                </div>
+            </div>
+        </div>
     </div>
 @endsection

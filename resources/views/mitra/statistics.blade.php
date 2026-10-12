@@ -1,65 +1,64 @@
 @extends('template.layout')
 
-@section('title', 'Dashboard Statistik')
+@section('title', 'Dashboard Statistik - WasteLyn')
 
 @section('content')
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="mb-0"><i class="bi bi-graph-up"></i> Dashboard Statistik</h3>
+        <div>
+            <h4 class="fw-bold mb-1">Dashboard Statistik</h4>
+            <p class="text-muted small mb-0">Ringkasan aktivitas setoran sampah</p>
+        </div>
     </div>
 
     {{-- Filter Periode --}}
-    <div class="card card-stat mb-4">
-        <div class="card-body">
-            <form method="GET" class="row g-2 align-items-end">
-                <div class="col-md-4">
-                    <label class="form-label">Periode</label>
-                    <select name="periode" class="form-select">
-                        <option value="all" @selected($periode === 'all')>Semua Waktu</option>
-                        @foreach ($listPeriode as $val => $label)
-                            <option value="{{ $val }}" @selected($periode === $val)>{{ $label }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <button type="submit" class="btn btn-success w-100">
-                        <i class="bi bi-funnel"></i> Terapkan
-                    </button>
-                </div>
-            </form>
+    <form method="GET" class="mb-4">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label small text-muted">Periode</label>
+                <select name="periode" class="form-select form-select-sm">
+                    <option value="all" @selected($periode === 'all')>Semua Waktu</option>
+                    @foreach ($listPeriode as $val => $label)
+                        <option value="{{ $val }}" @selected($periode === $val)>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-success btn-sm w-100">Terapkan</button>
+            </div>
         </div>
-    </div>
+    </form>
 
     {{-- Ringkasan Total --}}
     <div class="row g-3 mb-4">
         <div class="col-md-3">
-            <div class="card card-stat">
+            <div class="card border-0 shadow-sm">
                 <div class="card-body">
-                    <div class="text-muted small">Total Berat</div>
-                    <div class="fs-3 fw-bold">{{ number_format($totalSemuaBerat, 1, ',', '.') }} Kg</div>
+                    <div class="text-muted small mb-1">Total Berat</div>
+                    <div class="fs-4 fw-bold">{{ number_format($totalSemuaBerat, 1, ',', '.') }} <span class="fs-6 fw-normal text-muted">Kg</span></div>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card card-stat">
+            <div class="card border-0 shadow-sm">
                 <div class="card-body">
-                    <div class="text-muted small">Total Transaksi</div>
-                    <div class="fs-3 fw-bold">{{ number_format($totalSemuaTransaksi) }}</div>
+                    <div class="text-muted small mb-1">Total Transaksi</div>
+                    <div class="fs-4 fw-bold">{{ number_format($totalSemuaTransaksi) }}</div>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card card-stat">
+            <div class="card border-0 shadow-sm">
                 <div class="card-body">
-                    <div class="text-muted small">Total Poin</div>
-                    <div class="fs-3 fw-bold text-warning">{{ number_format($totalSemuaPoin) }}</div>
+                    <div class="text-muted small mb-1">Total Poin</div>
+                    <div class="fs-4 fw-bold">{{ number_format($totalSemuaPoin) }}</div>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card card-stat">
+            <div class="card border-0 shadow-sm">
                 <div class="card-body">
-                    <div class="text-muted small">Total Pendapatan</div>
-                    <div class="fs-3 fw-bold text-success">
+                    <div class="text-muted small mb-1">Total Pendapatan</div>
+                    <div class="fs-4 fw-bold text-success">
                         Rp {{ number_format($totalSemuaPendapatan, 0, ',', '.') }}
                     </div>
                 </div>
@@ -68,11 +67,9 @@
     </div>
 
     {{-- Grafik Per Jenis Sampah --}}
-    <div class="card card-stat mb-4">
-        <div class="card-header bg-white fw-semibold">
-            <i class="bi bi-bar-chart"></i> Grafik Setoran per Jenis Sampah
-        </div>
+    <div class="card border-0 shadow-sm mb-4">
         <div class="card-body">
+            <h6 class="fw-bold mb-3">Setoran per Jenis Sampah</h6>
             <div style="position:relative; height:300px;">
                 <canvas id="chartJenis"></canvas>
             </div>
@@ -80,89 +77,85 @@
     </div>
 
     {{-- Tabel Detail Per Jenis Sampah --}}
-    <div class="card card-stat mb-4">
-        <div class="card-header bg-white fw-semibold">
-            <i class="bi bi-list-ul"></i> Detail per Jenis Sampah
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body pb-0">
+            <h6 class="fw-bold mb-3">Detail per Jenis Sampah</h6>
         </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Kategori</th>
+                        <th class="text-end">Total Berat</th>
+                        <th class="text-end">Transaksi</th>
+                        <th class="text-end">Poin</th>
+                        <th class="text-end pe-4">Pendapatan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($sampahPerJenis as $item)
                         <tr>
-                            <th>Kategori</th>
-                            <th class="text-end">Total Berat (Kg)</th>
-                            <th class="text-end">Transaksi</th>
-                            <th class="text-end">Poin</th>
-                            <th class="text-end">Pendapatan</th>
+                            <td class="ps-4">{{ $item->wasteCategory->name ?? 'Tidak diketahui' }}</td>
+                            <td class="text-end">{{ number_format($item->total_berat, 1, ',', '.') }} kg</td>
+                            <td class="text-end">{{ number_format($item->total_transaksi) }}</td>
+                            <td class="text-end">+{{ number_format($item->total_poin) }}</td>
+                            <td class="text-end pe-4">
+                                Rp {{ number_format($item->total_pendapatan, 0, ',', '.') }}
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        @forelse ($sampahPerJenis as $item)
-                            <tr>
-                                <td>
-                                    <strong>{{ $item->wasteCategory->name ?? 'Tidak diketahui' }}</strong>
-                                </td>
-                                <td class="text-end">{{ number_format($item->total_berat, 1, ',', '.') }} kg</td>
-                                <td class="text-end">{{ number_format($item->total_transaksi) }}</td>
-                                <td class="text-end">+{{ number_format($item->total_poin) }}</td>
-                                <td class="text-end">
-                                    Rp {{ number_format($item->total_pendapatan, 0, ',', '.') }}
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5" class="text-center text-muted py-4">
-                                    Belum ada data setoran.
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                    @if($sampahPerJenis->count() > 0)
-                        <tfoot class="table-light">
-                            <tr>
-                                <th class="text-end">Total</th>
-                                <th class="text-end">{{ number_format($totalSemuaBerat, 1, ',', '.') }} kg</th>
-                                <th class="text-end">{{ number_format($totalSemuaTransaksi) }}</th>
-                                <th class="text-end">+{{ number_format($totalSemuaPoin) }}</th>
-                                <th class="text-end">Rp {{ number_format($totalSemuaPendapatan, 0, ',', '.') }}</th>
-                            </tr>
-                        </tfoot>
-                    @endif
-                </table>
-            </div>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-5">
+                                Belum ada data setoran.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+                @if($sampahPerJenis->count() > 0)
+                    <tfoot class="table-light">
+                        <tr>
+                            <th class="ps-4">Total</th>
+                            <th class="text-end">{{ number_format($totalSemuaBerat, 1, ',', '.') }} kg</th>
+                            <th class="text-end">{{ number_format($totalSemuaTransaksi) }}</th>
+                            <th class="text-end">+{{ number_format($totalSemuaPoin) }}</th>
+                            <th class="text-end pe-4">Rp {{ number_format($totalSemuaPendapatan, 0, ',', '.') }}</th>
+                        </tr>
+                    </tfoot>
+                @endif
+            </table>
         </div>
     </div>
 
     {{-- Statistik Status --}}
     <div class="row g-3 mb-4">
         <div class="col-md-3">
-            <div class="card card-stat">
+            <div class="card border-0 shadow-sm">
                 <div class="card-body">
-                    <div class="text-muted small">Menunggu</div>
+                    <div class="text-muted small mb-1">Menunggu</div>
                     <div class="fs-4 fw-bold">{{ $statusStats['pending'] ?? 0 }}</div>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card card-stat">
+            <div class="card border-0 shadow-sm">
                 <div class="card-body">
-                    <div class="text-muted small">Diambil Mitra</div>
+                    <div class="text-muted small mb-1">Diambil Mitra</div>
                     <div class="fs-4 fw-bold">{{ $statusStats['accepted'] ?? 0 }}</div>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card card-stat">
+            <div class="card border-0 shadow-sm">
                 <div class="card-body">
-                    <div class="text-muted small">Selesai</div>
+                    <div class="text-muted small mb-1">Selesai</div>
                     <div class="fs-4 fw-bold">{{ $statusStats['completed'] ?? 0 }}</div>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card card-stat">
+            <div class="card border-0 shadow-sm">
                 <div class="card-body">
-                    <div class="text-muted small">Ditolak</div>
+                    <div class="text-muted small mb-1">Ditolak</div>
                     <div class="fs-4 fw-bold">{{ $statusStats['rejected'] ?? 0 }}</div>
                 </div>
             </div>
@@ -170,11 +163,9 @@
     </div>
 
     {{-- Grafik Bulanan --}}
-    <div class="card card-stat">
-        <div class="card-header bg-white fw-semibold">
-            <i class="bi bi-graph-up"></i> Grafik Setoran 12 Bulan Terakhir
-        </div>
+    <div class="card border-0 shadow-sm">
         <div class="card-body">
+            <h6 class="fw-bold mb-3">Setoran 12 Bulan Terakhir</h6>
             <div style="position:relative; height:250px;">
                 <canvas id="chartBulanan"></canvas>
             </div>

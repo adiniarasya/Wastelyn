@@ -3,92 +3,130 @@
 @section('title', 'Edit Reward - WasteLyn')
 
 @section('content')
-    <div class="page-heading">
-        <div class="page-title">
-            <h3>Edit Reward</h3>
-            <p class="text-subtitle text-muted">Ubah informasi reward</p>
-        </div>
+    <div class="mb-4">
+        <h4 class="fw-bold mb-1">Edit Reward</h4>
+        <p class="text-muted small mb-0">Ubah informasi reward</p>
+    </div>
 
-        <section class="section">
-            <div class="card">
-                <div class="card-body">
-                    <form action="{{ route('mitra.rewards.update', $reward->reward_id) }}" method="POST">
-                        @csrf
-                        @method('PUT')
+    <form action="{{ route('mitra.rewards.update', $reward->reward_id) }}" method="POST" enctype="multipart/form-data">
+        @csrf
+        @method('PUT')
 
-                        @if($errors->any())
-                            <div class="alert alert-danger">
-                                <ul class="mb-0">
-                                    @foreach($errors->all() as $e)
-                                        <li>{{ $e }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
+        @if($errors->any())
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <ul class="mb-0 small">
+                    @foreach($errors->all() as $e)
+                        <li>{{ $e }}</li>
+                    @endforeach
+                </ul>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
 
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label>Nama Reward</label>
-                                    <input type="text" name="name" class="form-control"
-                                        value="{{ old('name', $reward->name) }}" required>
-                                </div>
-                            </div>
+        {{-- SECTION 1: Info Reward --}}
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body">
+                <h6 class="fw-bold mb-3">Informasi Reward</h6>
 
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label>Poin Dibutuhkan</label>
-                                    <input type="number" name="point_required" class="form-control"
-                                        value="{{ old('point_required', $reward->point_required) }}" min="1" required>
-                                </div>
-                            </div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label small text-muted">Nama Reward <span class="text-danger">*</span></label>
+                        <input type="text" name="name"
+                               class="form-control form-control-sm @error('name') is-invalid @enderror"
+                               value="{{ old('name', $reward->name) }}" required>
+                        @error('name')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
 
-                            <div class="col-12">
-                                <div class="form-group mb-3">
-                                    <label>Deskripsi</label>
-                                    <textarea name="description" class="form-control"
-                                        rows="4">{{ old('description', $reward->description) }}</textarea>
-                                </div>
-                            </div>
+                    <div class="col-md-6">
+                        <label class="form-label small text-muted">Poin Dibutuhkan <span class="text-danger">*</span></label>
+                        <input type="number" name="point_required"
+                               class="form-control form-control-sm @error('point_required') is-invalid @enderror"
+                               value="{{ old('point_required', $reward->point_required) }}" min="1" required>
+                        @error('point_required')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
 
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label>Stok</label>
-                                    <input type="number" name="stock" class="form-control"
-                                        value="{{ old('stock', $reward->stock) }}" min="0" required>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label>URL Gambar</label>
-                                    <input type="text" name="image" class="form-control"
-                                        value="{{ old('image', $reward->image) }}">
-                                </div>
-                            </div>
-
-                            <div class="col-12">
-                                <div class="form-group mb-3">
-                                    <label>Status</label>
-                                    <select name="status" class="form-select" required>
-                                        <option value="available" {{ old('status', $reward->status) == 'available' ? 'selected' : '' }}>
-                                            Tersedia
-                                        </option>
-                                        <option value="unavailable" {{ old('status', $reward->status) == 'unavailable' ? 'selected' : '' }}>
-                                            Tidak Tersedia
-                                        </option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="d-flex justify-content-end gap-2">
-                            <a href="{{ route('mitra.rewards.index') }}" class="btn btn-secondary">Batal</a>
-                            <button type="submit" class="btn btn-primary">Update Reward</button>
-                        </div>
-                    </form>
+                    <div class="col-12">
+                        <label class="form-label small text-muted">Deskripsi</label>
+                        <textarea name="description"
+                                  class="form-control form-control-sm @error('description') is-invalid @enderror"
+                                  rows="3">{{ old('description', $reward->description) }}</textarea>
+                        @error('description')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
                 </div>
             </div>
-        </section>
-    </div>
+        </div>
+
+        {{-- SECTION 2: Stok & Gambar --}}
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body">
+                <h6 class="fw-bold mb-3">Stok & Gambar</h6>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label small text-muted">Stok <span class="text-danger">*</span></label>
+                        <input type="number" name="stock"
+                               class="form-control form-control-sm @error('stock') is-invalid @enderror"
+                               value="{{ old('stock', $reward->stock) }}" min="0" required>
+                        @error('stock')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label small text-muted">Gambar Reward</label>
+                        <input type="file" name="image"
+                               class="form-control form-control-sm @error('image') is-invalid @enderror"
+                               accept="image/*">
+                        @error('image')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                        <small class="text-muted">Biarkan kosong jika tidak ingin mengubah gambar.</small>
+
+                        @if($reward->image)
+                            <div class="mt-2">
+                                <img src="{{ asset('assets/images/' . $reward->image) }}"
+                                     alt="Preview"
+                                     style="width: 100px; height: 100px; object-fit: cover; border-radius: 6px; border: 1px solid #ddd;">
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- SECTION 3: Status --}}
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body">
+                <h6 class="fw-bold mb-3">Status</h6>
+
+                <label class="form-label small text-muted">Status Reward <span class="text-danger">*</span></label>
+                <select name="status" class="form-select form-select-sm @error('status') is-invalid @enderror" required>
+                    <option value="available" {{ old('status', $reward->status) == 'available' ? 'selected' : '' }}>Tersedia</option>
+                    <option value="unavailable" {{ old('status', $reward->status) == 'unavailable' ? 'selected' : '' }}>Tidak Tersedia</option>
+                </select>
+                @error('status')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+        </div>
+
+        {{-- Tombol Aksi --}}
+        <div class="d-flex justify-content-end gap-2 mb-4">
+            <a href="{{ route('mitra.rewards.index') }}"
+               class="btn btn-outline-secondary btn-sm"
+               onclick="return confirm('Yakin batal? Perubahan yang belum disimpan akan hilang.')">
+                Batal
+            </a>
+            <button type="submit" class="btn btn-success btn-sm">
+                <i class="bi bi-check-lg me-1"></i> Simpan Perubahan
+            </button>
+        </div>
+
+    </form>
 @endsection

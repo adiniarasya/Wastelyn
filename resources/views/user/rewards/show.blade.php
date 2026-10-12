@@ -10,7 +10,7 @@
     <div class="card card-stat" style="max-width: 600px;">
         <div class="card-body text-center">
             @if($reward->image)
-                <img src="{{ asset('storage/' . $reward->image) }}"
+                <img src="{{ asset('assets/images/' . $reward->image) }}"
                      class="img-fluid rounded mb-3" style="max-height: 250px;">
             @endif
             <h4>{{ $reward->name }}</h4>

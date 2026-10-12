@@ -26,7 +26,7 @@
             <div class="col-md-3 col-sm-6">
                 <div class="card card-stat h-100">
                     @if($reward->image)
-                        <img src="{{ asset('storage/' . $reward->image) }}"
+                        <img src="{{ asset('assets/images/' . $reward->image) }}"
                              class="card-img-top" style="height:150px; object-fit:cover;"
                              alt="{{ $reward->name }}">
                     @endif
