@@ -22,7 +22,6 @@
             </div>
         @endif
 
-        {{-- SECTION 1: Info Reward --}}
         <div class="card border-0 shadow-sm mb-3">
             <div class="card-body">
                 <h6 class="fw-bold mb-3">Informasi Reward</h6>
@@ -48,6 +47,27 @@
                         @enderror
                     </div>
 
+                    <div class="col-md-6">
+                        <label class="form-label small text-muted">Tipe Reward <span class="text-danger">*</span></label>
+                        <select name="type" class="form-select form-select-sm @error('type') is-invalid @enderror" required>
+                            <option value="instant" {{ old('type', 'instant') == 'instant' ? 'selected' : '' }}>
+                                Instant (Voucher Digital / Kode)
+                            </option>
+                            <option value="manual" {{ old('type') == 'manual' ? 'selected' : '' }}>
+                                Manual (Pulsa / E-Wallet)
+                            </option>
+                            <option value="pickup" {{ old('type') == 'pickup' ? 'selected' : '' }}>
+                                Pickup (Ambil Sendiri di Bank Sampah)
+                            </option>
+                        </select>
+                        <small class="text-muted">
+                            Instant: langsung dapat kode voucher. Manual: input nomor pulsa. Pickup: ambil sendiri di bank sampah.
+                        </small>
+                        @error('type')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
                     <div class="col-12">
                         <label class="form-label small text-muted">Deskripsi</label>
                         <textarea name="description"
@@ -61,7 +81,6 @@
             </div>
         </div>
 
-        {{-- SECTION 2: Stok & Gambar --}}
         <div class="card border-0 shadow-sm mb-3">
             <div class="card-body">
                 <h6 class="fw-bold mb-3">Stok & Gambar</h6>
@@ -91,7 +110,6 @@
             </div>
         </div>
 
-        {{-- SECTION 3: Status --}}
         <div class="card border-0 shadow-sm mb-3">
             <div class="card-body">
                 <h6 class="fw-bold mb-3">Status</h6>
@@ -107,7 +125,6 @@
             </div>
         </div>
 
-        {{-- Tombol Aksi --}}
         <div class="d-flex justify-content-end gap-2 mb-4">
             <a href="{{ route('mitra.rewards.index') }}"
                class="btn btn-outline-secondary btn-sm"

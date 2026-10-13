@@ -12,9 +12,19 @@ class DropOffController extends Controller
     {
         $pickup = PickupRequest::where('pickup_request_id', $id)
             ->where('user_id', Auth::id())
-            ->where('pickup_method', 'dropoff')
-            ->where('status', PickupRequest::STATUS_ACCEPTED)
-            ->firstOrFail();
+            ->first();
+
+        if (!$pickup) {
+            abort(404, 'Setoran tidak ditemukan.');
+        }
+
+        if ($pickup->pickup_method !== 'dropoff') {
+            return back()->with('error', 'Ini bukan setoran dropoff.');
+        }
+
+        if ($pickup->status !== PickupRequest::STATUS_ACCEPTED) {
+            return back()->with('error', 'Status setoran belum bisa dikonfirmasi. Status saat ini: ' . $pickup->status);
+        }
 
         $pickup->update([
             'status' => PickupRequest::STATUS_WAITING_VERIFICATION,

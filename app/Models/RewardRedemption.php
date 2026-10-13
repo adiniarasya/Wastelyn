@@ -15,13 +15,22 @@ class RewardRedemption extends Model
         'user_id',
         'reward_id',
         'status',
-        'redeemed_at',
         'processed_at',
+        'redeemed_at',
+        'voucher_code',
+        'pickup_code',
+        'pickup_date',
+        'pickup_expires_at',
+        'picked_up_at',
+        'delivery_note',
     ];
 
     protected $casts = [
         'redeemed_at' => 'datetime',
         'processed_at' => 'datetime',
+        'picked_up_at' => 'datetime',
+        'pickup_date' => 'date',
+        'pickup_expires_at' => 'datetime',
     ];
 
     public function user()

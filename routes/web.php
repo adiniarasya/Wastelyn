@@ -149,7 +149,10 @@ Route::middleware(['auth', 'role:mitra'])->prefix('mitra')->name('mitra.')->grou
 
     Route::get('/rewards', [RewardController::class, 'mitraIndex'])->name('rewards.index');
     Route::get('/rewards/redemptions', [RewardController::class, 'mitraRedemptions'])->name('rewards.redemptions');
-    Route::put('/rewards/redemptions/{id}', [RewardController::class, 'mitraUpdateRedemption'])->name('rewards.redemptions.update');
+    Route::get('/rewards/redemptions/{id}', [RewardController::class, 'mitraRedemptionShow'])
+        ->name('rewards.redemptions.show');
+    Route::put('/rewards/redemptions/{id}/verify-pickup', [RewardController::class, 'mitraVerifyPickup'])
+        ->name('rewards.redemptions.verify-pickup');
     Route::get('/rewards/create', [RewardController::class, 'mitraCreate'])->name('rewards.create');
     Route::post('/rewards', [RewardController::class, 'mitraStore'])->name('rewards.store');
     Route::get('/rewards/{reward}', [RewardController::class, 'mitraShow'])->name('rewards.show');
@@ -191,6 +194,8 @@ Route::middleware(['auth', 'role:warga'])->prefix('user')->name('user.')->group(
         Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');
 
         Route::get('/rewards', [RewardController::class, 'userIndex'])->name('rewards.index');
+        Route::get('/rewards/redemptions/{id}', [RewardController::class, 'userRedemptionShow'])
+            ->name('rewards.redemptions.show');
         Route::get('/rewards/{id}', [RewardController::class, 'userShow'])->name('rewards.show');
         Route::post('/rewards/{id}/redeem', [RewardController::class, 'userRedeem'])->name('rewards.redeem');
 

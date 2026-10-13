@@ -29,7 +29,6 @@
     @endif
 
     <div class="row g-4">
-        {{-- KOLOM KIRI --}}
         <div class="col-md-6">
             <div class="card border-0 shadow-sm">
                 <div class="card-body">
@@ -76,7 +75,6 @@
                         </div>
                     @endif
 
-                    {{-- AKSI --}}
                     <div class="mt-4 pt-3 border-top">
 
                         @if (is_null($pickupRequest->mitra_id))
@@ -94,25 +92,52 @@
                                 </form>
 
                             @elseif ($pickupRequest->isPickup() && $pickupRequest->status === \App\Models\PickupRequest::STATUS_ACCEPTED)
-                                <form action="{{ route('mitra.pickup-requests.start', $pickupRequest->pickup_request_id) }}" method="POST">
+                                <form action="{{ route('mitra.pickup-requests.start', $pickupRequest->pickup_request_id) }}"
+                                      method="POST"
+                                      id="startForm">
                                     @csrf
                                     <div class="mb-3">
-                                        <label class="form-label small text-muted">Nama Kurir (Opsional)</label>
-                                        <input type="text" name="courier_name" class="form-control form-control-sm" placeholder="Misal: Budi">
+                                        <label class="form-label small fw-semibold">
+                                            Nama Kurir <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="text"
+                                               name="courier_name"
+                                               id="courierName"
+                                               class="form-control form-control-sm @error('courier_name') is-invalid @enderror"
+                                               placeholder="Misal: Budi"
+                                               value="{{ old('courier_name') }}"
+                                               required>
+                                        @error('courier_name')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                        <small class="text-muted">Wajib diisi sebelum memulai penjemputan.</small>
                                     </div>
                                     <div class="row g-2 mb-3">
                                         <div class="col-6">
-                                            <label class="form-label small text-muted">Tanggal</label>
-                                            <input type="date" name="pickup_date" class="form-control form-control-sm"
-                                                   value="{{ optional($pickupRequest->pickup_date)->format('Y-m-d') }}">
+                                            <label class="form-label small fw-semibold">
+                                                Tanggal <span class="text-danger">*</span>
+                                            </label>
+                                            <input type="date" name="pickup_date"
+                                                   class="form-control form-control-sm"
+                                                   value="{{ old('pickup_date', optional($pickupRequest->pickup_date)->format('Y-m-d')) }}"
+                                                   required>
                                         </div>
                                         <div class="col-6">
-                                            <label class="form-label small text-muted">Jam</label>
-                                            <input type="time" name="pickup_time" class="form-control form-control-sm"
-                                                   value="{{ $pickupRequest->pickup_time }}">
+                                            <label class="form-label small fw-semibold">
+                                                Jam <span class="text-danger">*</span>
+                                            </label>
+                                            <input type="time" name="pickup_time"
+                                                   class="form-control form-control-sm"
+                                                   value="{{ old('pickup_time', $pickupRequest->pickup_time) }}"
+                                                   required>
                                         </div>
                                     </div>
-                                    <button type="submit" class="btn btn-success w-100">Mulai Penjemputan</button>
+                                    <button type="submit"
+                                            class="btn btn-success w-100"
+                                            id="startBtn"
+                                            disabled>
+                                        <i class="bi bi-truck"></i> Mulai Penjemputan
+                                    </button>
                                 </form>
 
                             @elseif ($pickupRequest->isPickup() && $pickupRequest->status === \App\Models\PickupRequest::STATUS_IN_PROGRESS)
@@ -177,7 +202,6 @@
             </div>
         </div>
 
-        {{-- KOLOM KANAN --}}
         <div class="col-md-6">
             @if ($pickupRequest->status === \App\Models\PickupRequest::STATUS_COMPLETED)
                 <div class="card border-0 shadow-sm">
@@ -228,4 +252,20 @@
             @endif
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const courierInput = document.getElementById('courierName');
+            const startBtn = document.getElementById('startBtn');
+
+            if (!courierInput || !startBtn) return;
+
+            function checkCourier() {
+                startBtn.disabled = courierInput.value.trim().length === 0;
+            }
+
+            checkCourier();
+            courierInput.addEventListener('input', checkCourier);
+        });
+    </script>
 @endsection

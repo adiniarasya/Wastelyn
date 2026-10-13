@@ -42,6 +42,7 @@
                     <tr>
                         <th class="ps-4">Reward</th>
                         <th>Deskripsi</th>
+                        <th>Tipe</th>
                         <th>Poin</th>
                         <th>Stok</th>
                         <th>Gambar</th>
@@ -59,6 +60,13 @@
                                 <span class="small text-muted">
                                     {{ \Illuminate\Support\Str::limit($reward->description, 50) ?? '-' }}
                                 </span>
+                            </td>
+                            <td>
+                                @if(($reward->type ?? 'instant') === 'manual')
+                                    <span class="badge bg-info-subtle text-info border border-info-subtle">Manual</span>
+                                @else
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle">Instant</span>
+                                @endif
                             </td>
                             <td>
                                 <span class="small fw-semibold">
@@ -109,7 +117,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="text-center text-muted py-5">
+                            <td colspan="8" class="text-center text-muted py-5">
                                 Belum ada reward.
                             </td>
                         </tr>
