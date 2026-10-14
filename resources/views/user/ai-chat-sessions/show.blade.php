@@ -51,7 +51,34 @@
                         @if($msg->sender === 'user')
                             <div class="bubble bubble-user">{{ $msg->message }}</div>
                         @else
-                            <div class="bubble bubble-bero" data-markdown="{{ e($msg->message) }}"></div>
+                            @php
+                                $attachments = $msg->attachment;
+                                if (is_string($attachments)) {
+                                    $attachments = json_decode($attachments, true) ?: [];
+                                }
+                                if (!is_array($attachments)) {
+                                    $attachments = [];
+                                }
+                            @endphp
+
+                            <div class="bubble bubble-bero">
+                                <div class="bubble-text" data-markdown="{{ e($msg->message) }}"></div>
+
+                                @if(!empty($attachments))
+                                    <div class="bubble-attachments">
+                                        @foreach($attachments as $att)
+                                            @if(!empty($att['url']))
+                                                <div class="bubble-attachment">
+                                                    <img src="{{ $att['url'] }}" alt="{{ $att['nama'] ?? 'Gambar' }}" loading="lazy">
+                                                    @if(!empty($att['caption']))
+                                                        <div class="bubble-caption">{{ $att['caption'] }}</div>
+                                                    @endif
+                                                </div>
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
                         @endif
                     </div>
                 @empty
@@ -73,6 +100,8 @@
                 <button type="button" class="chip suggestion-chip">Bank sampah terdekat</button>
                 <button type="button" class="chip suggestion-chip">Tips kelola sampah</button>
                 <button type="button" class="chip suggestion-chip">Harga jual sampah</button>
+                <button type="button" class="chip suggestion-chip">Contoh botol plastik</button>
+                <button type="button" class="chip suggestion-chip">Contoh reward</button>
             </div>
 
             <div class="bero-input-wrap">
@@ -368,6 +397,37 @@
             margin-bottom: .35rem;
         }
 
+        .bubble-attachments {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .bubble-attachment {
+            max-width: 220px;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #f8f9fa;
+            border: 1px solid #eef0f2;
+        }
+
+        .bubble-attachment img {
+            width: 100%;
+            height: auto;
+            display: block;
+            max-height: 220px;
+            object-fit: cover;
+        }
+
+        .bubble-caption {
+            font-size: 12px;
+            padding: 6px 10px;
+            color: #4b5563;
+            background: #fff;
+            border-top: 1px solid #eef0f2;
+        }
+
         .typing {
             display: inline-flex;
             gap: 4px;
@@ -429,6 +489,8 @@
         const emptyState = document.getElementById('emptyState');
 
         const BERO_IMG = "{{ asset('assets/images/bero.png') }}";
+        const STORE_URL = "{{ route('user.ai-chat-messages.store', $session->session_id) }}";
+        const CSRF = '{{ csrf_token() }}';
 
         marked.setOptions({ breaks: true, gfm: true });
         const renderMarkdown = (t) => DOMPurify.sanitize(marked.parse(t || ''));
@@ -436,7 +498,7 @@
         const scrollBottom = () => chatBox.scrollTop = chatBox.scrollHeight;
         scrollBottom();
 
-        document.querySelectorAll('.bubble-bero[data-markdown]').forEach(el => {
+        document.querySelectorAll('.bubble-text[data-markdown]').forEach(el => {
             el.innerHTML = renderMarkdown(el.dataset.markdown);
         });
 
@@ -477,11 +539,15 @@
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
+
             const text = messageInput.value.trim();
             const file = imageInput.files[0];
             if (!text && !file) return;
 
             if (emptyState) emptyState.style.display = 'none';
+
+            const lastText = text;
+            const lastFile = file;
 
             appendUserMessage(text || '[Gambar]', file);
             messageInput.value = '';
@@ -496,45 +562,73 @@
             if (text) formData.append('message', text);
             if (file) formData.append('image', file);
 
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 60000);
+
             try {
-                const res = await fetch("{{ route('user.ai-chat-messages.store', $session->session_id) }}", {
+                const res = await fetch(STORE_URL, {
                     method: 'POST',
                     headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'X-CSRF-TOKEN': CSRF,
                         'Accept': 'application/json',
                     },
                     body: formData,
+                    signal: controller.signal,
                 });
+
+                clearTimeout(timeoutId);
 
                 const raw = await res.text();
                 let data;
-                try { data = JSON.parse(raw); }
-                catch {
+
+                try {
+                    data = JSON.parse(raw);
+                } catch {
                     loading.remove();
-                    appendBotMessage('Server tidak balas JSON (HTTP ' + res.status + ').');
+                    appendBotMessage('Server tidak balas JSON (HTTP ' + res.status + ').', [], lastText, lastFile);
                     return;
                 }
 
                 loading.remove();
 
                 if (data.bot_message?.message) {
-                    appendBotMessage(data.bot_message.message);
+                    const atts = normalizeAttachments(data.bot_message.attachment);
+                    appendBotMessage(data.bot_message.message, atts);
                 } else if (data.error) {
-                    appendBotMessage('⚠️ ' + data.error);
+                    appendBotMessage('⚠️ ' + data.error, [], lastText, lastFile);
                 } else if (data.message) {
-                    appendBotMessage('⚠️ ' + data.message);
+                    appendBotMessage('⚠️ ' + data.message, [], lastText, lastFile);
                 } else {
-                    appendBotMessage('Maaf, ada gangguan. Coba lagi ya.');
+                    appendBotMessage('Maaf, ada gangguan. Coba lagi ya.', [], lastText, lastFile);
                 }
             } catch (err) {
-                console.error(err);
+                clearTimeout(timeoutId);
                 loading.remove();
-                appendBotMessage('Koneksi error. Coba lagi.');
+
+                if (err.name === 'AbortError') {
+                    appendBotMessage('⏱️ Bero lama banget balasnya. Coba kirim ulang ya.', [], lastText, lastFile);
+                } else {
+                    appendBotMessage('Koneksi error. Coba lagi.', [], lastText, lastFile);
+                }
             } finally {
                 sendBtn.disabled = false;
                 messageInput.focus();
             }
         });
+
+        function normalizeAttachments(att) {
+            if (!att) return [];
+            if (Array.isArray(att)) return att;
+            if (typeof att === 'string') {
+                try {
+                    const parsed = JSON.parse(att);
+                    return Array.isArray(parsed) ? parsed : [];
+                } catch {
+                    return [];
+                }
+            }
+            return [];
+        }
 
         function appendUserMessage(text, file) {
             const wrap = document.createElement('div');
@@ -550,15 +644,86 @@
             scrollBottom();
         }
 
-        function appendBotMessage(text) {
+        function appendBotMessage(text, attachments, retryText, retryFile) {
             const wrap = document.createElement('div');
             wrap.className = 'd-flex mb-4 justify-content-start';
-            wrap.innerHTML = `
-                        <div class="avatar-bero-sm me-3">
-                            <img src="${BERO_IMG}" alt="Bero">
-                        </div>
-                        <div class="bubble bubble-bero">${renderMarkdown(text)}</div>
-                    `;
+
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar-bero-sm me-3';
+            avatar.innerHTML = `<img src="${BERO_IMG}" alt="Bero">`;
+
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble bubble-bero';
+
+            const textEl = document.createElement('div');
+            textEl.className = 'bubble-text';
+            textEl.innerHTML = renderMarkdown(text);
+            bubble.appendChild(textEl);
+
+            const atts = normalizeAttachments(attachments);
+
+            if (atts.length > 0) {
+                const attachWrap = document.createElement('div');
+                attachWrap.className = 'bubble-attachments';
+
+                atts.forEach(att => {
+                    if (!att.url) return;
+
+                    const item = document.createElement('div');
+                    item.className = 'bubble-attachment';
+
+                    const img = document.createElement('img');
+                    img.src = att.url;
+                    img.alt = att.nama || 'Gambar';
+                    img.loading = 'lazy';
+                    item.appendChild(img);
+
+                    if (att.caption) {
+                        const cap = document.createElement('div');
+                        cap.className = 'bubble-caption';
+                        cap.textContent = att.caption;
+                        item.appendChild(cap);
+                    }
+
+                    attachWrap.appendChild(item);
+                });
+
+                bubble.appendChild(attachWrap);
+            }
+
+            if (retryText || retryFile) {
+                const retryWrap = document.createElement('div');
+                retryWrap.className = 'mt-2';
+
+                const retryBtn = document.createElement('button');
+                retryBtn.type = 'button';
+                retryBtn.className = 'btn btn-sm btn-outline-secondary';
+                retryBtn.style.fontSize = '12px';
+                retryBtn.style.padding = '3px 10px';
+                retryBtn.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i> Coba lagi';
+
+                retryBtn.addEventListener('click', () => {
+                    if (retryText) messageInput.value = retryText;
+                    if (retryFile) {
+                        const dt = new DataTransfer();
+                        dt.items.add(retryFile);
+                        imageInput.files = dt.files;
+                        const reader = new FileReader();
+                        reader.onload = ev => {
+                            previewImg.src = ev.target.result;
+                            imagePreview.classList.remove('d-none');
+                        };
+                        reader.readAsDataURL(retryFile);
+                    }
+                    messageInput.focus();
+                });
+
+                retryWrap.appendChild(retryBtn);
+                bubble.appendChild(retryWrap);
+            }
+
+            wrap.appendChild(avatar);
+            wrap.appendChild(bubble);
             chatBox.appendChild(wrap);
             scrollBottom();
         }
@@ -567,15 +732,15 @@
             const wrap = document.createElement('div');
             wrap.className = 'd-flex mb-4 justify-content-start';
             wrap.innerHTML = `
-                        <div class="avatar-bero-sm me-3">
-                            <img src="${BERO_IMG}" alt="Bero">
-                        </div>
-                        <div class="bubble bubble-bero">
-                            <span class="typing">
-                                <span></span><span></span><span></span>
-                            </span>
-                        </div>
-                    `;
+                <div class="avatar-bero-sm me-3">
+                    <img src="${BERO_IMG}" alt="Bero">
+                </div>
+                <div class="bubble bubble-bero">
+                    <span class="typing">
+                        <span></span><span></span><span></span>
+                    </span>
+                </div>
+            `;
             chatBox.appendChild(wrap);
             scrollBottom();
             return wrap;

@@ -11,7 +11,7 @@ class AiChatSessionController extends Controller
     {
         $sessions = AiChatSession::where('user_id', auth()->id())
             ->withCount('messages')
-            ->latest()
+            ->latest('session_id')
             ->paginate(10);
 
         return view('user.ai-chat-sessions.index', compact('sessions'));
@@ -37,7 +37,12 @@ class AiChatSessionController extends Controller
     {
         $session = $this->findSession($id)->load('messages');
 
-        return view('user.ai-chat-sessions.show', compact('session'));
+        $sessions = AiChatSession::where('user_id', auth()->id())
+            ->latest('session_id')
+            ->limit(30)
+            ->get();
+
+        return view('user.ai-chat-sessions.show', compact('session', 'sessions'));
     }
 
     public function update(Request $request, $id)
@@ -54,7 +59,10 @@ class AiChatSessionController extends Controller
 
     public function destroy($id)
     {
-        $this->findSession($id)->delete();
+        $session = $this->findSession($id);
+
+        $session->messages()->delete();
+        $session->delete();
 
         return redirect()
             ->route('user.ai-chat-sessions.index')
@@ -63,6 +71,8 @@ class AiChatSessionController extends Controller
 
     private function findSession($id): AiChatSession
     {
-        return AiChatSession::where('user_id', auth()->id())->findOrFail($id);
+        return AiChatSession::where('user_id', auth()->id())
+            ->where('session_id', $id)
+            ->firstOrFail();
     }
 }

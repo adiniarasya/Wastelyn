@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\WasteBank;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -164,6 +165,16 @@ class AdminUserController extends Controller
 
         $user->update($data);
 
+        if ($user->role === 'mitra') {
+            if ($data['status'] === 'active') {
+                WasteBank::where('mitra_id', $user->user_id)
+                    ->update(['status' => 'active']);
+            } else {
+                WasteBank::where('mitra_id', $user->user_id)
+                    ->update(['status' => 'inactive']);
+            }
+        }
+
         return redirect()
             ->route('admin.users.index')
             ->with('success', 'User berhasil diperbarui.');
@@ -183,9 +194,12 @@ class AdminUserController extends Controller
             'status' => 'active',
         ]);
 
+        WasteBank::where('mitra_id', $user->user_id)
+            ->update(['status' => 'active']);
+
         return redirect()
             ->route('admin.users.index')
-            ->with('success', 'Mitra Bank Sampah berhasil disetujui.');
+            ->with('success', 'Mitra Bank Sampah berhasil disetujui, bank sampah otomatis diaktifkan.');
     }
 
     public function reject(string $id)
@@ -201,6 +215,9 @@ class AdminUserController extends Controller
         $user->update([
             'status' => 'rejected',
         ]);
+
+        WasteBank::where('mitra_id', $user->user_id)
+            ->update(['status' => 'inactive']);
 
         return redirect()
             ->route('admin.users.index')
