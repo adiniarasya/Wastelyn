@@ -15,8 +15,14 @@ class Reward extends Model
         'name',
         'description',
         'point_required',
+        'type',
         'stock',
         'image',
         'status',
+    ];
+
+    protected $casts = [
+        'point_required' => 'integer',
+        'stock' => 'integer',
     ];
 }
