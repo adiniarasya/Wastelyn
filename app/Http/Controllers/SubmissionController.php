@@ -29,7 +29,7 @@ class SubmissionController extends Controller
         $path = $request->file('photo')->store('submissions', 'public');
         $fullPath = storage_path('app/public/' . $path);
 
-        // ⬇️ KOMPRES FOTO (TAMBAH INI)
+        // ⬇️ KOMPRES FOTO
         try {
             $manager = new ImageManager(new Driver());
             $manager->read($fullPath)
@@ -91,12 +91,46 @@ class SubmissionController extends Controller
         // 7. update state
         $userMission->progress = $progressAfter;
 
+        $missionCompleted = false;
+
         if ($progressAfter >= $mission->target) {
             $userMission->status = 'ready_pickup';
             $userMission->completed_at = now();
+            $missionCompleted = true;
         }
 
         $userMission->save();
+
+        // 8. ⬇️ KASIH REWARD kalau misi selesai
+        if ($missionCompleted) {
+            $user = auth()->user();
+
+            // XP misi (diambil dari form mitra: $mission->reward_xp)
+            if ($mission->reward_xp > 0) {
+                app(\App\Services\XpService::class)->addXp(
+                    $user,
+                    $mission->bank_id,
+                    $mission->reward_xp,
+                    'mission',
+                    $userMission->user_mission_id,
+                    "Menyelesaikan misi: {$mission->title}"
+                );
+            }
+
+            // Poin misi (diambil dari form mitra: $mission->reward_points)
+            if ($mission->reward_points > 0) {
+                $user->addPoints($mission->reward_points);
+            }
+        }
+
+        // 9. redirect dengan pesan yang sesuai
+        if ($missionCompleted) {
+            return back()->with(
+                'success',
+                "🎉 Misi selesai! +{$mission->reward_xp} XP & +{$mission->reward_points} Poin. " .
+                    "Tunggu mitra jemput sampahmu ya."
+            );
+        }
 
         return back()->with(
             'success',
