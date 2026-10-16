@@ -1,12 +1,17 @@
 <div id="sidebar" class="active">
     <div class="sidebar-wrapper active">
         <div class="sidebar-header">
-            <div class="d-flex justify-content-between align-items-center w-100">
+            <div class="d-flex justify-content-between align-items-center w-100" style="padding: 20px 22px;">
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
                 <div class="logo">
-                    <a href="{{ url('/') }}" class="d-flex align-items-center gap-2">
-                        <img src="{{ asset('assets/logo.png') }}" alt="Logo" class="sidebar-logo">
-                        <span class="sidebar-brand">WasteLyn</span>
+                    <a href="{{ url('/') }}" class="d-flex align-items-center"
+                        style="gap: 12px; text-decoration: none;">
+                        <img src="{{ asset('assets/logo.png') }}" alt="Logo" class="sidebar-logo"
+                            style="width: 38px; height: 38px; object-fit: contain; flex-shrink: 0;">
+                        <span class="sidebar-brand"
+                            style="font-size: 20px; font-weight: 700; line-height: 1; color: #2E7D32; letter-spacing: -0.3px;">
+                            WasteLyn
+                        </span>
                     </a>
                 </div>
                 <div class="toggler">
@@ -20,6 +25,29 @@
         <div class="sidebar-menu">
             <ul class="menu">
                 @auth
+                    @php
+                        $lastSeen = session('notifications_seen_at');
+                        $sidebarNotifCount = 0;
+
+                        if (auth()->user()->role === 'admin') {
+                            $sidebarNotifCount = \App\Models\User::where('status', 'pending')
+                                ->when($lastSeen, fn($q) => $q->where('created_at', '>', $lastSeen))
+                                ->count()
+                                + \App\Models\PickupRequest::where('status', 'pending')
+                                    ->when($lastSeen, fn($q) => $q->where('created_at', '>', $lastSeen))
+                                    ->count();
+                        } elseif (auth()->user()->role === 'mitra') {
+                            $sidebarNotifCount = \App\Models\PickupRequest::where('status', 'pending')
+                                ->where('mitra_id', auth()->id())
+                                ->when($lastSeen, fn($q) => $q->where('created_at', '>', $lastSeen))
+                                ->count();
+                        } elseif (auth()->user()->role === 'warga') {
+                            $sidebarNotifCount = \App\Models\PickupRequest::where('user_id', auth()->id())
+                                ->whereIn('status', ['completed', 'rejected'])
+                                ->when($lastSeen, fn($q) => $q->where('updated_at', '>', $lastSeen))
+                                ->count();
+                        }
+                    @endphp
 
                     @if(auth()->user()->role == 'admin')
 
@@ -129,8 +157,6 @@
                             </a>
                         </li>
 
-                        <li class="sidebar-title">Pengaturan</li>
-
                         <li class="sidebar-item {{ request()->routeIs('mitra.missions.*') ? 'active' : '' }}">
                             <a href="{{ route('mitra.missions.index') }}" class="sidebar-link">
                                 <i class="bi bi-bullseye"></i>
@@ -145,22 +171,17 @@
                             </a>
                         </li>
 
+                        <li class="sidebar-title">Akun</li>
+
                         <li class="sidebar-item {{ request()->routeIs('mitra.notifications.*') ? 'active' : '' }}">
                             <a href="{{ route('mitra.notifications.index') }}" class="sidebar-link">
                                 <i class="bi bi-bell"></i>
                                 <span>Notifikasi</span>
-                                @php
-                                    $unreadNotif = \App\Models\Notification::where('user_id', auth()->id())
-                                        ->where('is_read', false)
-                                        ->count();
-                                @endphp
-                                @if($unreadNotif > 0)
-                                    <span class="badge bg-danger ms-auto">{{ $unreadNotif }}</span>
+                                @if($sidebarNotifCount > 0)
+                                    <span class="badge bg-danger ms-auto sidebar-notif-badge">{{ $sidebarNotifCount }}</span>
                                 @endif
                             </a>
                         </li>
-
-                        <li class="sidebar-title">Akun</li>
 
                         <li class="sidebar-item {{ request()->routeIs('mitra.profile') ? 'active' : '' }}">
                             <a href="{{ route('mitra.profile') }}" class="sidebar-link">
@@ -219,6 +240,18 @@
                             <a href="{{ route('user.rewards.index') }}" class="sidebar-link">
                                 <i class="bi bi-gift"></i>
                                 <span>Reward Center</span>
+                            </a>
+                        </li>
+
+                        <li class="sidebar-title">Akun</li>
+
+                        <li class="sidebar-item {{ request()->routeIs('user.pickup-requests.*') ? 'active' : '' }}">
+                            <a href="{{ route('user.pickup-requests.index') }}" class="sidebar-link">
+                                <i class="bi bi-bell"></i>
+                                <span>Notifikasi</span>
+                                @if($sidebarNotifCount > 0)
+                                    <span class="badge bg-danger ms-auto sidebar-notif-badge">{{ $sidebarNotifCount }}</span>
+                                @endif
                             </a>
                         </li>
 

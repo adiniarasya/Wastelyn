@@ -94,6 +94,8 @@ class UserController extends Controller
             $userXp = $user->getXpForBank($user->waste_bank_id);
         }
 
+        $streakBonus = $this->checkStreakBonus($user);
+
         return view('user.dashboard', compact(
             'user',
             'userXp',
@@ -113,8 +115,41 @@ class UserController extends Controller
             'mitrasJson',
             'totalUang',
             'totalCo2',
-            'totalBerat'
+            'totalBerat',
+            'streakBonus'
         ));
+    }
+
+    protected function checkStreakBonus(User $user): ?array
+    {
+        $streak = (int) ($user->current_streak ?? 0);
+
+        if ($streak === 0 || $streak % 4 !== 0) {
+            return null;
+        }
+
+        $lastClaimed = (int) ($user->last_streak_bonus_week ?? 0);
+
+        if ($lastClaimed >= $streak) {
+            return null;
+        }
+
+        $bonusXp = 50;
+
+        if (method_exists($user, 'addXp')) {
+            $user->addXp($bonusXp);
+        } else {
+            $user->xp = ($user->xp ?? 0) + $bonusXp;
+            $user->save();
+        }
+
+        $user->last_streak_bonus_week = $streak;
+        $user->save();
+
+        return [
+            'streak' => $streak,
+            'xp' => $bonusXp,
+        ];
     }
 
     public function ecoHabit()

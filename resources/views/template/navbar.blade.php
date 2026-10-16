@@ -13,47 +13,52 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
 
-                {{-- NOTIFIKASI --}}
-                <li class="nav-item dropdown me-3">
+                <li class="nav-item dropdown me-3" id="notifDropdownWrapper">
                     <a class="nav-link position-relative" href="#" data-bs-toggle="dropdown" aria-expanded="false"
                         style="padding: 6px 10px;">
                         <i class="bi bi-bell" style="font-size: 20px; color: #5a6474;"></i>
 
                         @php
+                            $lastSeen = session('notifications_seen_at');
                             $notifCount = 0;
+
                             if (auth()->user()->role === 'admin') {
-                                $notifCount = \App\Models\User::where('status', 'pending')->count()
-                                    + \App\Models\PickupRequest::where('status', 'pending')->count();
+                                $notifCount = \App\Models\User::where('status', 'pending')
+                                    ->when($lastSeen, fn($q) => $q->where('created_at', '>', $lastSeen))
+                                    ->count()
+                                    + \App\Models\PickupRequest::where('status', 'pending')
+                                        ->when($lastSeen, fn($q) => $q->where('created_at', '>', $lastSeen))
+                                        ->count();
                             } elseif (auth()->user()->role === 'mitra') {
                                 $notifCount = \App\Models\PickupRequest::where('status', 'pending')
-                                    ->where('mitra_id', auth()->id())->count();
+                                    ->where('mitra_id', auth()->id())
+                                    ->when($lastSeen, fn($q) => $q->where('created_at', '>', $lastSeen))
+                                    ->count();
                             } elseif (auth()->user()->role === 'warga') {
                                 $notifCount = \App\Models\PickupRequest::where('user_id', auth()->id())
                                     ->whereIn('status', ['completed', 'rejected'])
-                                    ->whereDate('updated_at', '>=', now()->subDays(7))
+                                    ->when($lastSeen, fn($q) => $q->where('updated_at', '>', $lastSeen))
                                     ->count();
                             }
                         @endphp
 
-                        @if($notifCount > 0)
-                            <span class="position-absolute" style="
-                                        top: 4px;
-                                        right: 4px;
-                                        min-width: 18px;
-                                        height: 18px;
-                                        padding: 0 5px;
-                                        background: #e53935;
-                                        color: #fff;
-                                        font-size: 10px;
-                                        font-weight: 600;
-                                        border-radius: 9px;
-                                        display: inline-flex;
-                                        align-items: center;
-                                        justify-content: center;
-                                        border: 2px solid #fff;
-                                        line-height: 1;
-                                    ">{{ $notifCount }}</span>
-                        @endif
+                        <span class="position-absolute notif-badge" style="
+                                    top: 4px;
+                                    right: 4px;
+                                    min-width: 18px;
+                                    height: 18px;
+                                    padding: 0 5px;
+                                    background: #e53935;
+                                    color: #fff;
+                                    font-size: 10px;
+                                    font-weight: 600;
+                                    border-radius: 9px;
+                                    display: {{ $notifCount > 0 ? 'inline-flex' : 'none' }};
+                                    align-items: center;
+                                    justify-content: center;
+                                    border: 2px solid #fff;
+                                    line-height: 1;
+                                ">{{ $notifCount }}</span>
                     </a>
 
                     <ul class="dropdown-menu dropdown-menu-end"
@@ -70,7 +75,7 @@
 
                             @forelse($pendingUsers as $u)
                                 <li>
-                                    <a class="dropdown-item" href="{{ route('admin.users.index') }}"
+                                    <a class="dropdown-item mark-seen-item" href="{{ route('admin.users.index') }}"
                                         style="padding: 10px 16px; font-size: 13px;">
                                         <i class="bi bi-person-plus text-warning me-2"></i>
                                         <strong>{{ $u->name }}</strong> menunggu approval
@@ -81,7 +86,7 @@
 
                             @forelse($pendingPickups as $p)
                                 <li>
-                                    <a class="dropdown-item" href="{{ route('admin.transactions.index') }}"
+                                    <a class="dropdown-item mark-seen-item" href="{{ route('admin.transactions.index') }}"
                                         style="padding: 10px 16px; font-size: 13px;">
                                         <i class="bi bi-box-seam text-info me-2"></i>
                                         Setoran <strong>{{ $p->user->name ?? 'Warga' }}</strong> menunggu
@@ -104,7 +109,7 @@
 
                             @forelse($pendingPickups as $p)
                                 <li>
-                                    <a class="dropdown-item"
+                                    <a class="dropdown-item mark-seen-item"
                                         href="{{ route('mitra.pickup-requests.show', $p->pickup_request_id) }}"
                                         style="padding: 10px 16px; font-size: 13px;">
                                         <i class="bi bi-truck text-success me-2"></i>
@@ -126,7 +131,7 @@
 
                             @forelse($myUpdates as $p)
                                 <li>
-                                    <a class="dropdown-item"
+                                    <a class="dropdown-item mark-seen-item"
                                         href="{{ route('user.pickup-requests.show', $p->pickup_request_id) }}"
                                         style="padding: 10px 16px; font-size: 13px;">
                                         @if($p->status === 'completed')
@@ -145,19 +150,24 @@
                             @endforelse
                         @endif
 
-                        @if(auth()->user()->role === 'mitra')
-                            <li
-                                style="padding: 10px 16px; text-align: center; border-top: 1px solid #f4f6f9; background: #fafbfc;">
-                                <a href="{{ route('mitra.notifications.index') }}" class="text-success"
-                                    style="font-size: 12px; font-weight: 600;">
-                                    Lihat Semua Notifikasi →
-                                </a>
-                            </li>
-                        @endif
+                        <li
+                            style="padding: 10px 16px; text-align: center; border-top: 1px solid #f4f6f9; background: #fafbfc;">
+                            @php
+                                $notifRoute = match (auth()->user()->role) {
+                                    'admin' => route('admin.users.index'),
+                                    'mitra' => route('mitra.notifications.index'),
+                                    'warga' => route('user.pickup-requests.index'),
+                                    default => '#',
+                                };
+                            @endphp
+                            <a href="{{ $notifRoute }}" class="text-success mark-seen-item"
+                                style="font-size: 12px; font-weight: 600;">
+                                Lihat Semua Notifikasi →
+                            </a>
+                        </li>
                     </ul>
                 </li>
 
-                {{-- USER --}}
                 <li class="nav-item dropdown">
                     <a href="#" class="nav-link d-flex align-items-center" data-bs-toggle="dropdown"
                         aria-expanded="false" style="padding: 6px 10px; gap: 10px;">
@@ -267,3 +277,24 @@
         </div>
     </div>
 </nav>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const notifWrapper = document.getElementById('notifDropdownWrapper');
+        const badge = document.querySelector('.notif-badge');
+
+        if (notifWrapper) {
+            notifWrapper.addEventListener('show.bs.dropdown', function () {
+                if (badge) badge.style.display = 'none';
+
+                fetch('{{ route('notifications.mark-seen') }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json',
+                    },
+                });
+            });
+        }
+    });
+</script>

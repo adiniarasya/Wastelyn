@@ -56,7 +56,13 @@ Route::get('/home', function () {
         'warga' => redirect()->route('user.dashboard'),
         default => redirect('/'),
     };
+
 })->middleware('auth');
+
+Route::post('/notifications/mark-seen', function () {
+    session(['notifications_seen_at' => now()->toDateTimeString()]);
+    return response()->json(['ok' => true]);
+})->middleware('auth')->name('notifications.mark-seen');
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
 
