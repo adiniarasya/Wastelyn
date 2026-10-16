@@ -3,87 +3,104 @@
 @section('title', 'Ganti Bank Sampah')
 
 @section('content')
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="mb-0"><i class="bi bi-shop"></i> Ganti Bank Sampah</h3>
-        <a href="{{ route('user.pickup-requests.index') }}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> Kembali
-        </a>
-    </div>
-
-    @if(!auth()->user()->waste_bank_id)
-        <div class="alert alert-info d-flex align-items-center gap-2 mb-4">
-            <i class="bi bi-info-circle fs-5"></i>
-            <div>
-                <strong>Pilih bank sampah tujuanmu.</strong>
-                Klik salah satu marker di peta, lalu klik tombol <em>Ganti ke Bank Ini</em>.
-            </div>
-        </div>
-    @else
-        <div class="alert alert-success d-flex align-items-center gap-2 mb-4">
-            <i class="bi bi-check-circle fs-5"></i>
-            <div>
-                Bank sampahmu saat ini:
-                <strong>{{ optional($wasteBanks->firstWhere('bank_id', auth()->user()->waste_bank_id))->name ?? '-' }}</strong>
-            </div>
-        </div>
-    @endif
-
-    <div class="card card-stat mb-4">
-        <div class="card-body p-2">
-            <div id="map" style="height: 400px; width: 100%; border-radius: .5rem;"></div>
-        </div>
-    </div>
-
-    <div class="row g-3">
-        @forelse ($wasteBanks as $bank)
-            <div class="col-md-4">
-                <div
-                    class="card card-stat h-100 {{ auth()->user()->waste_bank_id == $bank->bank_id ? 'border-success border-2' : '' }}">
-                    <div class="card-body">
-                        @if(auth()->user()->waste_bank_id == $bank->bank_id)
-                            <span class="badge bg-success mb-2">
-                                <i class="bi bi-star-fill"></i> Bank Sampah Saat Ini
-                            </span>
-                        @endif
-
-                        <h5 class="card-title mb-2">{{ $bank->name }}</h5>
-
-                        <p class="text-muted mb-1">
-                            <i class="bi bi-geo-alt"></i> {{ $bank->address ?? '-' }}
-                        </p>
-                        @if($bank->phone)
-                            <p class="text-muted mb-1">
-                                <i class="bi bi-telephone"></i> {{ $bank->phone }}
-                            </p>
-                        @endif
-                        @if($bank->opening_hours)
-                            <p class="text-muted mb-0">
-                                <i class="bi bi-clock"></i> {{ $bank->opening_hours }}
-                            </p>
-                        @endif
-
-                        <div class="d-flex gap-2 mt-3">
-                            <a href="{{ route('user.waste-banks.show', $bank) }}" class="btn btn-sm btn-outline-success">
-                                Lihat Detail
-                            </a>
-
-                            @if(auth()->user()->waste_bank_id != $bank->bank_id)
-                                <button type="button" class="btn btn-sm btn-success"
-                                    onclick="pilihBank({{ $bank->bank_id }}, '{{ addslashes($bank->name) }}')">
-                                    Ganti ke Bank Ini
-                                </button>
-                            @endif
-                        </div>
+    <div class="page-heading">
+        {{-- Header (pola sama seperti halaman lain) --}}
+        <div class="page-title">
+            <div class="row align-items-center">
+                <div class="col-12 col-md-8">
+                    <h3>Ganti Bank Sampah</h3>
+                    <p class="text-subtitle text-muted">Pilih bank sampah tujuan setoranmu.</p>
+                </div>
+                <div class="col-12 col-md-4">
+                    <div class="d-flex justify-content-md-end mb-3 mb-md-0">
+                        <a href="{{ route('user.pickup-requests.index') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Kembali
+                        </a>
                     </div>
                 </div>
             </div>
-        @empty
-            <div class="col-12">
-                <div class="alert alert-info text-center">
-                    Belum ada bank sampah terdaftar.
+        </div>
+
+        <section class="section">
+
+            @if(!auth()->user()->waste_bank_id)
+                <div class="alert alert-info d-flex align-items-center gap-2 mb-4">
+                    <i class="bi bi-info-circle fs-5"></i>
+                    <div>
+                        <strong>Pilih bank sampah tujuanmu.</strong>
+                        Klik salah satu marker di peta, lalu klik tombol <em>Ganti ke Bank Ini</em>.
+                    </div>
+                </div>
+            @else
+                <div class="alert alert-success d-flex align-items-center gap-2 mb-4">
+                    
+                    <div>
+                        Bank sampahmu saat ini:
+                        <strong>{{ optional($wasteBanks->firstWhere('bank_id', auth()->user()->waste_bank_id))->name ?? '-' }}</strong>
+                    </div>
+                </div>
+            @endif
+
+            <div class="card card-stat mb-4">
+                <div class="card-body p-2">
+                    <div id="map" style="height: 400px; width: 100%; border-radius: .5rem;"></div>
                 </div>
             </div>
-        @endforelse
+
+            <div class="row g-3">
+                @forelse ($wasteBanks as $bank)
+                    <div class="col-md-4">
+                        <div
+                            class="card card-stat h-100 {{ auth()->user()->waste_bank_id == $bank->bank_id ? 'border-success border-2' : '' }}">
+                            <div class="card-body">
+                                @if(auth()->user()->waste_bank_id == $bank->bank_id)
+                                    <span class="badge bg-success mb-2">
+                                        <i class="bi bi-star-fill"></i> Bank Sampah Saat Ini
+                                    </span>
+                                @endif
+
+                                <h5 class="card-title mb-2">{{ $bank->name }}</h5>
+
+                                <p class="text-muted mb-1">
+                                    <i class="bi bi-geo-alt"></i> {{ $bank->address ?? '-' }}
+                                </p>
+                                @if($bank->phone)
+                                    <p class="text-muted mb-1">
+                                        <i class="bi bi-telephone"></i> {{ $bank->phone }}
+                                    </p>
+                                @endif
+                                @if($bank->opening_hours)
+                                    <p class="text-muted mb-0">
+                                        <i class="bi bi-clock"></i> {{ $bank->opening_hours }}
+                                    </p>
+                                @endif
+
+                                <div class="d-flex gap-2 mt-3">
+                                    <a href="{{ route('user.waste-banks.show', $bank) }}"
+                                        class="btn btn-sm btn-outline-success">
+                                        Lihat Detail
+                                    </a>
+
+                                    @if(auth()->user()->waste_bank_id != $bank->bank_id)
+                                        <button type="button" class="btn btn-sm btn-success"
+                                            onclick="pilihBank({{ $bank->bank_id }}, '{{ addslashes($bank->name) }}')">
+                                            Ganti ke Bank Ini
+                                        </button>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="col-12">
+                        <div class="alert alert-info text-center">
+                            Belum ada bank sampah terdaftar.
+                        </div>
+                    </div>
+                @endforelse
+            </div>
+
+        </section>
     </div>
 @endsection
 

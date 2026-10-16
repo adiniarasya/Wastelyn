@@ -78,7 +78,6 @@
             {{-- Bank sampah langganan --}}
             @if(auth()->user()->wasteBank)
                 <div class="alert alert-info d-flex align-items-center gap-3">
-                    <i class="bi bi-shop fs-4"></i>
                     <div>
                         <div>
                             Bank sampah langganan:
