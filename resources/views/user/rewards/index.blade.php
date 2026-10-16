@@ -3,214 +3,263 @@
 @section('title', 'Reward Center')
 
 @section('content')
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="mb-0"><i class="bi bi-gift"></i> Reward Center</h3>
-        <div class="text-end">
-            <div class="small text-muted">Poin Kamu</div>
-            <div class="fs-4 fw-bold text-warning">
-                ⭐ {{ number_format($user->points) }}
-            </div>
-        </div>
-    </div>
+    <style>
+        /* Gambar dan badge kartu reward */
+        .reward-center .reward-img {
+            height: 150px;
+            object-fit: cover;
+        }
 
-    @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
-    @if (session('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
+        .reward-center .reward-type-badge {
+            font-size: .65rem;
+            flex-shrink: 0;
+        }
 
-    <div class="row g-3 mb-4">
-        @forelse ($rewards as $reward)
-            <div class="col-md-3 col-sm-6">
-                <div class="card card-stat h-100">
-                    @if($reward->image)
-                        <img src="{{ asset('assets/images/' . $reward->image) }}"
-                             class="card-img-top" style="height:150px; object-fit:cover;"
-                             alt="{{ $reward->name }}">
-                    @endif
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start mb-1">
-                            <h6 class="fw-bold mb-0">{{ $reward->name }}</h6>
-                            @if(($reward->type ?? 'instant') === 'manual')
-                                <span class="badge bg-info-subtle text-info border border-info-subtle" style="font-size: 0.65rem;">Manual</span>
-                            @elseif(($reward->type ?? 'instant') === 'pickup')
-                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle" style="font-size: 0.65rem;">Ambil Sendiri</span>
-                            @else
-                                <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.65rem;">Instant</span>
-                            @endif
+        .reward-center .code-sm {
+            font-size: .85rem;
+        }
+
+        /* Modal penukaran */
+        #redeemModal .modal-reward-img {
+            max-height: 120px;
+            object-fit: contain;
+        }
+
+        #redeemModal .point-box {
+            min-width: 130px;
+        }
+
+        #redeemModal .spinner-lg {
+            width: 3rem;
+            height: 3rem;
+        }
+
+        #redeemModal .success-icon {
+            font-size: 4rem;
+            line-height: 1;
+        }
+    </style>
+
+    <div class="page-heading reward-center">
+        {{-- Header --}}
+        <div class="page-title">
+            <div class="row align-items-center">
+                <div class="col-12 col-md-8">
+                    <h3>Reward Center</h3>
+                    <p class="text-subtitle text-muted">Tukarkan poinmu dengan reward yang tersedia.</p>
+                </div>
+                <div class="col-12 col-md-4">
+                    <div class="text-md-end">
+                        <div class="small text-muted">Poin kamu</div>
+                        <div class="fs-4 fw-bold text-warning">
+                            ⭐ {{ number_format($user->points) }}
                         </div>
-                        <p class="small text-muted mb-2">{{ Str::limit($reward->description, 60) }}</p>
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="badge bg-warning text-dark">
-                                ⭐ {{ number_format($reward->point_required) }}
-                            </span>
-                            <small class="text-muted">Stok: {{ $reward->stock }}</small>
-                        </div>
-                    </div>
-                    <div class="card-footer bg-white border-0 pt-0">
-                        @if($user->points >= $reward->point_required && $reward->stock > 0)
-                            <button type="button"
-                                    class="btn btn-success btn-sm w-100 btn-redeem"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#redeemModal"
-                                    data-reward-id="{{ $reward->reward_id }}"
-                                    data-reward-name="{{ $reward->name }}"
-                                    data-reward-points="{{ $reward->point_required }}"
-                                    data-reward-type="{{ $reward->type ?? 'instant' }}"
-                                    data-reward-image="{{ $reward->image ? asset('assets/images/' . $reward->image) : '' }}">
-                                <i class="bi bi-gift"></i> Tukar
-                            </button>
-                        @elseif($reward->stock <= 0)
-                            <button class="btn btn-secondary btn-sm w-100" disabled>Stok Habis</button>
-                        @else
-                            <button class="btn btn-outline-secondary btn-sm w-100" disabled>
-                                Poin Kurang
-                            </button>
-                        @endif
                     </div>
                 </div>
             </div>
-        @empty
-            <div class="col-12">
-                <div class="alert alert-info text-center">Belum ada reward tersedia.</div>
+        </div>
+
+        <section class="section">
+
+            {{-- Notifikasi --}}
+            @if (session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
+                </div>
+            @endif
+            @if (session('error'))
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-circle me-2"></i>{{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
+                </div>
+            @endif
+
+            {{-- Daftar reward --}}
+            <div class="row">
+                @forelse ($rewards as $reward)
+                    <div class="col-12 col-sm-6 col-lg-3 mb-4">
+                        <div class="card card-stat h-100 mb-0">
+                            @if($reward->image)
+                                <img src="{{ asset('assets/images/' . $reward->image) }}"
+                                    class="card-img-top reward-img" alt="{{ $reward->name }}">
+                            @endif
+
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                    <h6 class="fw-bold mb-0">{{ $reward->name }}</h6>
+                                    @if(($reward->type ?? 'instant') === 'manual')
+                                        <span class="badge reward-type-badge bg-info-subtle text-info border border-info-subtle">Manual</span>
+                                    @elseif(($reward->type ?? 'instant') === 'pickup')
+                                        <span class="badge reward-type-badge bg-warning-subtle text-warning border border-warning-subtle">Ambil sendiri</span>
+                                    @else
+                                        <span class="badge reward-type-badge bg-success-subtle text-success border border-success-subtle">Instan</span>
+                                    @endif
+                                </div>
+
+                                <p class="small text-muted mb-3">{{ Str::limit($reward->description, 60) }}</p>
+
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-warning text-dark">
+                                        ⭐ {{ number_format($reward->point_required) }}
+                                    </span>
+                                    <small class="text-muted">Stok: {{ $reward->stock }}</small>
+                                </div>
+                            </div>
+
+                            <div class="card-footer bg-transparent border-0 pt-0">
+                                @if($user->points >= $reward->point_required && $reward->stock > 0)
+                                    <button type="button" class="btn btn-success btn-sm w-100 btn-redeem"
+                                        data-bs-toggle="modal" data-bs-target="#redeemModal"
+                                        data-reward-id="{{ $reward->reward_id }}"
+                                        data-reward-name="{{ $reward->name }}"
+                                        data-reward-points="{{ $reward->point_required }}"
+                                        data-reward-type="{{ $reward->type ?? 'instant' }}"
+                                        data-reward-image="{{ $reward->image ? asset('assets/images/' . $reward->image) : '' }}">
+                                        <i class="bi bi-gift me-1"></i>Tukar
+                                    </button>
+                                @elseif($reward->stock <= 0)
+                                    <button class="btn btn-secondary btn-sm w-100" disabled>Stok habis</button>
+                                @else
+                                    <button class="btn btn-outline-secondary btn-sm w-100" disabled>Poin kurang</button>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="col-12">
+                        <div class="alert alert-info text-center">Belum ada reward tersedia.</div>
+                    </div>
+                @endforelse
             </div>
-        @endforelse
+
+            {{-- Riwayat penukaran (gaya tabel tidak diubah) --}}
+            <div class="card card-stat">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        Riwayat penukaran
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Tanggal</th>
+                                    <th>Reward</th>
+                                    <th>Poin</th>
+                                    <th>Status</th>
+                                    <th>Kode / Info</th>
+                                    <th class="text-end">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($myRedemptions as $r)
+                                    <tr>
+                                        <td>{{ $r->redeemed_at?->format('d M Y H:i') ?? '-' }}</td>
+                                        <td>{{ $r->reward->name ?? '-' }}</td>
+                                        <td>-{{ number_format($r->reward->point_required ?? 0) }}</td>
+                                        <td>
+                                            @if($r->status === 'pending' && $r->pickup_code)
+                                                <span class="badge bg-warning text-dark">
+                                                    <i class="bi bi-hourglass me-1"></i>Belum diambil
+                                                </span>
+                                            @else
+                                                <span class="badge bg-success">
+                                                    <i class="bi bi-check-circle me-1"></i>Berhasil
+                                                </span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if($r->pickup_code)
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <code class="code-sm text-primary fw-bold">{{ $r->pickup_code }}</code>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary"
+                                                        onclick="copyVoucher('{{ $r->pickup_code }}', this)"
+                                                        title="Salin kode">
+                                                        <i class="bi bi-clipboard"></i>
+                                                    </button>
+                                                </div>
+                                                <small class="text-muted d-block mt-1">
+                                                    Tunjukkan kode ini ke mitra untuk ambil barang.
+                                                </small>
+                                                @if($r->pickup_expires_at)
+                                                    <small class="text-danger d-block">
+                                                        <i class="bi bi-clock me-1"></i>
+                                                        Berlaku s.d. {{ \Carbon\Carbon::parse($r->pickup_expires_at)->format('d M Y') }}
+                                                    </small>
+                                                @endif
+                                            @elseif($r->voucher_code)
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <code class="code-sm text-success fw-bold">{{ $r->voucher_code }}</code>
+                                                    <button type="button" class="btn btn-sm btn-outline-success"
+                                                        onclick="copyVoucher('{{ $r->voucher_code }}', this)"
+                                                        title="Salin kode voucher">
+                                                        <i class="bi bi-clipboard"></i>
+                                                    </button>
+                                                </div>
+                                                <small class="text-muted d-block mt-1">
+                                                    Tukarkan kode ini di kasir / aplikasi terkait.
+                                                </small>
+                                            @elseif($r->delivery_note)
+                                                <small class="text-success fw-semibold">
+                                                    <i class="bi bi-check-circle me-1"></i>{{ $r->delivery_note }}
+                                                </small>
+                                            @else
+                                                <small class="text-muted">-</small>
+                                            @endif
+                                        </td>
+                                        <td class="text-end">
+                                            <a href="{{ route('user.rewards.redemptions.show', $r->redemption_id) }}"
+                                                class="btn btn-sm btn-outline-success" title="Lihat bukti">
+                                                <i class="bi bi-receipt"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted py-4">
+                                            <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+                                            Belum ada riwayat penukaran.
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </section>
     </div>
 
-    <div class="card card-stat">
-        <div class="card-header bg-white fw-semibold">
-            <i class="bi bi-clock-history"></i> Riwayat Penukaran
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-    <tr>
-        <th>Tanggal</th>
-        <th>Reward</th>
-        <th>Poin</th>
-        <th>Status</th>
-        <th>Kode / Info</th>
-        <th class="text-end">Aksi</th>
-    </tr>
-</thead>
-                    <tbody>
-                        @forelse($myRedemptions as $r)
-                            <tr>
-                                <td>{{ $r->redeemed_at?->format('d M Y H:i') ?? '-' }}</td>
-                                <td>{{ $r->reward->name ?? '-' }}</td>
-                                <td>-{{ number_format($r->reward->point_required ?? 0) }}</td>
-                                <td>
-                                    @if($r->status === 'pending' && $r->pickup_code)
-                                        <span class="badge bg-warning text-dark">
-                                            <i class="bi bi-hourglass"></i> Belum Diambil
-                                        </span>
-                                    @else
-                                        <span class="badge bg-success">
-                                            <i class="bi bi-check-circle"></i> Berhasil
-                                        </span>
-                                    @endif
-                                </td>
-                                <td>
-                                    @if($r->pickup_code)
-                                        <div class="d-flex align-items-center gap-2">
-                                            <code class="text-primary fw-bold" style="font-size: 0.85rem;">
-                                                {{ $r->pickup_code }}
-                                            </code>
-                                            <button type="button"
-                                                    class="btn btn-sm btn-outline-primary"
-                                                    onclick="copyVoucher('{{ $r->pickup_code }}', this)"
-                                                    title="Copy kode">
-                                                <i class="bi bi-clipboard"></i>
-                                            </button>
-                                        </div>
-                                        <small class="text-muted d-block mt-1">
-                                            Tunjukkan kode ini ke mitra untuk ambil barang.
-                                        </small>
-                                        @if($r->pickup_expires_at)
-                                            <small class="text-danger d-block">
-                                                <i class="bi bi-clock"></i>
-                                                Berlaku s.d. {{ \Carbon\Carbon::parse($r->pickup_expires_at)->format('d M Y') }}
-                                            </small>
-                                        @endif
-                                    @elseif($r->voucher_code)
-                                        <div class="d-flex align-items-center gap-2">
-                                            <code class="text-success fw-bold" style="font-size: 0.85rem;">
-                                                {{ $r->voucher_code }}
-                                            </code>
-                                            <button type="button"
-                                                    class="btn btn-sm btn-outline-success"
-                                                    onclick="copyVoucher('{{ $r->voucher_code }}', this)"
-                                                    title="Copy kode voucher">
-                                                <i class="bi bi-clipboard"></i>
-                                            </button>
-                                        </div>
-                                        <small class="text-muted d-block mt-1">
-                                            Tukarkan kode ini di kasir / aplikasi terkait.
-                                        </small>
-                                    @elseif($r->delivery_note)
-                                        <small class="text-success fw-semibold">
-                                            <i class="bi bi-check-circle"></i>
-                                            {{ $r->delivery_note }}
-                                        </small>
-                                    @else
-                                        <small class="text-muted">-</small>
-                                    @endif
-                                </td>
-                                <td class="text-end">
-                                    <a href="{{ route('user.rewards.redemptions.show', $r->redemption_id) }}"
-                                    class="btn btn-sm btn-outline-success"
-                                    title="Lihat bukti">
-                                        <i class="bi bi-receipt"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5" class="text-center text-muted py-4">
-                                    Belum ada riwayat penukaran.
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
+    {{-- Modal konfirmasi tukar reward --}}
     <div class="modal fade" id="redeemModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow">
+            <div class="modal-content border-0">
                 <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title fw-bold">
-                        <i class="bi bi-gift text-success"></i> Konfirmasi Tukar Reward
+                    <h5 class="modal-title">
+                        <i class="bi bi-gift text-success me-2"></i>Konfirmasi tukar reward
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="modalCloseBtn"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"
+                        id="modalCloseBtn"></button>
                 </div>
+
                 <div class="modal-body text-center py-4">
-                    <img id="modalRewardImage" src="" alt=""
-                         class="rounded mb-3 d-none"
-                         style="max-height: 120px; object-fit: contain;">
+                    <img id="modalRewardImage" src="" alt="" class="modal-reward-img rounded mb-3 d-none">
 
                     <h5 class="fw-bold mb-2" id="modalRewardName">-</h5>
                     <p class="text-muted mb-4" id="modalConfirmText">Apakah kamu yakin ingin menukar reward ini?</p>
 
                     <div class="d-flex justify-content-center gap-3" id="modalPointBox">
-                        <div class="border rounded p-3 text-center" style="min-width: 130px;">
-                            <div class="small text-muted mb-1">Poin Dibutuhkan</div>
+                        <div class="point-box border rounded p-3 text-center">
+                            <div class="small text-muted mb-1">Poin dibutuhkan</div>
                             <div class="fs-5 fw-bold text-warning">
                                 ⭐ <span id="modalRewardPoints">0</span>
                             </div>
                         </div>
-                        <div class="border rounded p-3 text-center" style="min-width: 130px;">
-                            <div class="small text-muted mb-1">Poin Kamu</div>
+                        <div class="point-box border rounded p-3 text-center">
+                            <div class="small text-muted mb-1">Poin kamu</div>
                             <div class="fs-5 fw-bold text-success">
                                 ⭐ {{ number_format($user->points) }}
                             </div>
@@ -221,13 +270,14 @@
                         $userPhone = auth()->user()->phone ?? null;
                     @endphp
 
+                    {{-- Form reward manual (pulsa / e-wallet) --}}
                     <div id="modalPhoneField" class="text-start mt-3 d-none">
                         <div id="modalEwalletField" class="d-none mb-3">
                             <label class="form-label small fw-semibold">
-                                Pilih E-Wallet <span class="text-danger">*</span>
+                                Pilih e-wallet <span class="text-danger">*</span>
                             </label>
                             <select id="modalEwalletProvider" class="form-select form-select-sm">
-                                <option value="">-- Pilih Provider --</option>
+                                <option value="">Pilih provider</option>
                                 <option value="DANA">DANA</option>
                                 <option value="GoPay">GoPay</option>
                                 <option value="OVO">OVO</option>
@@ -237,86 +287,78 @@
                         </div>
 
                         <label class="form-label small fw-semibold">
-                            Nomor Tujuan <span class="text-danger">*</span>
+                            Nomor tujuan <span class="text-danger">*</span>
                         </label>
 
                         @if($userPhone)
-                            <div class="alert alert-light border small py-2 mb-2 d-flex justify-content-between align-items-center">
+                            <div class="alert alert-light border small py-2 mb-2 d-flex justify-content-between align-items-center gap-2">
                                 <div>
-                                    <i class="bi bi-telephone-fill text-success"></i>
+                                    <i class="bi bi-telephone-fill text-success me-1"></i>
                                     Nomor kamu: <strong>{{ $userPhone }}</strong>
                                 </div>
-                                <button type="button"
-                                        class="btn btn-sm btn-success"
-                                        onclick="document.getElementById('modalPhoneNumber').value='{{ $userPhone }}'; document.getElementById('modalPhoneNumber').dispatchEvent(new Event('input'));">
-                                    <i class="bi bi-check-lg"></i> Pakai
+                                <button type="button" class="btn btn-sm btn-success"
+                                    onclick="document.getElementById('modalPhoneNumber').value='{{ $userPhone }}'; document.getElementById('modalPhoneNumber').dispatchEvent(new Event('input'));">
+                                    <i class="bi bi-check-lg me-1"></i>Pakai
                                 </button>
                             </div>
                         @endif
 
-                        <input type="text"
-                               id="modalPhoneNumber"
-                               class="form-control form-control-sm"
-                               value="{{ $userPhone ?? '' }}"
-                               placeholder="08xxxxxxxxxx">
-                        <small class="text-muted">
-                            Ubah kalau mau kirim ke nomor lain.
-                        </small>
+                        <input type="text" id="modalPhoneNumber" class="form-control form-control-sm"
+                            value="{{ $userPhone ?? '' }}" placeholder="08xxxxxxxxxx">
+                        <small class="text-muted">Ubah jika ingin mengirim ke nomor lain.</small>
                     </div>
 
+                    {{-- Form reward ambil sendiri --}}
                     <div id="modalPickupField" class="text-start mt-3 d-none">
                         <div class="alert alert-warning small mb-3">
-                            <i class="bi bi-info-circle"></i>
+                            <i class="bi bi-info-circle me-1"></i>
                             Setelah menukar, kamu akan mendapat <strong>kode pengambilan</strong>.
                             Tunjukkan kode tersebut ke mitra untuk mengambil barang.
                         </div>
                         <label class="form-label small fw-semibold">
-                            Rencana Tanggal Ambil <span class="text-danger">*</span>
+                            Rencana tanggal ambil <span class="text-danger">*</span>
                         </label>
-                        <input type="date"
-                               id="modalPickupDate"
-                               class="form-control form-control-sm"
-                               value="{{ now()->addDay()->format('Y-m-d') }}"
-                               min="{{ now()->format('Y-m-d') }}">
-                        <small class="text-muted">
-                            Kode berlaku 30 hari sejak tanggal tukar.
-                        </small>
+                        <input type="date" id="modalPickupDate" class="form-control form-control-sm"
+                            value="{{ now()->addDay()->format('Y-m-d') }}" min="{{ now()->format('Y-m-d') }}">
+                        <small class="text-muted">Kode berlaku 30 hari sejak tanggal tukar.</small>
                     </div>
 
                     <div class="alert alert-warning mt-3 mb-0 small" id="modalWarningBox">
-                        <i class="bi bi-exclamation-triangle"></i>
+                        <i class="bi bi-exclamation-triangle me-1"></i>
                         Poin akan langsung terpotong dan tidak bisa dikembalikan.
                     </div>
 
+                    {{-- Loading --}}
                     <div id="modalLoading" class="d-none py-4">
-                        <div class="spinner-border text-success mb-3" role="status" style="width: 3rem; height: 3rem;">
-                            <span class="visually-hidden">Loading...</span>
+                        <div class="spinner-border spinner-lg text-success mb-3" role="status">
+                            <span class="visually-hidden">Memuat...</span>
                         </div>
                         <h6 class="fw-bold mb-1">Memproses penukaran...</h6>
                         <p class="text-muted small mb-0">Mohon tunggu sebentar.</p>
                     </div>
 
+                    {{-- Berhasil --}}
                     <div id="modalSuccess" class="d-none py-4">
                         <div class="mb-3">
-                            <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
+                            <i class="bi bi-check-circle-fill success-icon text-success"></i>
                         </div>
                         <h5 class="fw-bold text-success mb-2" id="modalSuccessTitle">Berhasil!</h5>
                         <p class="text-muted mb-3" id="modalSuccessMessage">Reward berhasil ditukar.</p>
 
                         <div id="modalSuccessPhoneBox" class="alert alert-success small mb-0 d-none">
-                            <i class="bi bi-telephone-fill"></i>
+                            <i class="bi bi-telephone-fill me-1"></i>
                             Nomor tujuan: <strong id="modalSuccessPhone">-</strong>
                         </div>
 
                         <div id="modalSuccessPickupBox" class="d-none">
                             <div class="alert alert-primary small mb-2">
-                                <i class="bi bi-key-fill"></i> Kode Pengambilan:
+                                <i class="bi bi-key-fill me-1"></i>Kode pengambilan:
                                 <div class="mt-2">
                                     <code class="fs-4 fw-bold text-primary" id="modalSuccessCode">-</code>
                                 </div>
                             </div>
                             <small class="text-muted d-block">
-                                <i class="bi bi-clock"></i>
+                                <i class="bi bi-clock me-1"></i>
                                 Berlaku s.d. <strong id="modalSuccessExpiry">-</strong>
                             </small>
                             <small class="text-muted d-block mt-1">
@@ -325,17 +367,17 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="modal-footer border-0 pt-0" id="modalFooterNormal">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                        Batal
-                    </button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
                     <button type="button" class="btn btn-success" id="redeemSubmitBtn">
-                        <i class="bi bi-check-lg"></i> Ya, Tukar Sekarang
+                        <i class="bi bi-check-lg me-1"></i>Ya, tukar sekarang
                     </button>
                 </div>
                 <div class="modal-footer border-0 pt-0 d-none" id="modalFooterSuccess">
-                    <button type="button" class="btn btn-success w-100" data-bs-dismiss="modal" onclick="location.reload();">
-                        <i class="bi bi-check-lg"></i> Selesai
+                    <button type="button" class="btn btn-success w-100" data-bs-dismiss="modal"
+                        onclick="location.reload();">
+                        <i class="bi bi-check-lg me-1"></i>Selesai
                     </button>
                 </div>
             </div>

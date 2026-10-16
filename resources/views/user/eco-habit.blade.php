@@ -3,52 +3,94 @@
 @section('title', 'Eco Habit Score - WasteLyn')
 
 @section('content')
-    <div class="page-heading">
+    <style>
+        /* Kotak ikon: ikon pas di tengah, ukuran tetap bawaan Mazer */
+        .eco-habit .stats-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .eco-habit .stats-icon i {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: auto;
+            height: auto;
+            margin: 0;
+            padding: 0;
+            line-height: 1;
+            color: #fff;
+        }
+
+        .eco-habit .stats-icon i::before {
+            display: block;
+            line-height: 1;
+            vertical-align: 0;
+        }
+
+        .eco-habit .stats-icon.wl-green {
+            background-color: #2E7D32;
+        }
+
+        /* Lebar kolom ikon di tabel riwayat */
+        .eco-habit .col-icon {
+            width: 50px;
+        }
+    </style>
+
+    @php
+        $xp = $userXp->xp ?? 0;
+        $level = $userXp->level ?? 1;
+        $levelName = $userXp->level_name ?? 'Green Newbie';
+        $nextXp = $userXp->next_level_xp ?? null;
+        $progress = $userXp->progress_percent ?? 0;
+    @endphp
+
+    <div class="page-heading eco-habit">
         <div class="page-title">
             <div class="row align-items-center">
-                <div class="col-12 col-md-6">
-                    <h3 class="fw-bold">🌱 Eco Habit Score</h3>
+                <div class="col-12 col-md-6 order-md-1 order-last">
+                    <h3>Eco Habit Score</h3>
                     <p class="text-subtitle text-muted">
-                        Konsistensi kebiasaan ramah lingkunganmu
+                        Konsistensi kebiasaan ramah lingkunganmu.
                     </p>
+                </div>
+                <div class="col-12 col-md-6 order-md-2 order-first">
+                    <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item active" aria-current="page">Eco Habit Score</li>
+                        </ol>
+                    </nav>
                 </div>
             </div>
         </div>
 
         <section class="section">
 
-            <div class="row g-3 mb-4">
-                <div class="col-12 col-lg-6">
-                    <div class="card shadow-sm border-0 rounded-4 h-100">
+            <div class="row">
+                {{-- Level dan XP --}}
+                <div class="col-12 col-lg-6 mb-4">
+                    <div class="card h-100 mb-0">
                         <div class="card-body">
-                            @php
-                                $xp = $userXp->xp ?? 0;
-                                $level = $userXp->level ?? 1;
-                                $levelName = $userXp->level_name ?? 'Green Newbie';
-                                $nextXp = $userXp->next_level_xp ?? null;
-                                $progress = $userXp->progress_percent ?? 0;
-                            @endphp
-
-                            <div class="d-flex align-items-center gap-3 mb-3">
-                                <div class="bg-success bg-opacity-10 text-success rounded-3 p-3">
-                                    <i class="bi bi-trophy-fill fs-2"></i>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="stats-icon wl-green mb-0 flex-shrink-0">
+                                    <i class="bi bi-trophy-fill fs-4"></i>
                                 </div>
                                 <div>
-                                    <div class="text-uppercase small fw-semibold text-secondary">
-                                        Level Kamu
-                                    </div>
-                                    <div class="fs-4 fw-bold">{{ $levelName }}</div>
+                                    <h6 class="text-muted font-semibold mb-1">Level kamu</h6>
+                                    <h4 class="font-extrabold mb-0">{{ $levelName }}</h4>
                                 </div>
                             </div>
 
-                            <div class="d-flex justify-content-between align-items-end mb-2">
+                            <div class="d-flex justify-content-between align-items-end mt-4">
                                 <div>
-                                    <div class="fs-1 fw-bold">{{ number_format($xp) }}</div>
+                                    <h2 class="font-extrabold mb-0">{{ number_format($xp) }}</h2>
                                     <small class="text-muted">Total Eco Habit Score</small>
                                 </div>
                                 @if($nextXp)
                                     <div class="text-end">
-                                        <div class="fs-5 fw-bold text-success">{{ $progress }}%</div>
+                                        <h5 class="font-bold mb-0">{{ $progress }}%</h5>
                                         <small class="text-muted">
                                             {{ number_format($nextXp - $xp) }} XP lagi
                                         </small>
@@ -56,25 +98,24 @@
                                 @endif
                             </div>
 
-                            <div class="progress" style="height: 10px;">
-                                <div class="progress-bar bg-success" style="width: {{ $progress }}%"></div>
+                            <div class="progress progress-success mt-3">
+                                <div class="progress-bar" role="progressbar" style="width: {{ $progress }}%"
+                                    aria-valuenow="{{ $progress }}" aria-valuemin="0" aria-valuemax="100">
+                                </div>
                             </div>
 
-                            @if($nextXp)
-                                <small class="text-muted mt-2 d-block">
-                                    {{ number_format($xp) }} / {{ number_format($nextXp) }} XP
-                                    menuju level berikutnya
-                                </small>
-                            @else
-                                <small class="text-muted mt-2 d-block">
-                                    🎉 Level maksimal tercapai
-                                </small>
-                            @endif
+                            <small class="text-muted d-block mt-2">
+                                @if($nextXp)
+                                    {{ number_format($xp) }} / {{ number_format($nextXp) }} XP menuju level berikutnya
+                                @else
+                                    Level maksimal tercapai
+                                @endif
+                            </small>
 
                             @if($user->wasteBank)
-                                <div class="mt-3 pt-3 border-top">
+                                <div class="border-top mt-3 pt-3">
                                     <small class="text-muted">
-                                        <i class="bi bi-shop"></i>
+                                        <i class="bi bi-shop me-1"></i>
                                         XP dari <strong>{{ $user->wasteBank->name }}</strong>
                                     </small>
                                 </div>
@@ -83,39 +124,45 @@
                     </div>
                 </div>
 
-                <div class="col-12 col-lg-6">
-                    <div class="card shadow-sm border-0 rounded-4 h-100">
-                        <div class="card-body">
-                            <h6 class="fw-semibold mb-3">📊 Cara Dapat XP</h6>
-
-                            <div class="d-flex align-items-center gap-2 mb-2">
-                                <i class="bi bi-truck text-success"></i>
-                                <span class="small">Setor sampah = <strong>+20 XP/kg</strong></span>
-                            </div>
-                            <div class="d-flex align-items-center gap-2 mb-2">
-                                <i class="bi bi-bullseye text-success"></i>
-                                <span class="small">Selesaikan misi = <strong>+10 XP</strong></span>
-                            </div>
-                            <div class="d-flex align-items-center gap-2 mb-2">
-                                <i class="bi bi-fire text-success"></i>
-                                <span class="small">Konsisten 4 minggu = <strong>+50 XP</strong></span>
-                            </div>
-                            <div class="d-flex align-items-center gap-2 mb-2">
-                                <i class="bi bi-book text-success"></i>
-                                <span class="small">Baca artikel EcoTips = <strong>+5 XP</strong></span>
-                            </div>
-                            <div class="d-flex align-items-center gap-2">
-                                <i class="bi bi-trophy text-success"></i>
-                                <span class="small">Ikut tantangan = <strong>+15 XP</strong></span>
+                {{-- Cara dapat XP --}}
+                <div class="col-12 col-lg-6 mb-4">
+                    <div class="card h-100 mb-0">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Cara dapat XP</h5>
+                        </div>
+                        <div class="card-body pt-0">
+                            <div class="list-group list-group-flush">
+                                <div class="list-group-item d-flex align-items-center justify-content-between px-0">
+                                    <span>
+                                        <i class="bi bi-truck text-success me-2"></i>Setor sampah
+                                    </span>
+                                    <span class="badge bg-light-success">+20 XP/kg</span>
+                                </div>
+                                <div class="list-group-item d-flex align-items-center justify-content-between px-0">
+                                    <span>
+                                        <i class="bi bi-bullseye text-success me-2"></i>Selesaikan misi
+                                    </span>
+                                    <span class="badge bg-light-success">+1 s/d +10 XP</span>
+                                </div>
+                                <div class="list-group-item d-flex align-items-center justify-content-between px-0">
+                                    <span>
+                                        <i class="bi bi-fire text-success me-2"></i>Konsisten 4 minggu
+                                    </span>
+                                    <span class="badge bg-light-success">+50 XP</span>
+                                </div>
+                                
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="card shadow-sm border-0 rounded-4">
-                <div class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center">
-                    <span><i class="bi bi-clock-history"></i> Riwayat XP</span>
+            {{-- Riwayat XP (gaya tabel tidak diubah) --}}
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        Riwayat XP
+                    </h5>
                     <span class="badge bg-secondary">{{ $logs->total() }}</span>
                 </div>
                 <div class="card-body p-0">
@@ -123,7 +170,7 @@
                         <table class="table table-hover align-middle mb-0">
                             <thead class="table-light">
                                 <tr>
-                                    <th width="50"></th>
+                                    <th class="col-icon"></th>
                                     <th>Deskripsi</th>
                                     <th>Tanggal</th>
                                     <th class="text-end">XP</th>
@@ -153,8 +200,7 @@
                                 @empty
                                     <tr>
                                         <td colspan="4" class="text-center text-muted py-4">
-                                            <i class="bi bi-inbox fs-3 d-block mb-2"></i>
-                                            Belum ada riwayat XP. Yuk mulai setor sampah atau ikuti misi!
+                                            Belum ada riwayat XP. Mulai setor sampah atau ikuti misi.
                                         </td>
                                     </tr>
                                 @endforelse
@@ -163,7 +209,7 @@
                     </div>
                 </div>
                 @if($logs->hasPages())
-                    <div class="card-footer bg-white">
+                    <div class="card-footer">
                         {{ $logs->links() }}
                     </div>
                 @endif
