@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\WasteBank;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
@@ -234,14 +235,23 @@ class AdminUserController extends Controller
                 ->with('error', 'Tidak bisa menghapus akun sendiri.');
         }
 
-        if (
-            $user->photo &&
-            Storage::disk('public')->exists($user->photo)
-        ) {
-            Storage::disk('public')->delete($user->photo);
-        }
+        DB::transaction(function () use ($user) {
+            if (
+                $user->photo &&
+                Storage::disk('public')->exists($user->photo)
+            ) {
+                Storage::disk('public')->delete($user->photo);
+            }
 
-        $user->delete();
+            $user->aiChatMessages()->delete();
+            $user->aiChatSessions()->delete();
+            $user->xpLogs()->delete();
+            $user->userXp()->delete();
+
+            WasteBank::where('mitra_id', $user->user_id)->delete();
+
+            $user->delete();
+        });
 
         return redirect()
             ->route('admin.users.index')
