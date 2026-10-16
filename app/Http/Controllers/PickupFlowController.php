@@ -138,6 +138,9 @@ class PickupFlowController extends Controller
                 $user->points = ($user->points ?? 0) + $pointsEarned;
                 $user->updateLevel();
                 $user->save();
+
+                // ⬇️ Update streak mingguan
+                $user->updateStreak();
             }
 
             Transaction::create([

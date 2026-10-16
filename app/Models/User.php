@@ -28,8 +28,10 @@ class User extends Authenticatable
         'waste_bank_id',
         'onboarding_completed',
         'onboarding_completed_at',
-        'latitude', 
+        'latitude',
         'longitude',
+        'current_streak',
+        'last_streak_week',
     ];
 
     protected $hidden = [
@@ -47,6 +49,8 @@ class User extends Authenticatable
             'xp' => 'integer',
             'points' => 'integer',
             'level' => 'integer',
+            'current_streak' => 'integer',
+            'last_streak_week' => 'date',
         ];
     }
 
@@ -241,6 +245,60 @@ class User extends Authenticatable
         }
 
         return false;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Streak System
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Update streak mingguan user.
+     * Dipanggil setiap ada aktivitas (setor sampah / selesai misi).
+     */
+    public function updateStreak(): void
+    {
+        $currentWeek = now()->format('oW');
+
+        $lastWeek = $this->last_streak_week
+            ? \Carbon\Carbon::parse($this->last_streak_week)->format('oW')
+            : null;
+
+        if ($lastWeek === $currentWeek) {
+            return;
+        }
+
+        $lastWeekDate = $this->last_streak_week
+            ? \Carbon\Carbon::parse($this->last_streak_week)
+            : null;
+
+        if ($lastWeekDate && $lastWeekDate->diffInWeeks(now()->startOfWeek()) === 1) {
+            $this->current_streak = ($this->current_streak ?? 0) + 1;
+        } else {
+            $this->current_streak = 1;
+        }
+
+        $this->last_streak_week = now()->startOfWeek()->toDateString();
+        $this->save();
+
+        // Bonus XP setiap kelipatan 4 minggu
+        if ($this->current_streak > 0 && $this->current_streak % 4 === 0) {
+            try {
+                app(\App\Services\XpService::class)->addXpFromStreak(
+                    $this,
+                    $this->waste_bank_id
+                );
+
+                // ⬇️ TAMBAH: Set session flag buat modal
+                session()->put('streak_bonus', [
+                    'streak' => $this->current_streak,
+                    'xp' => 50,
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('Gagal kasih bonus streak: ' . $e->getMessage());
+            }
+        }
     }
 
     /*

@@ -7,6 +7,7 @@ use App\Models\Submission;
 use App\Models\UserMission;
 use App\Models\MissionProgressLog;
 use App\Services\GeminiService;
+use App\Services\XpService;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
 
@@ -107,7 +108,7 @@ class SubmissionController extends Controller
 
             // XP misi (diambil dari form mitra: $mission->reward_xp)
             if ($mission->reward_xp > 0) {
-                app(\App\Services\XpService::class)->addXp(
+                app(XpService::class)->addXp(
                     $user,
                     $mission->bank_id,
                     $mission->reward_xp,
@@ -121,6 +122,9 @@ class SubmissionController extends Controller
             if ($mission->reward_points > 0) {
                 $user->addPoints($mission->reward_points);
             }
+
+            // ⬇️ Update streak mingguan
+            $user->updateStreak();
         }
 
         // 9. redirect dengan pesan yang sesuai
