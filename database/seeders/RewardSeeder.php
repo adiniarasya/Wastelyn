@@ -15,7 +15,7 @@ class RewardSeeder extends Seeder
                 'description' => 'Tukar poin dengan pulsa semua operator',
                 'point_required' => 1000,
                 'stock' => 50,
-                'image' => 'pulsa-10k.png',
+                'image' => 'image/pulsa-10k.png',
                 'status' => 'available',
                 'created_at' => now(),
                 'updated_at' => now(),
