@@ -1,3 +1,32 @@
+<style>
+    /* Bikin isi menu jadi flexbox biar sejajar vertikal */
+    #sidebar .sidebar-link {
+        display: flex !important;
+        align-items: center !important;
+        gap: 12px; /* Jarak antara icon dan teks */
+    }
+
+    /* Reset bawaan icon biar gak turun */
+    #sidebar .sidebar-link i {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        vertical-align: middle;
+        line-height: 1;
+        margin: 0;
+        padding: 0;
+        font-size: 1.2rem; /* Sesuaikan ukuran icon kalau perlu */
+    }
+
+    /* Teks juga di tengah */
+    #sidebar .sidebar-link span {
+        display: inline-block;
+        line-height: 1.2;
+        vertical-align: middle;
+    }
+</style>
+
+
 <div id="sidebar" class="active">
     <div class="sidebar-wrapper active">
         <div class="sidebar-header">
@@ -243,17 +272,7 @@
                             </a>
                         </li>
 
-                        <li class="sidebar-title">Akun</li>
-
-                        <li class="sidebar-item {{ request()->routeIs('user.pickup-requests.*') ? 'active' : '' }}">
-                            <a href="{{ route('user.pickup-requests.index') }}" class="sidebar-link">
-                                <i class="bi bi-bell"></i>
-                                <span>Notifikasi</span>
-                                @if($sidebarNotifCount > 0)
-                                    <span class="badge bg-danger ms-auto sidebar-notif-badge">{{ $sidebarNotifCount }}</span>
-                                @endif
-                            </a>
-                        </li>
+                       
 
                     @endif
 
