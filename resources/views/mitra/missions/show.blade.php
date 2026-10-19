@@ -19,9 +19,7 @@
     </div>
 
     <div class="row g-3">
-        {{-- KOLOM KIRI --}}
         <div class="col-md-6">
-            {{-- Info Mission --}}
             <div class="card border-0 shadow-sm mb-3">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -61,8 +59,6 @@
                     </div>
                 </div>
             </div>
-
-            {{-- Waktu --}}
             <div class="card border-0 shadow-sm mb-3">
                 <div class="card-body">
                     <h6 class="fw-bold mb-3">Waktu</h6>
@@ -86,10 +82,7 @@
                 </div>
             </div>
         </div>
-
-        {{-- KOLOM KANAN --}}
         <div class="col-md-6">
-            {{-- Gambar Mission (BARU) --}}
             <div class="card border-0 shadow-sm mb-3">
                 <div class="card-body">
                     <h6 class="fw-bold mb-3">Gambar Mission</h6>
@@ -110,16 +103,12 @@
                     @endif
                 </div>
             </div>
-
-            {{-- Deskripsi --}}
             <div class="card border-0 shadow-sm mb-3">
                 <div class="card-body">
                     <h6 class="fw-bold mb-3">Deskripsi Mission</h6>
                     <p class="small text-muted mb-0">{{ $mission->description ?? '-' }}</p>
                 </div>
             </div>
-
-            {{-- AI Prompt --}}
             <div class="card border-0 shadow-sm mb-3">
                 <div class="card-body">
                     <h6 class="fw-bold mb-3">AI Prompt</h6>
@@ -129,8 +118,6 @@
                 </div>
             </div>
         </div>
-
-        {{-- Daftar Warga (full width) --}}
         <div class="col-12">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">

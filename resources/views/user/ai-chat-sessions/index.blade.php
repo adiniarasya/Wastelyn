@@ -4,8 +4,6 @@
 
 @section('content')
     <div class="bero-wrap">
-
-        {{-- Sidebar riwayat --}}
         <aside class="bero-side">
             <form action="{{ route('user.ai-chat-sessions.store') }}" method="POST" class="bero-side-top">
                 @csrf
@@ -28,8 +26,6 @@
                 @endforelse
             </div>
         </aside>
-
-        {{-- Main area --}}
         <main class="bero-main">
             @if(session('success'))
                 <div class="bero-alert bero-alert-ok">{{ session('success') }}</div>
@@ -78,7 +74,6 @@
             box-sizing: border-box !important;
         }
 
-        /* ================= SIDEBAR ================= */
         .bero-side {
             width: 280px !important;
             flex-shrink: 0 !important;
@@ -180,7 +175,6 @@
             font-style: italic !important;
         }
 
-        /* ================= MAIN ================= */
         .bero-main {
             flex: 1 !important;
             padding: 40px 48px !important;
@@ -210,7 +204,6 @@
             border: 1px solid #fecaca !important;
         }
 
-        /* ================= HERO ================= */
         .bero-hero {
             flex: 1 !important;
             display: flex !important;
@@ -293,7 +286,6 @@
             font-weight: 600 !important;
         }
 
-        /* ================= RESPONSIVE ================= */
         @media (max-width: 768px) {
             .bero-wrap {
                 flex-direction: column !important;

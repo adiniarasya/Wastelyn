@@ -8,26 +8,17 @@ use Illuminate\Support\Facades\Storage;
 
 class WasteCategoryController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         $wasteCategories = WasteCategory::latest()->get();
         return view('admin.waste-categories.index', compact('wasteCategories'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         return view('admin.waste-categories.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -51,26 +42,17 @@ class WasteCategoryController extends Controller
             ->with('success', 'Jenis sampah berhasil ditambahkan');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(WasteCategory $wasteCategory)
     {
         $wasteCategory->load('pickupItems');
         return view('admin.waste-categories.show', compact('wasteCategory'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(WasteCategory $wasteCategory)
     {
         return view('admin.waste-categories.edit', compact('wasteCategory'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, WasteCategory $wasteCategory)
     {
         $data = $request->validate([
@@ -97,9 +79,6 @@ class WasteCategoryController extends Controller
             ->with('success', 'Jenis sampah berhasil diupdate');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(WasteCategory $wasteCategory)
     {
         if ($wasteCategory->icon && Storage::disk('public')->exists($wasteCategory->icon)) {

@@ -32,7 +32,6 @@
         </div>
     @endif
 
-    {{-- Filter --}}
     <form method="GET" class="mb-4">
         <div class="row g-2 align-items-end">
             <div class="col-md-3">
@@ -59,7 +58,6 @@
         </div>
     </form>
 
-    {{-- Daftar Notifikasi --}}
     <div class="card border-0 shadow-sm">
         @forelse($notifications as $notif)
             @php

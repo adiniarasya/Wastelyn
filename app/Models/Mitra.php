@@ -30,17 +30,11 @@ class Mitra extends Model
         'is_active' => 'boolean',
     ];
 
-    /**
-     * Relasi ke User
-     */
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 
-    /**
-     * Relasi ke Transactions
-     */
     public function transactions()
     {
         return $this->hasMany(Transaction::class, 'mitra_id', 'mitra_id');

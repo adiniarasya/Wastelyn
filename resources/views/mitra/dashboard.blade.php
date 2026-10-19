@@ -11,8 +11,6 @@
     </div>
 
     <section class="section">
-
-        {{-- ===== STATISTIK UTAMA ===== --}}
         <div class="row g-3 mb-3">
             <div class="col-6 col-lg-3">
                 <div class="card border-0 shadow-sm h-100 rounded-3">
@@ -77,8 +75,6 @@
                 </div>
             </div>
         </div>
-
-        {{-- ===== PERBANDINGAN BULAN ===== --}}
         <div class="row g-3 mb-4">
             <div class="col-md-6">
                 <div class="card border-0 shadow-sm rounded-3 h-100">
@@ -127,8 +123,6 @@
                 </div>
             </div>
         </div>
-
-        {{-- ===== GRAFIK ===== --}}
         <div class="row g-3 mb-4">
             <div class="col-lg-7">
                 <div class="card border-0 shadow-sm rounded-3 h-100">
@@ -157,8 +151,6 @@
                 </div>
             </div>
         </div>
-
-        {{-- ===== PERMINTAAN & RIWAYAT ===== --}}
         <div class="row g-3">
 
             <div class="col-lg-4">
@@ -301,7 +293,6 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Chart Setoran 7 Hari
         new Chart(document.getElementById('transactionChart'), {
             type: 'bar',
             data: {
@@ -330,8 +321,6 @@
                 }
             }
         });
-
-        // Chart Pendapatan 12 Bulan
         new Chart(document.getElementById('pendapatanChart'), {
             type: 'line',
             data: {

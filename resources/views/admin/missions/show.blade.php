@@ -122,7 +122,6 @@
                     <div class="row justify-content-center">
                         <div class="col-12 col-lg-10">
 
-                            {{-- Header: Judul + Status --}}
                             <div class="text-center mb-4">
                                 <div class="rounded-circle d-inline-flex justify-content-center align-items-center"
                                     style="width:90px;height:90px;background:#E6F7EE;color:#2E7D32;">
@@ -177,7 +176,6 @@
                                 </div>
                             </div>
 
-                            {{-- Stat Cards --}}
                             <div class="row g-3 mb-4">
                                 <div class="col-6 col-md-3">
                                     <div class="stat-card" style="background:#E7F1FF;">
@@ -213,7 +211,6 @@
                                 </div>
                             </div>
 
-                            {{-- Deskripsi --}}
                             @if($mission->description)
                                 <div class="border-top pt-3 mb-3">
                                     <h6 class="fw-bold mb-3">Deskripsi</h6>
@@ -223,7 +220,6 @@
                                 </div>
                             @endif
 
-                            {{-- Info Misi --}}
                             <div class="border-top pt-3 mb-3">
                                 <h6 class="fw-bold mb-3">Informasi Misi</h6>
 
@@ -254,7 +250,6 @@
                                 </div>
                             </div>
 
-                            {{-- Daftar Peserta --}}
                             <div class="border-top pt-3 mb-3">
                                 <h6 class="fw-bold mb-3">
                                     Peserta Misi
@@ -327,7 +322,6 @@
                                 @endforelse
                             </div>
 
-                            {{-- Tombol --}}
                             <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
                                 <a href="{{ route('admin.missions.index') }}" class="btn btn-light border px-4">
                                     Kembali

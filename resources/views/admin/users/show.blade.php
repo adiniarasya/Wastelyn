@@ -35,7 +35,6 @@
                     <div class="row justify-content-center">
                         <div class="col-12 col-lg-9">
 
-                            {{-- Foto Profil --}}
                             <div class="text-center mb-4">
                                 @if($user->photo && \Illuminate\Support\Facades\Storage::disk('public')->exists($user->photo))
                                     <img src="{{ asset('storage/' . $user->photo) }}" alt="{{ $user->name }}"
@@ -102,7 +101,6 @@
                                 </div>
                             </div>
 
-                            {{-- Statistik Singkat --}}
                             <div class="row g-3 mb-4">
                                 <div class="col-4">
                                     <div class="text-center p-3 rounded-3" style="background:#E7F1FF;">
@@ -130,7 +128,6 @@
                                 </div>
                             </div>
 
-                            {{-- Detail Info --}}
                             <div class="border-top pt-3">
                                 <h6 class="fw-bold mb-3">Informasi Kontak</h6>
 
@@ -173,7 +170,6 @@
                                 @endif
                             </div>
 
-                            {{-- Tombol Aksi --}}
                             <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
                                 <a href="{{ route('admin.users.index') }}" class="btn btn-light border px-4">
                                     Kembali

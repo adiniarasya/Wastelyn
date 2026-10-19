@@ -179,8 +179,6 @@
     <div class="info">
         <strong>Tanggal Cetak:</strong> {{ now()->format('d F Y, H:i') }}
     </div>
-
-    {{-- Ringkasan Statistik --}}
     <div class="section-title">Ringkasan Data</div>
     <table class="stats-grid">
         <tr>
@@ -207,7 +205,6 @@
         </tr>
     </table>
 
-    {{-- Transaksi Terbaru --}}
     <div class="section-title">Transaksi Terbaru</div>
     <table class="data">
         <thead>
@@ -248,7 +245,6 @@
         </tbody>
     </table>
 
-    {{-- User Terbaru --}}
     <div class="section-title">User Terbaru</div>
     <table class="data">
         <thead>

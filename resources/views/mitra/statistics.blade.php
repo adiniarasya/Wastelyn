@@ -9,8 +9,6 @@
             <p class="text-muted small mb-0">Ringkasan aktivitas setoran sampah</p>
         </div>
     </div>
-
-    {{-- Filter Periode --}}
     <form method="GET" class="mb-4">
         <div class="row g-2 align-items-end">
             <div class="col-md-3">
@@ -27,8 +25,6 @@
             </div>
         </div>
     </form>
-
-    {{-- Ringkasan Total --}}
     <div class="row g-3 mb-4">
         <div class="col-md-3">
             <div class="card border-0 shadow-sm">
@@ -65,8 +61,6 @@
             </div>
         </div>
     </div>
-
-    {{-- Grafik Per Jenis Sampah --}}
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body">
             <h6 class="fw-bold mb-3">Setoran per Jenis Sampah</h6>
@@ -75,8 +69,6 @@
             </div>
         </div>
     </div>
-
-    {{-- Tabel Detail Per Jenis Sampah --}}
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body pb-0">
             <h6 class="fw-bold mb-3">Detail per Jenis Sampah</h6>
@@ -125,8 +117,6 @@
             </table>
         </div>
     </div>
-
-    {{-- Statistik Status --}}
     <div class="row g-3 mb-4">
         <div class="col-md-3">
             <div class="card border-0 shadow-sm">
@@ -161,8 +151,6 @@
             </div>
         </div>
     </div>
-
-    {{-- Grafik Bulanan --}}
     <div class="card border-0 shadow-sm">
         <div class="card-body">
             <h6 class="fw-bold mb-3">Setoran 12 Bulan Terakhir</h6>
@@ -177,7 +165,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // GRAFIK PER JENIS SAMPAH
             const ctxJenis = document.getElementById('chartJenis').getContext('2d');
             const labelsJenis = @json($sampahPerJenis->pluck('wasteCategory.name')->map(fn($n) => $n ?? 'Lainnya'));
             const dataJenis = @json($sampahPerJenis->pluck('total_berat'));
@@ -205,8 +192,7 @@
                     }
                 }
             });
-
-            // GRAFIK BULANAN
+            
             const ctxBulanan = document.getElementById('chartBulanan').getContext('2d');
             const labelsBulanan = @json($bulanLabels);
             const dataBulanan = @json($bulanData);

@@ -46,8 +46,6 @@
                 <p class="mt-2 text-xs text-red-600">{{ $message }}</p>
             @enderror
         </div>
-
-        {{-- NO. TELEPON: sekarang selalu tampil untuk Warga & Mitra --}}
         <div>
             <label for="phone" class="block mb-2 text-sm font-medium" style="color:#1a2330;">
                 No. Telepon
@@ -125,7 +123,6 @@
             @enderror
         </div>
 
-        {{-- FIELD KHUSUS MITRA: alamat & peta --}}
         <div id="mitra-fields" class="space-y-4 {{ old('role') === 'mitra' ? '' : 'hidden' }}">
             <div>
                 <label for="address" class="block mb-2 text-sm font-medium" style="color:#1a2330;">
@@ -237,9 +234,6 @@
             const lngEl = document.getElementById('longitude');
             const coordsEl = document.getElementById('coords-display');
             const alamatEl = document.getElementById('alamat-terpilih');
-
-            // Catatan: phone TIDAK lagi diubah required-nya di sini.
-            // phone selalu required untuk kedua role (diatur di HTML).
 
             if (isMitra) {
                 mitraFields.classList.remove('hidden');

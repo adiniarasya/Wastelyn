@@ -4,7 +4,6 @@
 
 @section('content')
     <div class="page-heading">
-        {{-- Header (pola sama seperti halaman lain) --}}
         <div class="page-title">
             <div class="row align-items-center">
                 <div class="col-12 col-md-8">

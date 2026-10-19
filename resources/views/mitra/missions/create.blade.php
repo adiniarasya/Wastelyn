@@ -10,8 +10,6 @@
 
     <form action="{{ route('mitra.missions.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
-
-        {{-- SECTION 1: Info Mission --}}
         <div class="card border-0 shadow-sm mb-3">
             <div class="card-body">
                 <h6 class="fw-bold mb-3">Informasi Mission</h6>
@@ -54,8 +52,6 @@
                 </div>
             </div>
         </div>
-
-        {{-- SECTION 1.5: Gambar Mission --}}
         <div class="card border-0 shadow-sm mb-3">
             <div class="card-body">
                 <h6 class="fw-bold mb-3">Gambar Mission</h6>
@@ -86,8 +82,6 @@
                 </div>
             </div>
         </div>
-
-        {{-- SECTION 2: Target & Tipe --}}
         <div class="card border-0 shadow-sm mb-3">
             <div class="card-body">
                 <h6 class="fw-bold mb-3">Target & Tipe</h6>
@@ -132,7 +126,6 @@
             </div>
         </div>
 
-        {{-- SECTION 3: Validasi AI --}}
 <div class="card border-0 shadow-sm mb-3">
     <div class="card-body">
         <h6 class="fw-bold mb-1">Validasi AI</h6>
@@ -142,8 +135,6 @@
         </p>
 
         <label class="form-label small text-muted">AI Prompt <span class="text-danger">*</span></label>
-
-        {{-- Kotak Contoh Prompt (bisa disalin) --}}
         <div class="d-flex justify-content-between align-items-center bg-light border rounded p-2 mb-2 small">
             <div class="text-truncate me-2" id="contohPrompt" style="font-family: monospace; font-size: 12px;">
                 Hitung jumlah botol plastik di gambar ini. Jawab JSON: {"valid": bool, "count": int, "reason": string}
@@ -164,8 +155,6 @@
         @enderror
     </div>
 </div>
-
-        {{-- SECTION 4: Reward --}}
         <div class="card border-0 shadow-sm mb-3">
             <div class="card-body">
                 <h6 class="fw-bold mb-3">Reward</h6>
@@ -194,7 +183,6 @@
             </div>
         </div>
 
-        {{-- SECTION 5: Periode & Status --}}
         <div class="card border-0 shadow-sm mb-3">
             <div class="card-body">
                 <h6 class="fw-bold mb-3">Periode & Status</h6>
@@ -234,7 +222,6 @@
             </div>
         </div>
 
-        {{-- Tombol Aksi --}}
         <div class="d-flex justify-content-end gap-2 mb-4">
             <a href="{{ route('mitra.missions.index') }}"
                class="btn btn-outline-secondary btn-sm"
@@ -253,8 +240,6 @@
         const textarea = document.getElementById('aiPromptInput');
         textarea.value = contoh;
         textarea.focus();
-
-        // Feedback visual: tombol berubah sebentar
         const btn = event.currentTarget;
         const originalHtml = btn.innerHTML;
         btn.innerHTML = '<i class="bi bi-check-lg"></i>';
@@ -266,8 +251,6 @@
             btn.classList.add('btn-outline-secondary');
         }, 1500);
     }
-
-    // Preview gambar sebelum upload
     document.getElementById('imageInput')?.addEventListener('change', function(e) {
         const file = e.target.files[0];
         const preview = document.getElementById('imagePreview');

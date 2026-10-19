@@ -116,13 +116,11 @@ class PickupRequest extends Model
         return $this->belongsTo(WasteBank::class, 'bank_id', 'bank_id');
     }
 
-    // alias, karena controller pakai 'wasteBank'
     public function wasteBank()
     {
         return $this->belongsTo(WasteBank::class, 'bank_id', 'bank_id');
     }
 
-    // mitra_id menunjuk ke users.user_id (user role mitra)
     public function mitra()
     {
         return $this->belongsTo(User::class, 'mitra_id', 'user_id');
@@ -150,9 +148,6 @@ class PickupRequest extends Model
             'pickup_request_id'
         );
     }
-        /**
-     * Ambil harga efektif (override mitra atau default admin).
-     */
     public function getHargaEfektifAttribute(): array
     {
         $default = [

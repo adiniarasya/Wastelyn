@@ -9,13 +9,11 @@ use RuntimeException;
 
 class GeminiService
 {
-    // === Dari punyamu (HEAD) ===
     protected ?string $apiKey;
     protected string $model;
     protected array $fallbackModels;
     protected string $baseUrl;
 
-    // === Dari temenmu (de3b9d1) ===
     private const MODEL = 'gemini-flash-lite-latest';
 
     public function __construct()
@@ -41,7 +39,6 @@ class GeminiService
         );
     }
 
-    // === Dari punyamu ===
     public function chat(
         string $message,
         array $history = [],
@@ -94,7 +91,6 @@ class GeminiService
         return $this->extractText($data);
     }
 
-    // === GABUNGAN: struktur punyamu + ide retry & pesan dari temenmu ===
     public function analyzeImage(
         string $imagePath,
         string $prompt = '',
@@ -144,7 +140,6 @@ class GeminiService
         ];
 
         try {
-            // requestWithFallback punyamu sudah handle retry (503, 429, timeout)
             $data = $this->requestWithFallback($payload, 'analyzeImage');
         } catch (\Throwable $e) {
             Log::error('analyzeImage gagal', [
@@ -176,7 +171,6 @@ class GeminiService
         ];
     }
 
-    // === Dari punyamu ===
     public function extractImageMarkers(string $reply): array
     {
         $images = [];
@@ -200,7 +194,6 @@ class GeminiService
         ];
     }
 
-    // === Dari punyamu ===
     protected function requestWithFallback(array $payload, string $context): array
     {
         $models = array_values(array_unique(array_merge(
@@ -238,7 +231,6 @@ class GeminiService
             ?? new RuntimeException('Semua model Gemini gagal diakses.');
     }
 
-    // === Dari punyamu ===
     protected function isModelNotFound(string $msg): bool
     {
         return stripos($msg, 'not found') !== false
@@ -337,7 +329,6 @@ class GeminiService
         return $response->json() ?? [];
     }
 
-    // === Dari punyamu ===
     protected function extractText(array $data): string
     {
         $text = $data['candidates'][0]['content']['parts'][0]['text']

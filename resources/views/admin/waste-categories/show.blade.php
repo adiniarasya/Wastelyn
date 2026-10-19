@@ -34,8 +34,6 @@
                 <div class="card-body pt-4">
                     <div class="row justify-content-center">
                         <div class="col-12 col-lg-10">
-
-                            {{-- Foto & Nama --}}
                             <div class="text-center mb-4">
                                 @if($wasteCategory->icon && \Illuminate\Support\Facades\Storage::disk('public')->exists($wasteCategory->icon))
                                     <img src="{{ asset('storage/' . $wasteCategory->icon) }}" alt="{{ $wasteCategory->name }}"
@@ -60,14 +58,12 @@
                                 </p>
                             </div>
 
-                            {{-- Deskripsi --}}
                             @if($wasteCategory->description)
                                 <div class="alert alert-light border small text-muted mb-4">
                                     {{ $wasteCategory->description }}
                                 </div>
                             @endif
 
-                            {{-- Statistik Harga/Reward/Poin --}}
                             <div class="row g-3 mb-4">
                                 <div class="col-6 col-md-3">
                                     <div class="text-center p-3 rounded-3" style="background:#E6F7EE;">
@@ -111,7 +107,6 @@
                                 </div>
                             </div>
 
-                            {{-- Detail Info --}}
                             <div class="border-top pt-3">
                                 <h6 class="fw-bold mb-3">Informasi Tambahan</h6>
 
@@ -134,7 +129,6 @@
                                 </div>
                             </div>
 
-                            {{-- Tombol Aksi --}}
                             <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
                                 <a href="{{ route('admin.waste-categories.index') }}" class="btn btn-light border px-4">
                                     Kembali

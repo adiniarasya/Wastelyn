@@ -13,7 +13,6 @@
         </button>
     </div>
 
-    {{-- Filter Bulan & Tahun --}}
     <form method="GET" class="mb-4">
         <div class="row g-2 align-items-end">
             <div class="col-md-3">
@@ -38,13 +37,11 @@
         </div>
     </form>
 
-    {{-- Judul Laporan --}}
     <div class="mb-4">
         <h5 class="fw-bold mb-1">Laporan Setoran — {{ $listBulan[$bulan] }} {{ $tahun }}</h5>
         <p class="text-muted small mb-0">Mitra: {{ auth()->user()->name }}</p>
     </div>
 
-    {{-- Ringkasan --}}
     <div class="row g-3 mb-4">
         <div class="col-6 col-md-3">
             <div class="card border-0 shadow-sm">
@@ -82,7 +79,6 @@
         </div>
     </div>
 
-    {{-- Grafik --}}
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body">
             <h6 class="fw-bold mb-3">Setoran Harian</h6>
@@ -92,7 +88,6 @@
         </div>
     </div>
 
-    {{-- Tabel Detail --}}
     <div class="card border-0 shadow-sm">
         <div class="card-body pb-0">
             <h6 class="fw-bold mb-3">Detail Transaksi</h6>

@@ -4,7 +4,6 @@
 
 @section('content')
     <style>
-        /* Ukuran gambar dibuat seragam */
         .mission-detail .mission-cover {
             width: 100%;
             max-height: 320px;
@@ -22,7 +21,6 @@
     
 
     @php
-        // Label status untuk tampilan (nilai status di database tidak diubah)
         $statusLabels = [
             'ongoing' => 'Berlangsung',
             'ready_pickup' => 'Siap dijemput',
@@ -54,8 +52,6 @@
         </div>
 
         <section class="section">
-
-            {{-- Notifikasi --}}
             @foreach (['success' => 'success', 'error' => 'danger', 'info' => 'info'] as $key => $type)
                 @if (session($key))
                     <div class="alert alert-{{ $type }} alert-dismissible fade show" role="alert">
@@ -72,20 +68,14 @@
                 </div>
 
                 <div class="card-body">
-
-                    {{-- Gambar misi --}}
                     @if($mission->image)
                         <img src="{{ asset('storage/' . $mission->image) }}" alt="{{ $mission->title }}"
                             class="mission-cover rounded-3 mb-4">
                     @endif
-
-                    {{-- Deskripsi --}}
                     <div class="mb-4">
                         <h6 class="text-muted mb-2">Deskripsi misi</h6>
                         <p class="mb-0">{{ $mission->description }}</p>
                     </div>
-
-                    {{-- Detail misi --}}
                     <div class="row g-3">
                         <div class="col-12 col-md-4">
                             <div class="border rounded p-3 h-100">
@@ -120,7 +110,6 @@
                                 : 0;
                         @endphp
 
-                        {{-- Progres --}}
                         <div class="border-top mt-4 pt-4">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h5 class="mb-0">Progres misi kamu</h5>
@@ -145,8 +134,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        {{-- Kode unik --}}
                         <div class="alert alert-warning d-flex align-items-start gap-3 mt-4">
                             <i class="bi bi-key-fill fs-4"></i>
                             <div>
@@ -159,8 +146,6 @@
                                 </small>
                             </div>
                         </div>
-
-                        {{-- Form upload bukti (hanya saat status ongoing) --}}
                         @if ($userMission->status === 'ongoing')
                             <div class="card border-success mb-4">
                                 <div class="card-header bg-success text-white">
@@ -200,13 +185,11 @@
                             </div>
                         @endif
 
-                        {{-- Info status --}}
                         @if ($userMission->status === 'ready_pickup')
                             <div class="alert alert-info d-flex align-items-center gap-3">
                                 <i class="bi bi-truck fs-4"></i>
                                 <div>
                                     Misi selesai. Sampahmu siap dijemput oleh bank sampah.
-                                    {{-- nanti diganti route pickup --}}
                                     <a href="#" class="alert-link">Ajukan jemput</a>
                                 </div>
                             </div>
@@ -224,8 +207,6 @@
                                 </div>
                             </div>
                         @endif
-
-                        {{-- Riwayat bukti --}}
                         @if ($userMission->submissions && $userMission->submissions->count() > 0)
                             <div class="border-top pt-4">
                                 <h6 class="mb-3">Riwayat bukti</h6>
@@ -274,8 +255,7 @@
             </div>
         </section>
     </div>
-
-    {{-- Modal konfirmasi ikuti misi --}}
+    
     <div class="modal fade" id="confirmMissionModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">

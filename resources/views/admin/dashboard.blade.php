@@ -3,7 +3,6 @@
 @section('title', 'Dashboard Admin - WasteLyn')
 
 @php
-    // Format angka kg: hilangkan nol desimal yang tidak perlu (12,50 -> 12,5 ; 12,00 -> 12)
     $formatKg = fn($v) => rtrim(rtrim(number_format((float) $v, 2, ',', '.'), '0'), ',');
 
     $stats = [
@@ -61,7 +60,6 @@
         ],
     ];
 
-    // Warna eksplisit (tidak bergantung pada --bs-*-bg-subtle yang hanya ada di Bootstrap 5.3+)
     $activityColors = [
         'success' => ['bg' => '#E6F7EE', 'fg' => '#2E7D32'],
         'warning' => ['bg' => '#FFF4E0', 'fg' => '#D97706'],
@@ -107,7 +105,6 @@
 
         <section class="section">
 
-            {{-- Statistik --}}
             <div class="row g-3">
                 @foreach ($stats as $stat)
                     <div class="col-12 col-sm-6 col-xl-3">
@@ -130,7 +127,6 @@
                 @endforeach
             </div>
 
-            {{-- Grafik --}}
             <div class="row mt-4">
                 <div class="col-12">
                     <div class="card border-0 shadow-sm rounded-4">
@@ -156,7 +152,6 @@
 
             <div class="row mt-4 g-3">
 
-                {{-- Aktivitas terbaru --}}
                 <div class="col-lg-8">
                     <div class="card border-0 shadow-sm rounded-4 h-100">
                         <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
@@ -200,7 +195,6 @@
                     </div>
                 </div>
 
-                {{-- Pending approval --}}
                 <div class="col-lg-4">
                     <div class="card border-0 shadow-sm rounded-4 h-100">
                         <div class="card-header bg-white py-3">
@@ -230,7 +224,6 @@
                                 </div>
                             @endforeach
 
-                            {{-- TODO: ganti '#' dengan route halaman approval, mis. route('admin.approvals.index') --}}
                             <a href="#"
                                 class="btn btn-outline-success btn-sm w-100 mt-auto d-flex align-items-center justify-content-center gap-2">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"

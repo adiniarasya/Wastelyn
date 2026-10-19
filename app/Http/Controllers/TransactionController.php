@@ -11,9 +11,6 @@ use Illuminate\Support\Facades\DB;
 
 class TransactionController extends Controller
 {
-    /**
-     * Tampilkan riwayat transaksi (admin / mitra).
-     */
     public function index()
     {
         $transactions = Transaction::with('user')
@@ -23,9 +20,6 @@ class TransactionController extends Controller
         return view('mitra.transactions.index', compact('transactions'));
     }
 
-    /**
-     * Verifikasi setoran oleh Mitra → status completed, poin masuk.
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -40,15 +34,12 @@ class TransactionController extends Controller
                 ->whereIn('status', ['accepted', 'scheduled'])
                 ->firstOrFail();
 
-    
             $pickup->weight_kg = $request->weight_kg;
             $pickup->calculateRewards();
-
 
             $pickup->status = 'completed';
             $pickup->verified_at = now();
             $pickup->save();
-
 
             $user = User::find($pickup->user_id);
             if ($user) {
@@ -82,10 +73,8 @@ class TransactionController extends Controller
         $transaction = Transaction::with('user')->findOrFail($id);
         return view('mitra.transactions.show', compact('transaction'));
     }
-        /**
-     * Export PDF riwayat transaksi mitra.
-     */
-       public function exportPdf(Request $request)
+
+    public function exportPdf(Request $request)
     {
         $mitraId = Auth::id();
 

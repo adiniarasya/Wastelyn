@@ -9,9 +9,6 @@ use Illuminate\Support\Facades\Auth;
 
 class MitraWastePriceController extends Controller
 {
-    /**
-     * Daftar semua kategori + harga override mitra.
-     */
     public function index()
     {
         $mitraId = Auth::id();
@@ -25,9 +22,6 @@ class MitraWastePriceController extends Controller
         return view('mitra.harga-sampah.index', compact('categories', 'prices'));
     }
 
-    /**
-     * Simpan / update harga override.
-     */
     public function update(Request $request, $categoryId)
     {
         $request->validate([
@@ -51,9 +45,6 @@ class MitraWastePriceController extends Controller
         return back()->with('success', 'Harga berhasil disimpan.');
     }
 
-    /**
-     * Hapus harga override (kembali ke default admin).
-     */
     public function destroy($categoryId)
     {
         $mitraId = Auth::id();

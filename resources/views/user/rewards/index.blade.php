@@ -4,7 +4,6 @@
 
 @section('content')
     <style>
-        /* Gambar dan badge kartu reward */
         .reward-center .reward-img {
             height: 150px;
             object-fit: cover;
@@ -19,7 +18,6 @@
             font-size: .85rem;
         }
 
-        /* Modal penukaran */
         #redeemModal .modal-reward-img {
             max-height: 120px;
             object-fit: contain;
@@ -41,7 +39,6 @@
     </style>
 
     <div class="page-heading reward-center">
-        {{-- Header --}}
         <div class="page-title">
             <div class="row align-items-center">
                 <div class="col-12 col-md-8">
@@ -60,8 +57,6 @@
         </div>
 
         <section class="section">
-
-            {{-- Notifikasi --}}
             @if (session('success'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
@@ -74,8 +69,6 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
                 </div>
             @endif
-
-            {{-- Daftar reward --}}
             <div class="row">
                 @forelse ($rewards as $reward)
                     <div class="col-12 col-sm-6 col-lg-3 mb-4">
@@ -132,8 +125,6 @@
                     </div>
                 @endforelse
             </div>
-
-            {{-- Riwayat penukaran (gaya tabel tidak diubah) --}}
             <div class="card card-stat">
                 <div class="card-header">
                     <h5 class="card-title mb-0">
@@ -233,7 +224,6 @@
         </section>
     </div>
 
-    {{-- Modal konfirmasi tukar reward --}}
     <div class="modal fade" id="redeemModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0">
@@ -270,7 +260,6 @@
                         $userPhone = auth()->user()->phone ?? null;
                     @endphp
 
-                    {{-- Form reward manual (pulsa / e-wallet) --}}
                     <div id="modalPhoneField" class="text-start mt-3 d-none">
                         <div id="modalEwalletField" class="d-none mb-3">
                             <label class="form-label small fw-semibold">
@@ -308,7 +297,6 @@
                         <small class="text-muted">Ubah jika ingin mengirim ke nomor lain.</small>
                     </div>
 
-                    {{-- Form reward ambil sendiri --}}
                     <div id="modalPickupField" class="text-start mt-3 d-none">
                         <div class="alert alert-warning small mb-3">
                             <i class="bi bi-info-circle me-1"></i>
@@ -328,7 +316,6 @@
                         Poin akan langsung terpotong dan tidak bisa dikembalikan.
                     </div>
 
-                    {{-- Loading --}}
                     <div id="modalLoading" class="d-none py-4">
                         <div class="spinner-border spinner-lg text-success mb-3" role="status">
                             <span class="visually-hidden">Memuat...</span>
@@ -337,7 +324,6 @@
                         <p class="text-muted small mb-0">Mohon tunggu sebentar.</p>
                     </div>
 
-                    {{-- Berhasil --}}
                     <div id="modalSuccess" class="d-none py-4">
                         <div class="mb-3">
                             <i class="bi bi-check-circle-fill success-icon text-success"></i>

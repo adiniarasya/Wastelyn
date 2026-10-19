@@ -22,8 +22,6 @@
 
     <div class="card border-0 shadow-sm" style="max-width: 800px;">
         <div class="card-body p-4">
-
-            {{-- HEADER BUKTI --}}
             <div class="text-center border-bottom pb-3 mb-4">
                 <h2 class="fw-bold text-success mb-1">
                     <i class="bi bi-recycle"></i> WasteLyn
@@ -32,8 +30,6 @@
                 <h5 class="fw-bold mt-3 mb-1">BUKTI PENUKARAN REWARD</h5>
                 <code class="text-muted small">#{{ str_pad($redemption->redemption_id, 6, '0', STR_PAD_LEFT) }}</code>
             </div>
-
-            {{-- STATUS BANNER --}}
             @if($redemption->status === 'completed')
                 <div class="alert alert-success d-flex align-items-center gap-2 mb-4">
                     <i class="bi bi-check-circle-fill fs-3"></i>
@@ -58,8 +54,6 @@
                     </div>
                 </div>
             @endif
-
-            {{-- INFO WARGA --}}
             <div class="row mb-4">
                 <div class="col-md-6 mb-3 mb-md-0">
                     <h6 class="fw-bold text-muted small text-uppercase mb-2">Penerima</h6>
@@ -95,8 +89,6 @@
                     </div>
                 </div>
             </div>
-
-            {{-- DETAIL REWARD --}}
             <h6 class="fw-bold text-muted small text-uppercase mb-2">Detail Reward</h6>
             <table class="table table-bordered mb-4">
                 <tr>
@@ -125,8 +117,6 @@
                     </td>
                 </tr>
             </table>
-
-            {{-- INFO PENGIRIMAN / KODE --}}
             @if($redemption->delivery_note)
                 <h6 class="fw-bold text-muted small text-uppercase mb-2">Info Pengiriman</h6>
                 <div class="alert alert-success small mb-4">
@@ -160,8 +150,6 @@
                     @endif
                 </div>
             @endif
-
-            {{-- FOOTER --}}
             <div class="border-top pt-3 mt-4 text-center small text-muted">
                 <p class="mb-1">Terima kasih telah menggunakan WasteLyn!</p>
                 <p class="mb-0">

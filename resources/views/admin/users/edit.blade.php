@@ -42,7 +42,6 @@
                             <div class="row justify-content-center">
                                 <div class="col-12 col-lg-9">
 
-                                    {{-- Foto Profil --}}
                                     <div class="text-center mb-4">
                                         @if($user->photo && \Illuminate\Support\Facades\Storage::disk('public')->exists($user->photo))
                                             <img src="{{ asset('storage/' . $user->photo) }}"
@@ -67,7 +66,6 @@
                                         </div>
                                     </div>
 
-                                    {{-- Nama --}}
                                     <div class="row align-items-center mb-3">
                                         <label for="name" class="col-4 col-md-3 text-md-end text-muted small fw-semibold mb-0">
                                             Nama <span class="text-danger">*</span>
@@ -82,7 +80,6 @@
                                         </div>
                                     </div>
 
-                                    {{-- Email --}}
                                     <div class="row align-items-center mb-3">
                                         <label for="email" class="col-4 col-md-3 text-md-end text-muted small fw-semibold mb-0">
                                             Email <span class="text-danger">*</span>
@@ -97,7 +94,6 @@
                                         </div>
                                     </div>
 
-                                    {{-- No HP --}}
                                     <div class="row align-items-center mb-3">
                                         <label for="phone" class="col-4 col-md-3 text-md-end text-muted small fw-semibold mb-0">
                                             No HP
@@ -108,7 +104,6 @@
                                         </div>
                                     </div>
 
-                                    {{-- Alamat --}}
                                     <div class="row mb-3">
                                         <label for="address" class="col-4 col-md-3 text-md-end text-muted small fw-semibold pt-2 mb-0">
                                             Alamat
@@ -119,7 +114,6 @@
                                         </div>
                                     </div>
 
-                                    {{-- Role --}}
                                     <div class="row align-items-center mb-3">
                                         <label for="role" class="col-4 col-md-3 text-md-end text-muted small fw-semibold mb-0">
                                             Role <span class="text-danger">*</span>
@@ -133,7 +127,6 @@
                                         </div>
                                     </div>
 
-                                    {{-- Status --}}
                                     <div class="row align-items-center mb-3">
                                         <label for="status" class="col-4 col-md-3 text-md-end text-muted small fw-semibold mb-0">
                                             Status <span class="text-danger">*</span>
@@ -151,7 +144,6 @@
                                         </div>
                                     </div>
 
-                                    {{-- XP --}}
                                     <div class="row align-items-center mb-3">
                                         <label class="col-4 col-md-3 text-md-end text-muted small fw-semibold mb-0">
                                             XP
@@ -161,7 +153,6 @@
                                         </div>
                                     </div>
 
-                                    {{-- Point --}}
                                     <div class="row align-items-center mb-3">
                                         <label class="col-4 col-md-3 text-md-end text-muted small fw-semibold mb-0">
                                             Point
@@ -171,7 +162,6 @@
                                         </div>
                                     </div>
 
-                                    {{-- Foto --}}
                                     <div class="row align-items-center mb-4">
                                         <label for="photo" class="col-4 col-md-3 text-md-end text-muted small fw-semibold mb-0">
                                             Foto
@@ -183,14 +173,12 @@
                                         </div>
                                     </div>
 
-                                    {{-- Separator --}}
                                     <div class="border-top pt-3 mt-2 mb-3">
                                         <small class="text-muted">
                                             <strong>Ubah Password</strong> — kosongkan jika tidak ingin mengubah
                                         </small>
                                     </div>
 
-                                    {{-- Password --}}
                                     <div class="row align-items-center mb-3">
                                         <label for="password" class="col-4 col-md-3 text-md-end text-muted small fw-semibold mb-0">
                                             Password
@@ -205,7 +193,6 @@
                                         </div>
                                     </div>
 
-                                    {{-- Konfirmasi Password --}}
                                     <div class="row align-items-center mb-4">
                                         <label for="password_confirmation" class="col-4 col-md-3 text-md-end text-muted small fw-semibold mb-0">
                                             Konfirmasi
@@ -216,7 +203,6 @@
                                         </div>
                                     </div>
 
-                                    {{-- Tombol Aksi --}}
                                     <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
                                         <a href="{{ route('admin.users.index') }}" class="btn btn-light border px-4">
                                             Batal

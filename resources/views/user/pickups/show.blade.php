@@ -4,7 +4,7 @@
 
 @section('content')
     <style>
-        /* Kotak ikon status: ikon pas di tengah, ukuran tetap bawaan Mazer */
+
         .pickup-detail .stats-icon {
             display: flex;
             align-items: center;
@@ -29,7 +29,6 @@
             vertical-align: 0;
         }
 
-        /* Daftar detail: label di kiri, nilai di kanan, dipisah garis tipis */
         .pickup-detail .detail-item {
             display: flex;
             justify-content: space-between;
@@ -97,7 +96,6 @@
 
         <section class="section">
 
-            {{-- Notifikasi --}}
             @if (session('success'))
                 <div class="alert alert-success alert-dismissible fade show">
                     <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
@@ -111,7 +109,6 @@
                 </div>
             @endif
 
-            {{-- Status setoran --}}
             <div class="card">
                 <div class="card-body d-flex align-items-center gap-3">
                     <div class="stats-icon {{ $sc[0] }} mb-0 flex-shrink-0">
@@ -125,8 +122,6 @@
             </div>
 
             <div class="row">
-
-                {{-- Informasi setoran --}}
                 <div class="col-12 col-md-6 mb-4">
                     <div class="card h-100 mb-0">
                         <div class="card-header">
@@ -156,8 +151,6 @@
                         </div>
                     </div>
                 </div>
-
-                {{-- Hasil verifikasi --}}
                 <div class="col-12 col-md-6 mb-4">
                     @if ($pickupRequest->status === 'completed')
                         <div class="card h-100 mb-0 border-start border-success border-4">
@@ -198,7 +191,6 @@
                     @endif
                 </div>
 
-                {{-- Aksi antar sendiri --}}
                 @if ($pickupRequest->pickup_method === 'dropoff' && $pickupRequest->status === 'accepted')
                     <div class="col-12 mb-4">
                         <div class="card mb-0 border-start border-primary border-4">
@@ -220,7 +212,6 @@
                     </div>
                 @endif
 
-                {{-- Info status --}}
                 @if ($pickupRequest->pickup_method === 'dropoff' && $pickupRequest->status === 'waiting_verification')
                     <div class="col-12">
                         <div class="alert alert-info d-flex align-items-center gap-3">

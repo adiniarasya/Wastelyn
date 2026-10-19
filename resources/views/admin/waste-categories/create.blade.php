@@ -58,7 +58,6 @@
                         <div class="row justify-content-center">
                             <div class="col-12 col-lg-10">
 
-                                {{-- Nama --}}
                                 <div class="mb-3">
                                     <label for="name" class="form-label fw-semibold small text-muted">
                                         Nama <span class="text-danger">*</span>
@@ -73,7 +72,6 @@
                                     @enderror
                                 </div>
 
-                                {{-- Deskripsi --}}
                                 <div class="mb-3">
                                     <label for="description" class="form-label fw-semibold small text-muted">
                                         Deskripsi
@@ -86,7 +84,6 @@
                                     @enderror
                                 </div>
 
-                                {{-- Harga, Reward, Poin --}}
                                 <div class="row">
                                     <div class="col-md-4 mb-3">
                                         <label for="price_per_kg" class="form-label fw-semibold small text-muted">
@@ -136,7 +133,6 @@
                                     </div>
                                 </div>
 
-                                {{-- CO2 & Foto --}}
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="co2_saved_per_kg" class="form-label fw-semibold small text-muted">
@@ -175,7 +171,6 @@
                                     </div>
                                 </div>
 
-                                {{-- Tombol Aksi --}}
                                 <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
                                     <a href="{{ route('admin.waste-categories.index') }}"
                                         class="btn btn-light border px-4">

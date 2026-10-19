@@ -105,7 +105,6 @@
 
         <section class="section">
 
-            {{-- Statistik --}}
             <div class="row g-3 mb-4">
                 <div class="col-6 col-md-4 col-lg">
                     <div class="stat-card" style="background:#E7F1FF;">
@@ -143,7 +142,6 @@
                 </div>
             </div>
 
-            {{-- Transaksi Terbaru --}}
             <div class="card border-0 shadow-sm rounded-4 mb-4">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-2 py-3">
                     <h5 class="card-title mb-0">Transaksi Terbaru</h5>
@@ -231,7 +229,6 @@
                         </table>
                     </div>
 
-                    {{-- Pagination Transaksi --}}
                     @if($recentTransactions instanceof \Illuminate\Pagination\LengthAwarePaginator && $recentTransactions->hasPages())
                         <div class="d-flex justify-content-end mt-3">
                             {{ $recentTransactions->appends(request()->except('transactions_page'))->links() }}
@@ -240,7 +237,6 @@
                 </div>
             </div>
 
-            {{-- User Terbaru --}}
             <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-2 py-3">
                     <h5 class="card-title mb-0">User Terbaru</h5>
@@ -329,7 +325,6 @@
                         </table>
                     </div>
 
-                    {{-- Pagination User --}}
                     @if($recentUsers instanceof \Illuminate\Pagination\LengthAwarePaginator && $recentUsers->hasPages())
                         <div class="d-flex justify-content-end mt-3">
                             {{ $recentUsers->appends(request()->except('users_page'))->links() }}

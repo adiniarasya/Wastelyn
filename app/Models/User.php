@@ -54,12 +54,6 @@ class User extends Authenticatable
         ];
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Role & Status Helpers
-    |--------------------------------------------------------------------------
-    */
-
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
@@ -112,12 +106,6 @@ class User extends Authenticatable
         return 'home';
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Relations
-    |--------------------------------------------------------------------------
-    */
-
     public function wasteBank()
     {
         return $this->belongsTo(WasteBank::class, 'waste_bank_id', 'bank_id');
@@ -155,16 +143,6 @@ class User extends Authenticatable
         );
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | XP & Level System
-    |--------------------------------------------------------------------------
-    */
-
-    /**
-     * Ambil data XP user untuk bank sampah tertentu.
-     * Return null kalau bankId null atau data tidak ada.
-     */
     public function getXpForBank(?int $bankId): ?UserXp
     {
         if (is_null($bankId)) {
@@ -174,10 +152,6 @@ class User extends Authenticatable
         return $this->userXp()->where('bank_id', $bankId)->first();
     }
 
-    /**
-     * Accessor: $user->active_xp
-     * Otomatis ambil XP dari waste_bank_id aktif.
-     */
     public function getActiveXpAttribute(): ?UserXp
     {
         if (!$this->waste_bank_id) {
@@ -187,9 +161,6 @@ class User extends Authenticatable
         return $this->getXpForBank($this->waste_bank_id);
     }
 
-    /**
-     * Tambah XP ke user, lalu update level otomatis.
-     */
     public function addXp(int $amount)
     {
         $this->xp += $amount;
@@ -200,18 +171,12 @@ class User extends Authenticatable
         return $this->xp;
     }
 
-    /**
-     * Update level user berdasarkan total XP.
-     * Aturan: setiap 100 XP naik 1 level, maksimal level 5.
-     */
     public function updateLevel()
     {
         $totalXp = $this->xp ?? 0;
 
-        // 0-99 = Lv1, 100-199 = Lv2, dst.
         $newLevel = (int) floor($totalXp / 100) + 1;
 
-        // Batasi 1 s/d 5
         $newLevel = max(1, min($newLevel, 5));
 
         if ($this->level !== $newLevel) {
@@ -221,12 +186,6 @@ class User extends Authenticatable
 
         return $this->level;
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Points System
-    |--------------------------------------------------------------------------
-    */
 
     public function addPoints($amount)
     {
@@ -247,16 +206,6 @@ class User extends Authenticatable
         return false;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Streak System
-    |--------------------------------------------------------------------------
-    */
-
-    /**
-     * Update streak mingguan user.
-     * Dipanggil setiap ada aktivitas (setor sampah / selesai misi).
-     */
     public function updateStreak(): void
     {
         $currentWeek = now()->format('oW');
@@ -282,7 +231,6 @@ class User extends Authenticatable
         $this->last_streak_week = now()->startOfWeek()->toDateString();
         $this->save();
 
-        // Bonus XP setiap kelipatan 4 minggu
         if ($this->current_streak > 0 && $this->current_streak % 4 === 0) {
             try {
                 app(\App\Services\XpService::class)->addXpFromStreak(
@@ -290,7 +238,6 @@ class User extends Authenticatable
                     $this->waste_bank_id
                 );
 
-                // ⬇️ TAMBAH: Set session flag buat modal
                 session()->put('streak_bonus', [
                     'streak' => $this->current_streak,
                     'xp' => 50,
@@ -300,12 +247,6 @@ class User extends Authenticatable
             }
         }
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Accessors
-    |--------------------------------------------------------------------------
-    */
 
     public function getLevelNameAttribute(): string
     {

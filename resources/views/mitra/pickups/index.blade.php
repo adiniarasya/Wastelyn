@@ -26,7 +26,6 @@
         </div>
     @endif
 
-    {{-- Panel Filter --}}
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body">
             <form method="GET" class="row g-3 align-items-end">
@@ -69,7 +68,6 @@
         </div>
     </div>
 
-    {{-- Tabel Setoran --}}
     <div class="card border-0 shadow-sm">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
             <h6 class="mb-0 fw-bold">Setoran Masuk</h6>

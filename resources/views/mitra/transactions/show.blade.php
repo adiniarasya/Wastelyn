@@ -8,8 +8,6 @@
 
     <div class="card border-0 shadow-sm" style="max-width: 640px;">
         <div class="card-body">
-
-            {{-- Info Utama --}}
             <div class="d-flex justify-content-between align-items-start mb-4">
                 <div>
                     <div class="text-muted small mb-1">Warga</div>
@@ -20,8 +18,6 @@
                     <div class="small">{{ $transaction->created_at->format('d M Y, H:i') }}</div>
                 </div>
             </div>
-
-            {{-- Poin --}}
             <div class="p-3 rounded mb-4" style="background-color: #f8f9fa;">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
@@ -40,8 +36,6 @@
                     @endif
                 </div>
             </div>
-
-            {{-- Detail Lainnya --}}
             <div class="mb-3">
                 <div class="d-flex justify-content-between py-2 border-bottom">
                     <span class="text-muted small">Tipe Transaksi</span>
@@ -60,8 +54,6 @@
                     <span class="small text-success fw-semibold">Selesai</span>
                 </div>
             </div>
-
-            {{-- Setoran Terkait --}}
             @if ($transaction->pickupRequest)
                 <div class="mt-4">
                     <div class="text-muted small fw-semibold mb-2 text-uppercase" style="letter-spacing: 0.5px;">
@@ -96,8 +88,6 @@
                     </div>
                 </div>
             @endif
-
-            {{-- Tombol Kembali --}}
             <div class="mt-4 pt-3 border-top">
                 <a href="{{ route('mitra.transactions.index') }}" class="btn btn-secondary btn-sm">
                     <i class="bi bi-arrow-left me-1"></i> Kembali

@@ -19,7 +19,6 @@
     </div>
 
     <div class="row g-3">
-        {{-- Info --}}
         <div class="col-md-6">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
@@ -50,8 +49,6 @@
                 </div>
             </div>
         </div>
-
-        {{-- Gambar & Deskripsi --}}
         <div class="col-md-6">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">

@@ -8,7 +8,6 @@
     </a>
 
     <div class="row g-4">
-        {{-- Kolom Kiri: Gambar Reward --}}
         <div class="col-md-5">
             <div class="card card-stat border-0 shadow-sm h-100">
                 <div class="card-body d-flex align-items-center justify-content-center p-4">
@@ -26,12 +25,9 @@
                 </div>
             </div>
         </div>
-
-        {{-- Kolom Kanan: Info & Tombol --}}
         <div class="col-md-7">
             <div class="card card-stat border-0 shadow-sm h-100">
                 <div class="card-body p-4">
-                    {{-- Badge Status Stok --}}
                     <div class="mb-3">
                         @if($reward->stock > 0)
                             <span class="badge bg-success-subtle text-success border border-success-subtle">
@@ -43,14 +39,10 @@
                             </span>
                         @endif
                     </div>
-
-                    {{-- Nama & Deskripsi --}}
                     <h3 class="fw-bold mb-2">{{ $reward->name }}</h3>
                     <p class="text-muted mb-4">
                         {{ $reward->description ?? 'Tidak ada deskripsi.' }}
                     </p>
-
-                    {{-- Info Poin & Stok --}}
                     <div class="row g-3 mb-4">
                         <div class="col-6">
                             <div class="border rounded p-3 text-center bg-light">
@@ -60,6 +52,7 @@
                                 </div>
                             </div>
                         </div>
+                        
                         <div class="col-6">
                             <div class="border rounded p-3 text-center bg-light">
                                 <div class="small text-muted mb-1">Stok Tersedia</div>
@@ -70,7 +63,6 @@
                         </div>
                     </div>
 
-                    {{-- Info Poin User --}}
                     <div class="alert {{ $user->points >= $reward->point_required ? 'alert-success' : 'alert-warning' }} d-flex justify-content-between align-items-center mb-4">
                         <div>
                             <div class="small">Poin Kamu Saat Ini</div>
@@ -84,7 +76,6 @@
                         </div>
                     </div>
 
-                    {{-- Tombol Aksi --}}
                     @if($user->points >= $reward->point_required && $reward->stock > 0)
                         <form action="{{ route('user.rewards.redeem', $reward->reward_id) }}"
                               method="POST"

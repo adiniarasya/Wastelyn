@@ -102,7 +102,6 @@
         </div>
     </div>
 
-    {{-- Modal Edit --}}
     @foreach ($categories as $cat)
         @php
             $override = $prices->get($cat->category_id);

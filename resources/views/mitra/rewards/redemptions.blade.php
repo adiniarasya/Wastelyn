@@ -51,8 +51,6 @@
             </div>
         </div>
     </div>
-
-    {{-- TAB FILTER --}}
     <div class="card card-stat mb-3">
         <div class="card-body pb-2">
             <ul class="nav nav-pills gap-2 flex-wrap">
@@ -100,8 +98,6 @@
             </ul>
         </div>
     </div>
-
-    {{-- TABEL --}}
     <div class="card card-stat">
         <div class="card-body p-0">
             <div class="table-responsive">
@@ -226,8 +222,6 @@
             <div class="p-3">{{ $redemptions->links() }}</div>
         </div>
     </div>
-
-    {{-- MODAL VERIFIKASI PICKUP --}}
     <div class="modal fade" id="verifyPickupModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow">

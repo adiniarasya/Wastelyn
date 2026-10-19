@@ -120,7 +120,6 @@
                 </div>
 
                 <div class="card-body pt-3">
-                    {{-- Filter --}}
                     <form action="{{ route('admin.missions.index') }}" method="GET">
                         <div class="row g-3 mb-4">
                             <div class="col-12 col-md-4">
@@ -184,7 +183,6 @@
                         </div>
                     </form>
 
-                    {{-- Tabel --}}
                     <div class="table-responsive">
                         <table class="table table-clean table-hover align-middle mb-0">
                             <thead>

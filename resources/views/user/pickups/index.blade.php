@@ -4,14 +4,12 @@
 
 @section('content')
     <style>
-        /* Warna ikon: satu keluarga hijau, menunggu kuning. Ukuran tetap bawaan Mazer. */
         .riwayat-setoran .stats-icon {
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        /* Reset posisi ikon bawaan Mazer supaya pas di tengah kotak */
         .riwayat-setoran .stats-icon i {
             display: flex;
             align-items: center;
@@ -42,7 +40,6 @@
     @endphp
 
     <div class="page-heading riwayat-setoran">
-        {{-- Header --}}
         <div class="page-title">
             <div class="row align-items-center">
                 <div class="col-12 col-md-6 order-md-1 order-last">
@@ -60,8 +57,6 @@
         </div>
 
         <section class="section">
-
-            {{-- Notifikasi --}}
             @if (session('success'))
                 <div class="alert alert-light-success alert-dismissible fade show">
                     <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
@@ -75,7 +70,6 @@
                 </div>
             @endif
 
-            {{-- Bank sampah langganan --}}
             @if(auth()->user()->wasteBank)
                 <div class="alert alert-info d-flex align-items-center gap-3">
                     <div>
@@ -88,7 +82,6 @@
                 </div>
             @endif
 
-            {{-- Statistik --}}
             <div class="row">
                 <div class="col-12 col-md-4">
                     <div class="card">
@@ -144,8 +137,6 @@
                     </div>
                 </div>
             </div>
-
-            {{-- Tabel (gaya tabel tidak diubah) --}}
             <div class="card">
                 <div class="card-body p-0">
                     <div class="table-responsive">

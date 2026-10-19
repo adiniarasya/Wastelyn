@@ -108,10 +108,8 @@
                 </div>
 
                 <div class="card-body pt-3">
-                    {{-- Filter --}}
                     <form action="{{ route('admin.transactions.index') }}" method="GET">
                         <div class="row g-3 mb-4">
-                            {{-- Search --}}
                             <div class="col-12 col-md-6">
                                 <label class="form-label fw-semibold small text-muted">Cari User</label>
                                 <div class="input-group">
@@ -128,7 +126,6 @@
                                 </div>
                             </div>
 
-                            {{-- Tipe --}}
                             <div class="col-12 col-md-4">
                                 <label class="form-label fw-semibold small text-muted">Tipe Transaksi</label>
                                 <select class="form-select" name="type" style="height:40px;">
@@ -138,7 +135,6 @@
                                 </select>
                             </div>
 
-                            {{-- Tombol --}}
                             <div class="col-12 col-md-2 d-flex align-items-end gap-2">
                                 <button type="submit" class="btn btn-primary filter-btn flex-grow-1">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -162,7 +158,6 @@
                         </div>
                     </form>
 
-                    {{-- Tabel --}}
                     <div class="table-responsive">
                         <table class="table table-clean table-hover align-middle mb-0">
                             <thead>
@@ -269,7 +264,6 @@
                         </table>
                     </div>
 
-                    {{-- Pagination --}}
                     @if($transactions instanceof \Illuminate\Pagination\LengthAwarePaginator && $transactions->hasPages())
                         <div class="d-flex justify-content-end mt-4">
                             {{ $transactions->links() }}

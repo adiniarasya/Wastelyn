@@ -4,7 +4,6 @@
 
 @section('content')
     <style>
-        /* Kotak ikon: ikon pas di tengah, ukuran tetap bawaan Mazer */
         .eco-habit .stats-icon {
             display: flex;
             align-items: center;
@@ -33,7 +32,6 @@
             background-color: #2E7D32;
         }
 
-        /* Lebar kolom ikon di tabel riwayat */
         .eco-habit .col-icon {
             width: 50px;
         }
@@ -69,7 +67,6 @@
         <section class="section">
 
             <div class="row">
-                {{-- Level dan XP --}}
                 <div class="col-12 col-lg-6 mb-4">
                     <div class="card h-100 mb-0">
                         <div class="card-body">
@@ -123,8 +120,6 @@
                         </div>
                     </div>
                 </div>
-
-                {{-- Cara dapat XP --}}
                 <div class="col-12 col-lg-6 mb-4">
                     <div class="card h-100 mb-0">
                         <div class="card-header">
@@ -156,8 +151,6 @@
                     </div>
                 </div>
             </div>
-
-            {{-- Riwayat XP (gaya tabel tidak diubah) --}}
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">
