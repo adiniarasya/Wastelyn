@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Reward;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
+use App\Models\RewardRedemption;
+use App\Models\Transaction;
 
 class RewardController extends Controller
 {
@@ -34,9 +38,15 @@ class RewardController extends Controller
             'status' => 'required|in:available,unavailable',
         ]);
 
-        $data = $request->all();
-
-        $data['bank_id'] = auth()->user()->waste_bank_id;
+        $data = [
+            'name' => $request->name,
+            'description' => $request->description,
+            'point_required' => $request->point_required,
+            'type' => $request->type,
+            'stock' => $request->stock,
+            'status' => $request->status,
+            'bank_id' => auth()->user()->waste_bank_id,
+        ];
 
         if ($request->hasFile('image')) {
             $file = $request->file('image');
@@ -54,16 +64,28 @@ class RewardController extends Controller
 
     public function mitraShow(Reward $reward)
     {
+        if ($reward->bank_id != auth()->user()->waste_bank_id) {
+            abort(404);
+        }
+
         return view('mitra.rewards.show', compact('reward'));
     }
 
     public function mitraEdit(Reward $reward)
     {
+        if ($reward->bank_id != auth()->user()->waste_bank_id) {
+            abort(404);
+        }
+
         return view('mitra.rewards.edit', compact('reward'));
     }
 
     public function mitraUpdate(Request $request, Reward $reward)
     {
+        if ($reward->bank_id != auth()->user()->waste_bank_id) {
+            abort(404);
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -74,9 +96,15 @@ class RewardController extends Controller
             'status' => 'required|in:available,unavailable',
         ]);
 
-        $data = $request->all();
-
-        $data['bank_id'] = $reward->bank_id;
+        $data = [
+            'name' => $request->name,
+            'description' => $request->description,
+            'point_required' => $request->point_required,
+            'type' => $request->type,
+            'stock' => $request->stock,
+            'status' => $request->status,
+            'bank_id' => $reward->bank_id,
+        ];
 
         if ($request->hasFile('image')) {
             if ($reward->image && File::exists(public_path('assets/images/' . $reward->image))) {
@@ -98,6 +126,10 @@ class RewardController extends Controller
 
     public function mitraDestroy(Reward $reward)
     {
+        if ($reward->bank_id != auth()->user()->waste_bank_id) {
+            abort(404);
+        }
+
         if ($reward->image && File::exists(public_path('assets/images/' . $reward->image))) {
             File::delete(public_path('assets/images/' . $reward->image));
         }
@@ -113,10 +145,11 @@ class RewardController extends Controller
     {
         $status = $request->input('status', 'all');
         $type = $request->input('type', 'all');
+        $bankId = auth()->user()->waste_bank_id;
 
-        $query = \App\Models\RewardRedemption::with('user', 'reward')
-            ->whereHas('reward', function ($q) {
-                $q->where('bank_id', auth()->user()->waste_bank_id);
+        $query = RewardRedemption::with('user', 'reward')
+            ->whereHas('reward', function ($q) use ($bankId) {
+                $q->where('bank_id', $bankId);
             });
 
         if ($status === 'pending') {
@@ -136,8 +169,8 @@ class RewardController extends Controller
 
         $redemptions = $query->paginate(20)->withQueryString();
 
-        $baseStats = \App\Models\RewardRedemption::whereHas('reward', function ($q) {
-            $q->where('bank_id', auth()->user()->waste_bank_id);
+        $baseStats = RewardRedemption::whereHas('reward', function ($q) use ($bankId) {
+            $q->where('bank_id', $bankId);
         });
 
         $stats = [
@@ -159,7 +192,11 @@ class RewardController extends Controller
             'pickup_code' => 'required|string',
         ]);
 
-        $redemption = \App\Models\RewardRedemption::findOrFail($id);
+        $redemption = RewardRedemption::with('reward')->findOrFail($id);
+
+        if ($redemption->reward->bank_id != auth()->user()->waste_bank_id) {
+            return back()->with('error', 'Anda tidak berhak memverifikasi penukaran ini.');
+        }
 
         if ($redemption->status !== 'pending') {
             return back()->with('error', 'Penukaran ini sudah selesai.');
@@ -188,15 +225,19 @@ class RewardController extends Controller
                 'link' => route('user.rewards.index'),
                 'is_read' => false,
             ]);
-        } catch (\Exception $e) {}
+        } catch (\Exception $e) {
+        }
 
         return back()->with('success', 'Pengambilan barang berhasil diverifikasi.');
     }
 
     public function mitraRedemptionShow($id)
     {
-        $redemption = \App\Models\RewardRedemption::with('user', 'reward')
-            ->findOrFail($id);
+        $redemption = RewardRedemption::with('user', 'reward')->findOrFail($id);
+
+        if ($redemption->reward->bank_id != auth()->user()->waste_bank_id) {
+            abort(404);
+        }
 
         return view('mitra.rewards.redemption-show', compact('redemption'));
     }
@@ -210,7 +251,7 @@ class RewardController extends Controller
             ->orderBy('point_required')
             ->get();
 
-        $myRedemptions = \App\Models\RewardRedemption::with('reward')
+        $myRedemptions = RewardRedemption::with('reward')
             ->where('user_id', $user->user_id)
             ->latest()
             ->limit(10)
@@ -224,6 +265,10 @@ class RewardController extends Controller
         $reward = Reward::findOrFail($id);
         $user = auth()->user();
 
+        if ($reward->bank_id != $user->waste_bank_id) {
+            abort(404, 'Reward tidak ditemukan.');
+        }
+
         return view('user.rewards.show', compact('reward', 'user'));
     }
 
@@ -231,6 +276,13 @@ class RewardController extends Controller
     {
         $user = auth()->user();
         $reward = Reward::findOrFail($id);
+
+        if ($reward->bank_id != $user->waste_bank_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Reward ini bukan dari bank sampah Anda.',
+            ], 403);
+        }
 
         if ($reward->status !== 'available') {
             return response()->json(['success' => false, 'message' => 'Reward tidak tersedia.'], 400);
@@ -263,7 +315,7 @@ class RewardController extends Controller
             ]);
         }
 
-        \DB::beginTransaction();
+        DB::beginTransaction();
         try {
             $user->points -= $reward->point_required;
             $user->save();
@@ -294,7 +346,7 @@ class RewardController extends Controller
                 $status = 'pending';
             }
 
-            $redemption = \App\Models\RewardRedemption::create([
+            $redemption = RewardRedemption::create([
                 'user_id' => $user->user_id,
                 'reward_id' => $reward->reward_id,
                 'status' => $status,
@@ -307,7 +359,7 @@ class RewardController extends Controller
                 'delivery_note' => $deliveryNote,
             ]);
 
-            \App\Models\Transaction::create([
+            Transaction::create([
                 'user_id' => $user->user_id,
                 'redemption_id' => $redemption->redemption_id,
                 'type' => 'redeem',
@@ -318,7 +370,7 @@ class RewardController extends Controller
             $mitras = \App\Models\User::where('role', 'mitra')
                 ->where('waste_bank_id', $reward->bank_id)
                 ->get();
-                
+
             foreach ($mitras as $mitra) {
                 try {
                     $message = 'Warga ' . $user->name . ' menukar "' . $reward->name . '".';
@@ -340,10 +392,11 @@ class RewardController extends Controller
                         'link' => route('mitra.rewards.redemptions'),
                         'is_read' => false,
                     ]);
-                } catch (\Exception $e) {}
+                } catch (\Exception $e) {
+                }
             }
 
-            \DB::commit();
+            DB::commit();
 
             $response = ['success' => true];
 
@@ -356,7 +409,7 @@ class RewardController extends Controller
 
             return response()->json($response);
         } catch (\Exception $e) {
-            \DB::rollBack();
+            DB::rollBack();
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal tukar reward: ' . $e->getMessage(),
@@ -366,7 +419,7 @@ class RewardController extends Controller
 
     public function userRedemptionShow($id)
     {
-        $redemption = \App\Models\RewardRedemption::with('user', 'reward')
+        $redemption = RewardRedemption::with('user', 'reward')
             ->where('redemption_id', $id)
             ->where('user_id', auth()->id())
             ->firstOrFail();

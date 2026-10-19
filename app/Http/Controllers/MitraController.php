@@ -12,9 +12,6 @@ use Illuminate\Support\Facades\DB;
 
 class MitraController extends Controller
 {
-    /**
-     * Dashboard Mitra
-     */
     public function dashboard()
     {
         try {
@@ -33,6 +30,7 @@ class MitraController extends Controller
             $totalNasabah = PickupRequest::where('mitra_id', $mitraId)
                 ->distinct('user_id')
                 ->count('user_id');
+
             $pendapatanBulanIni = PickupRequest::where('mitra_id', $mitraId)
                 ->where('status', 'completed')
                 ->whereYear('created_at', now()->year)
@@ -64,6 +62,7 @@ class MitraController extends Controller
             $persenSetoran = $setoranBulanLalu > 0
                 ? (($setoranBulanIni - $setoranBulanLalu) / $setoranBulanLalu) * 100
                 : ($setoranBulanIni > 0 ? 100 : 0);
+
             $pendapatanLabels = [];
             $pendapatanData = [];
             for ($i = 11; $i >= 0; $i--) {
@@ -134,12 +133,6 @@ class MitraController extends Controller
         }
     }
 
-<<<<<<< Updated upstream
-=======
-    /**
-     * Halaman Kelola Setoran
-     */
->>>>>>> Stashed changes
     public function kelolaSetoran()
     {
         try {
@@ -156,12 +149,6 @@ class MitraController extends Controller
         }
     }
 
-<<<<<<< Updated upstream
-=======
-    /**
-     * Detail Pickup Request
-     */
->>>>>>> Stashed changes
     public function detailSetoran($id)
     {
         try {
@@ -179,12 +166,6 @@ class MitraController extends Controller
         }
     }
 
-<<<<<<< Updated upstream
-=======
-    /**
-     * Update Status Pickup Request
-     */
->>>>>>> Stashed changes
     public function updateStatus(Request $request, $id)
     {
         try {
@@ -207,28 +188,16 @@ class MitraController extends Controller
                 $pickup->berat_aktual = $request->berat_aktual ?? 0;
                 $pickup->total_harga = $request->total_harga ?? 0;
 
-<<<<<<< Updated upstream
-=======
-                // Kasih reward HANYA kalau transisi pertama kali ke 'completed'
->>>>>>> Stashed changes
                 if ($oldStatus !== 'completed' && $pickup->user_mission_id) {
                     $userMission = \App\Models\UserMission::find($pickup->user_mission_id);
 
                     if ($userMission && $userMission->status !== 'completed') {
-<<<<<<< Updated upstream
-=======
-                        // Update status misi warga
->>>>>>> Stashed changes
                         $userMission->update([
                             'status' => 'completed',
                             'picked_up_at' => now(),
                             'completed_at' => now(),
                         ]);
 
-<<<<<<< Updated upstream
-=======
-                        // Kasih reward ke warga
->>>>>>> Stashed changes
                         $mission = $userMission->mission;
                         $user = $userMission->user;
 
@@ -246,10 +215,6 @@ class MitraController extends Controller
                                     'description' => "Misi selesai: {$mission->title}",
                                 ]);
                             } catch (\Exception $e) {
-<<<<<<< Updated upstream
-=======
-                                // skip kalau tabel transactions bermasalah
->>>>>>> Stashed changes
                             }
                         }
                     }
@@ -264,12 +229,6 @@ class MitraController extends Controller
         }
     }
 
-<<<<<<< Updated upstream
-=======
-    /**
-     * Halaman Riwayat Setoran
-     */
->>>>>>> Stashed changes
     public function riwayatSetoran()
     {
         try {
@@ -287,21 +246,11 @@ class MitraController extends Controller
         }
     }
 
-<<<<<<< Updated upstream
-=======
-    /**
-     * Halaman Statistik
-     */
->>>>>>> Stashed changes
     public function statistics(Request $request)
     {
         try {
             $mitraId = auth()->id();
 
-<<<<<<< Updated upstream
-=======
-            // Filter periode: 'all' atau format YYYY-MM
->>>>>>> Stashed changes
             $periode = $request->input('periode', 'all');
             $bulan = null;
             $tahun = null;
@@ -310,10 +259,6 @@ class MitraController extends Controller
                 [$tahun, $bulan] = explode('-', $periode);
             }
 
-<<<<<<< Updated upstream
-=======
-            // Base query: transaksi completed milik mitra ini
->>>>>>> Stashed changes
             $baseQuery = PickupRequest::where('mitra_id', $mitraId)
                 ->where('status', 'completed');
 
@@ -322,10 +267,6 @@ class MitraController extends Controller
                     ->whereMonth('created_at', $bulan);
             }
 
-<<<<<<< Updated upstream
-=======
-            // ===== STATISTIK PER JENIS SAMPAH =====
->>>>>>> Stashed changes
             $sampahPerJenis = (clone $baseQuery)
                 ->select(
                     'waste_category_id',
@@ -338,24 +279,10 @@ class MitraController extends Controller
                 ->with('wasteCategory')
                 ->get();
 
-<<<<<<< Updated upstream
-=======
-            // Total keseluruhan
->>>>>>> Stashed changes
             $totalSemuaBerat = $sampahPerJenis->sum('total_berat');
             $totalSemuaTransaksi = $sampahPerJenis->sum('total_transaksi');
             $totalSemuaPoin = $sampahPerJenis->sum('total_poin');
             $totalSemuaPendapatan = $sampahPerJenis->sum('total_pendapatan');
-<<<<<<< Updated upstream
-=======
-
-            // ===== GRAFIK 12 BULAN TERAKHIR =====
->>>>>>> Stashed changes
-            $sampahPerJenis = PickupRequest::where('mitra_id', $mitraId)
-                ->where('status', 'completed')
-                ->select('jenis_sampah', DB::raw('SUM(berat_aktual) as total_berat'), DB::raw('COUNT(*) as total_transaksi'))
-                ->groupBy('jenis_sampah')
-                ->get();
 
             $bulanLabels = [];
             $bulanData = [];
@@ -369,10 +296,6 @@ class MitraController extends Controller
                     ->sum('berat_aktual') ?? 0;
             }
 
-<<<<<<< Updated upstream
-=======
-            // ===== STATISTIK STATUS =====
->>>>>>> Stashed changes
             $statusStats = [
                 'pending' => PickupRequest::where('mitra_id', $mitraId)->where('status', 'pending')->count(),
                 'accepted' => PickupRequest::where('mitra_id', $mitraId)->where('status', 'accepted')->count(),
@@ -380,10 +303,6 @@ class MitraController extends Controller
                 'rejected' => PickupRequest::where('mitra_id', $mitraId)->where('status', 'rejected')->count(),
             ];
 
-<<<<<<< Updated upstream
-=======
-            // List periode untuk dropdown (12 bulan terakhir)
->>>>>>> Stashed changes
             $listPeriode = [];
             for ($i = 11; $i >= 0; $i--) {
                 $bln = now()->subMonths($i);
@@ -418,12 +337,7 @@ class MitraController extends Controller
             ]);
         }
     }
-<<<<<<< Updated upstream
-=======
-    /**
-     * Halaman Profil Mitra
-     */
->>>>>>> Stashed changes
+
     public function profile()
     {
         try {
@@ -434,12 +348,6 @@ class MitraController extends Controller
         }
     }
 
-<<<<<<< Updated upstream
-=======
-    /**
-     * Update Profil Mitra
-     */
->>>>>>> Stashed changes
     public function updateProfile(Request $request)
     {
         try {
@@ -450,7 +358,6 @@ class MitraController extends Controller
                 'address' => 'nullable|string',
             ]);
 
-            /** @var \App\Models\User $user */
             $user = auth()->user();
             $user->name = $request->name;
             $user->email = $request->email;
@@ -463,45 +370,24 @@ class MitraController extends Controller
             return redirect()->back()->with('error', 'Gagal memperbarui profil: ' . $e->getMessage());
         }
     }
-<<<<<<< Updated upstream
+
     public function laporan(Request $request)
     {
         $mitraId = auth()->id();
         $bulan = (int) $request->input('bulan', now()->month);
         $tahun = (int) $request->input('tahun', now()->year);
-=======
-    /**
-     * Laporan Bulanan Mitra
-     */
-    public function laporan(Request $request)
-    {
-        $mitraId = auth()->id();
 
-        // Default: bulan & tahun sekarang
-        $bulan = (int) $request->input('bulan', now()->month);
-        $tahun = (int) $request->input('tahun', now()->year);
-
-        // Base query: setoran selesai milik mitra ini di bulan & tahun itu
->>>>>>> Stashed changes
         $baseQuery = PickupRequest::where('mitra_id', $mitraId)
             ->where('status', 'completed')
             ->whereYear('created_at', $tahun)
             ->whereMonth('created_at', $bulan);
 
-<<<<<<< Updated upstream
-=======
-        // Ringkasan
->>>>>>> Stashed changes
         $totalTransaksi = (clone $baseQuery)->count();
         $totalBerat = (clone $baseQuery)->sum('berat_aktual') ?? 0;
         $totalPoin = (clone $baseQuery)->sum('points_earned') ?? 0;
         $totalPendapatan = (clone $baseQuery)->sum('total_harga') ?? 0;
         $totalXp = (clone $baseQuery)->sum('xp_earned') ?? 0;
-<<<<<<< Updated upstream
-=======
 
-        // Grafik: setoran per hari dalam bulan itu
->>>>>>> Stashed changes
         $jumlahHari = \Carbon\Carbon::create($tahun, $bulan, 1)->daysInMonth;
         $chartLabels = [];
         $chartData = [];
@@ -515,10 +401,6 @@ class MitraController extends Controller
                 ->sum('berat_aktual') ?? 0;
         }
 
-<<<<<<< Updated upstream
-=======
-        // Detail transaksi
->>>>>>> Stashed changes
         $transaksi = (clone $baseQuery)
             ->with('user', 'wasteCategory')
             ->latest()
@@ -556,8 +438,4 @@ class MitraController extends Controller
             'transaksi'
         ));
     }
-<<<<<<< Updated upstream
 }
-=======
-}
->>>>>>> Stashed changes

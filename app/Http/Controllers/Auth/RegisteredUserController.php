@@ -74,7 +74,7 @@ class RegisteredUserController extends Controller
                 ])->withInput();
             }
 
-            WasteBank::create([
+            $wasteBank = WasteBank::create([
                 'mitra_id' => $user->user_id,
                 'name' => $validated['name'] . ' Bank Sampah',
                 'address' => $validated['address'],
@@ -84,6 +84,10 @@ class RegisteredUserController extends Controller
                 'longitude' => $lng,
                 'opening_hours' => '08:00 - 17:00',
                 'status' => 'pending',
+            ]);
+
+            $user->update([
+                'waste_bank_id' => $wasteBank->bank_id
             ]);
         }
 
@@ -133,7 +137,6 @@ class RegisteredUserController extends Controller
                     ];
                 }
             } catch (\Throwable $e) {
-                //
             }
         }
 

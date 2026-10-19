@@ -12,10 +12,8 @@
             <div class="card card-stat border-0 shadow-sm h-100">
                 <div class="card-body d-flex align-items-center justify-content-center p-4">
                     @if($reward->image)
-                        <img src="{{ asset('assets/images/' . $reward->image) }}"
-                             class="img-fluid rounded"
-                             style="max-height: 280px; object-fit: contain;"
-                             alt="{{ $reward->name }}">
+                        <img src="{{ asset('assets/images/' . $reward->image) }}" class="img-fluid rounded"
+                            style="max-height: 280px; object-fit: contain;" alt="{{ $reward->name }}">
                     @else
                         <div class="text-center text-muted py-5">
                             <i class="bi bi-image" style="font-size: 4rem;"></i>
@@ -25,6 +23,7 @@
                 </div>
             </div>
         </div>
+
         <div class="col-md-7">
             <div class="card card-stat border-0 shadow-sm h-100">
                 <div class="card-body p-4">
@@ -39,10 +38,12 @@
                             </span>
                         @endif
                     </div>
+
                     <h3 class="fw-bold mb-2">{{ $reward->name }}</h3>
                     <p class="text-muted mb-4">
                         {{ $reward->description ?? 'Tidak ada deskripsi.' }}
                     </p>
+
                     <div class="row g-3 mb-4">
                         <div class="col-6">
                             <div class="border rounded p-3 text-center bg-light">
@@ -52,7 +53,6 @@
                                 </div>
                             </div>
                         </div>
-                        
                         <div class="col-6">
                             <div class="border rounded p-3 text-center bg-light">
                                 <div class="small text-muted mb-1">Stok Tersedia</div>
@@ -63,7 +63,8 @@
                         </div>
                     </div>
 
-                    <div class="alert {{ $user->points >= $reward->point_required ? 'alert-success' : 'alert-warning' }} d-flex justify-content-between align-items-center mb-4">
+                    <div
+                        class="alert {{ $user->points >= $reward->point_required ? 'alert-success' : 'alert-warning' }} d-flex justify-content-between align-items-center mb-4">
                         <div>
                             <div class="small">Poin Kamu Saat Ini</div>
                             <div class="fw-bold">⭐ {{ number_format($user->points) }}</div>
@@ -77,14 +78,10 @@
                     </div>
 
                     @if($user->points >= $reward->point_required && $reward->stock > 0)
-                        <form action="{{ route('user.rewards.redeem', $reward->reward_id) }}"
-                              method="POST"
-                              onsubmit="return confirm('Tukar {{ number_format($reward->point_required) }} poin dengan {{ $reward->name }}?\n\nPoin kamu akan berkurang dan tidak bisa dikembalikan.');">
-                            @csrf
-                            <button type="submit" class="btn btn-success w-100 py-2 fw-semibold">
-                                <i class="bi bi-gift"></i> Tukar Sekarang
-                            </button>
-                        </form>
+                        <a href="{{ route('user.rewards.index', ['open_reward' => $reward->reward_id]) }}"
+                            class="btn btn-success w-100 py-2 fw-semibold">
+                            <i class="bi bi-gift"></i> Tukar Sekarang
+                        </a>
                     @elseif($reward->stock <= 0)
                         <button class="btn btn-secondary w-100 py-2" disabled>
                             <i class="bi bi-x-circle"></i> Stok Habis

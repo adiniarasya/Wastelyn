@@ -29,6 +29,18 @@
                         <span class="small fw-semibold">{{ $reward->name }}</span>
                     </div>
                     <div class="d-flex justify-content-between py-2 border-bottom">
+                        <span class="text-muted small">Tipe Reward</span>
+                        <span>
+                            @if(($reward->type ?? 'instant') === 'manual')
+                                <span class="badge bg-info-subtle text-info border border-info-subtle">Manual (Pulsa/E-Wallet)</span>
+                            @elseif(($reward->type ?? 'instant') === 'pickup')
+                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle">Pickup (Ambil Sendiri)</span>
+                            @else
+                                <span class="badge bg-success-subtle text-success border border-success-subtle">Instant (Voucher)</span>
+                            @endif
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between py-2 border-bottom">
                         <span class="text-muted small">Poin Dibutuhkan</span>
                         <span class="small fw-semibold">{{ number_format($reward->point_required, 0, ',', '.') }} Poin</span>
                     </div>

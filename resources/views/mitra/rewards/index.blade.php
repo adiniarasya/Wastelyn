@@ -64,6 +64,8 @@
                             <td>
                                 @if(($reward->type ?? 'instant') === 'manual')
                                     <span class="badge bg-info-subtle text-info border border-info-subtle">Manual</span>
+                                @elseif(($reward->type ?? 'instant') === 'pickup')
+                                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle">Pickup</span>
                                 @else
                                     <span class="badge bg-success-subtle text-success border border-success-subtle">Instant</span>
                                 @endif
@@ -78,10 +80,8 @@
                             </td>
                             <td>
                                 @if($reward->image)
-                                    <img src="{{ asset('assets/images/' . $reward->image) }}"
-                                         alt="{{ $reward->name }}"
-                                         width="48" height="48"
-                                         style="object-fit: cover; border-radius: 6px;">
+                                    <img src="{{ asset('assets/images/' . $reward->image) }}" alt="{{ $reward->name }}" width="48"
+                                        height="48" style="object-fit: cover; border-radius: 6px;">
                                 @else
                                     <span class="small text-muted">-</span>
                                 @endif
@@ -90,22 +90,22 @@
                                 @if($reward->status == 'available')
                                     <span class="badge bg-success-subtle text-success border border-success-subtle">Tersedia</span>
                                 @else
-                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">Tidak Tersedia</span>
+                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">Tidak
+                                        Tersedia</span>
                                 @endif
                             </td>
                             <td class="text-end pe-4">
                                 <div class="d-flex justify-content-end gap-1">
                                     <a href="{{ route('mitra.rewards.show', $reward->reward_id) }}"
-                                       class="btn btn-sm btn-outline-secondary" title="Detail">
+                                        class="btn btn-sm btn-outline-secondary" title="Detail">
                                         <i class="bi bi-eye"></i>
                                     </a>
                                     <a href="{{ route('mitra.rewards.edit', $reward->reward_id) }}"
-                                       class="btn btn-sm btn-outline-secondary" title="Edit">
+                                        class="btn btn-sm btn-outline-secondary" title="Edit">
                                         <i class="bi bi-pencil"></i>
                                     </a>
-                                    <form action="{{ route('mitra.rewards.destroy', $reward->reward_id) }}"
-                                          method="POST" class="d-inline"
-                                          onsubmit="return confirm('Yakin ingin menghapus reward ini?')">
+                                    <form action="{{ route('mitra.rewards.destroy', $reward->reward_id) }}" method="POST"
+                                        class="d-inline" onsubmit="return confirm('Yakin ingin menghapus reward ini?')">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-sm btn-outline-danger" title="Hapus">

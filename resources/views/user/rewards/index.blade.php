@@ -51,6 +51,11 @@
                         <div class="fs-4 fw-bold text-warning">
                             ⭐ {{ number_format($user->points) }}
                         </div>
+                        @if($user->wasteBank)
+                            <small class="text-muted d-block mt-1">
+                                <i class="bi bi-shop me-1"></i>{{ $user->wasteBank->name }}
+                            </small>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -554,6 +559,25 @@
                     alert(error.message || 'Gagal memproses. Coba lagi.');
                 });
             });
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const openRewardId = urlParams.get('open_reward');
+            
+            if (openRewardId) {
+                const targetBtn = document.querySelector(`.btn-redeem[data-reward-id="${openRewardId}"]`);
+                
+                if (targetBtn) {
+                    if (window.history.replaceState) {
+                        const url = new URL(window.location.href);
+                        url.searchParams.delete('open_reward');
+                        window.history.replaceState({}, '', url.toString());
+                    }
+                    
+                    setTimeout(function () {
+                        targetBtn.click();
+                    }, 150);
+                }
+            }
         });
 
         function copyVoucher(code, btn) {

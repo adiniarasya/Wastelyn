@@ -20,6 +20,19 @@
         </div>
     </div>
 
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show no-print" role="alert">
+            <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show no-print" role="alert">
+            <i class="bi bi-exclamation-circle me-2"></i>{{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
     <div class="card border-0 shadow-sm" style="max-width: 800px;">
         <div class="card-body p-4">
             <div class="text-center border-bottom pb-3 mb-4">
@@ -30,6 +43,7 @@
                 <h5 class="fw-bold mt-3 mb-1">BUKTI PENUKARAN REWARD</h5>
                 <code class="text-muted small">#{{ str_pad($redemption->redemption_id, 6, '0', STR_PAD_LEFT) }}</code>
             </div>
+
             @if($redemption->status === 'completed')
                 <div class="alert alert-success d-flex align-items-center gap-2 mb-4">
                     <i class="bi bi-check-circle-fill fs-3"></i>
@@ -54,6 +68,7 @@
                     </div>
                 </div>
             @endif
+
             <div class="row mb-4">
                 <div class="col-md-6 mb-3 mb-md-0">
                     <h6 class="fw-bold text-muted small text-uppercase mb-2">Penerima</h6>
@@ -89,6 +104,7 @@
                     </div>
                 </div>
             </div>
+
             <h6 class="fw-bold text-muted small text-uppercase mb-2">Detail Reward</h6>
             <table class="table table-bordered mb-4">
                 <tr>
@@ -117,6 +133,7 @@
                     </td>
                 </tr>
             </table>
+
             @if($redemption->delivery_note)
                 <h6 class="fw-bold text-muted small text-uppercase mb-2">Info Pengiriman</h6>
                 <div class="alert alert-success small mb-4">
@@ -139,17 +156,43 @@
                     @if($redemption->pickup_expires_at)
                         <div class="small text-danger mt-2">
                             <i class="bi bi-clock"></i>
-                            Berlaku s.d. <strong>{{ \Carbon\Carbon::parse($redemption->pickup_expires_at)->format('d M Y') }}</strong>
+                            Berlaku s.d.
+                            <strong>{{ \Carbon\Carbon::parse($redemption->pickup_expires_at)->format('d M Y') }}</strong>
                         </div>
                     @endif
                     @if($redemption->pickup_date)
                         <div class="small text-muted mt-1">
-                            <i class="bi bi-calendar"></i>
-                            Rencana ambil: <strong>{{ \Carbon\Carbon::parse($redemption->pickup_date)->format('d M Y') }}</strong>
+                            <i class="bi bi-calendar"></i> Rencana ambil:
+                            <strong>{{ \Carbon\Carbon::parse($redemption->pickup_date)->format('d M Y') }}</strong>
                         </div>
                     @endif
                 </div>
             @endif
+
+            @if($redemption->status === 'pending' && $redemption->pickup_code)
+                <div class="card border-warning bg-warning-subtle mb-4 no-print">
+                    <div class="card-body">
+                        <h6 class="fw-bold mb-3"><i class="bi bi-shield-check"></i> Verifikasi Pengambilan Barang</h6>
+                        <form action="{{ route('mitra.rewards.redemptions.verify-pickup', $redemption->redemption_id) }}"
+                            method="POST">
+                            @csrf
+                            @method('PUT')
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i class="bi bi-key"></i></span>
+                                <input type="text" name="pickup_code" class="form-control"
+                                    placeholder="Masukkan kode pengambilan (Contoh: AMBIL-123)" required>
+                                <button class="btn btn-warning fw-bold" type="submit">
+                                    Verifikasi Sekarang
+                                </button>
+                            </div>
+                            <small class="text-muted mt-2 d-block">
+                                *Pastikan warga telah menunjukkan kode ini sebelum menekan tombol verifikasi.
+                            </small>
+                        </form>
+                    </div>
+                </div>
+            @endif
+
             <div class="border-top pt-3 mt-4 text-center small text-muted">
                 <p class="mb-1">Terima kasih telah menggunakan WasteLyn!</p>
                 <p class="mb-0">
@@ -162,12 +205,20 @@
 
     <style>
         @media print {
-            .no-print, nav, aside, .sidebar, header, footer {
+
+            .no-print,
+            nav,
+            aside,
+            .sidebar,
+            header,
+            footer {
                 display: none !important;
             }
+
             body {
                 background: white !important;
             }
+
             .card {
                 box-shadow: none !important;
                 border: 1px solid #ddd !important;

@@ -34,6 +34,7 @@
 
             @if($redemption->status === 'completed')
                 <div class="alert alert-success d-flex align-items-center gap-2 mb-4">
+                    <i class="bi bi-check-circle-fill fs-3"></i>
                     <div>
                         <strong>Transaksi Selesai</strong>
                         <div class="small">Reward telah berhasil diproses.</div>
@@ -114,6 +115,10 @@
                 <div class="alert alert-success text-center mb-4">
                     <code class="fs-4 fw-bold text-success">{{ $redemption->voucher_code }}</code>
                     <div class="small text-muted mt-2">Tukarkan kode ini di kasir / aplikasi terkait.</div>
+                    <button type="button" class="btn btn-sm btn-outline-success mt-2 no-print"
+                        onclick="copyCode('{{ $redemption->voucher_code }}', this)">
+                        <i class="bi bi-clipboard"></i> Salin Kode
+                    </button>
                 </div>
             @endif
 
@@ -133,6 +138,10 @@
                             Rencana ambil: <strong>{{ \Carbon\Carbon::parse($redemption->pickup_date)->format('d M Y') }}</strong>
                         </div>
                     @endif
+                    <button type="button" class="btn btn-sm btn-outline-primary mt-2 no-print"
+                        onclick="copyCode('{{ $redemption->pickup_code }}', this)">
+                        <i class="bi bi-clipboard"></i> Salin Kode
+                    </button>
                 </div>
             @endif
 
@@ -158,4 +167,23 @@
             }
         }
     </style>
+
+    <script>
+        function copyCode(code, btn) {
+            navigator.clipboard.writeText(code).then(function () {
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = '<i class="bi bi-check-lg"></i> Tersalin!';
+                btn.classList.remove('btn-outline-success', 'btn-outline-primary');
+                btn.classList.add('btn-success');
+
+                setTimeout(function () {
+                    btn.innerHTML = originalHtml;
+                    btn.classList.remove('btn-success');
+                    btn.classList.add('btn-outline-success', 'btn-outline-primary');
+                }, 1500);
+            }).catch(function () {
+                alert('Kode: ' + code);
+            });
+        }
+    </script>
 @endsection
