@@ -8,10 +8,12 @@ use Illuminate\Support\Facades\File;
 
 class RewardController extends Controller
 {
-
     public function mitraIndex()
     {
-        $rewards = Reward::all();
+        $rewards = Reward::where('bank_id', auth()->user()->waste_bank_id)
+            ->latest()
+            ->get();
+
         return view('mitra.rewards.index', compact('rewards'));
     }
 
@@ -33,6 +35,8 @@ class RewardController extends Controller
         ]);
 
         $data = $request->all();
+
+        $data['bank_id'] = auth()->user()->waste_bank_id;
 
         if ($request->hasFile('image')) {
             $file = $request->file('image');
@@ -72,6 +76,8 @@ class RewardController extends Controller
 
         $data = $request->all();
 
+        $data['bank_id'] = $reward->bank_id;
+
         if ($request->hasFile('image')) {
             if ($reward->image && File::exists(public_path('assets/images/' . $reward->image))) {
                 File::delete(public_path('assets/images/' . $reward->image));
@@ -103,13 +109,106 @@ class RewardController extends Controller
             ->with('success', 'Reward berhasil dihapus');
     }
 
+    public function mitraRedemptions(Request $request)
+    {
+        $status = $request->input('status', 'all');
+        $type = $request->input('type', 'all');
+
+        $query = \App\Models\RewardRedemption::with('user', 'reward')
+            ->whereHas('reward', function ($q) {
+                $q->where('bank_id', auth()->user()->waste_bank_id);
+            });
+
+        if ($status === 'pending') {
+            $query->where('status', 'pending');
+        } elseif ($status === 'completed') {
+            $query->where('status', 'completed');
+        }
+
+        if ($type !== 'all') {
+            $query->whereHas('reward', function ($q) use ($type) {
+                $q->where('type', $type);
+            });
+        }
+
+        $query->orderByRaw("CASE WHEN status = 'pending' THEN 0 ELSE 1 END ASC")
+            ->orderBy('redeemed_at', 'desc');
+
+        $redemptions = $query->paginate(20)->withQueryString();
+
+        $baseStats = \App\Models\RewardRedemption::whereHas('reward', function ($q) {
+            $q->where('bank_id', auth()->user()->waste_bank_id);
+        });
+
+        $stats = [
+            'total' => (clone $baseStats)->count(),
+            'pending_pickup' => (clone $baseStats)->where('status', 'pending')->count(),
+            'completed' => (clone $baseStats)->where('status', 'completed')->count(),
+            'today' => (clone $baseStats)->whereDate('redeemed_at', today())->count(),
+            'pulsa' => (clone $baseStats)->whereHas('reward', fn($q) => $q->where('type', 'manual'))->count(),
+            'voucher' => (clone $baseStats)->whereHas('reward', fn($q) => $q->where('type', 'instant'))->count(),
+            'pickup' => (clone $baseStats)->whereHas('reward', fn($q) => $q->where('type', 'pickup'))->count(),
+        ];
+
+        return view('mitra.rewards.redemptions', compact('redemptions', 'stats', 'status', 'type'));
+    }
+
+    public function mitraVerifyPickup(Request $request, $id)
+    {
+        $request->validate([
+            'pickup_code' => 'required|string',
+        ]);
+
+        $redemption = \App\Models\RewardRedemption::findOrFail($id);
+
+        if ($redemption->status !== 'pending') {
+            return back()->with('error', 'Penukaran ini sudah selesai.');
+        }
+
+        if (strtoupper($request->pickup_code) !== strtoupper($redemption->pickup_code)) {
+            return back()->with('error', 'Kode pengambilan salah. Cek ulang.');
+        }
+
+        if ($redemption->pickup_expires_at && now()->greaterThan($redemption->pickup_expires_at)) {
+            return back()->with('error', 'Kode sudah kadaluarsa.');
+        }
+
+        $redemption->update([
+            'status' => 'completed',
+            'processed_at' => now(),
+            'picked_up_at' => now(),
+        ]);
+
+        try {
+            \App\Models\Notification::create([
+                'user_id' => $redemption->user_id,
+                'title' => 'Barang Berhasil Diambil',
+                'message' => 'Penukaran reward "' . ($redemption->reward->name ?? '-') . '" telah selesai.',
+                'type' => 'success',
+                'link' => route('user.rewards.index'),
+                'is_read' => false,
+            ]);
+        } catch (\Exception $e) {}
+
+        return back()->with('success', 'Pengambilan barang berhasil diverifikasi.');
+    }
+
+    public function mitraRedemptionShow($id)
+    {
+        $redemption = \App\Models\RewardRedemption::with('user', 'reward')
+            ->findOrFail($id);
+
+        return view('mitra.rewards.redemption-show', compact('redemption'));
+    }
+
     public function userIndex()
     {
-        $rewards = Reward::where('status', 'available')
+        $user = auth()->user();
+
+        $rewards = Reward::where('bank_id', $user->waste_bank_id)
+            ->where('status', 'available')
             ->orderBy('point_required')
             ->get();
-
-        $user = auth()->user();
 
         $myRedemptions = \App\Models\RewardRedemption::with('reward')
             ->where('user_id', $user->user_id)
@@ -216,7 +315,10 @@ class RewardController extends Controller
                 'description' => 'Tukar reward: ' . $reward->name,
             ]);
 
-            $mitras = \App\Models\User::where('role', 'mitra')->get();
+            $mitras = \App\Models\User::where('role', 'mitra')
+                ->where('waste_bank_id', $reward->bank_id)
+                ->get();
+                
             foreach ($mitras as $mitra) {
                 try {
                     $message = 'Warga ' . $user->name . ' menukar "' . $reward->name . '".';
@@ -253,7 +355,6 @@ class RewardController extends Controller
             }
 
             return response()->json($response);
-
         } catch (\Exception $e) {
             \DB::rollBack();
             return response()->json([
@@ -262,100 +363,14 @@ class RewardController extends Controller
             ], 500);
         }
     }
+
     public function userRedemptionShow($id)
-{
-    $redemption = \App\Models\RewardRedemption::with('user', 'reward')
-        ->where('redemption_id', $id)
-        ->where('user_id', auth()->id())
-        ->firstOrFail();
-
-    return view('user.rewards.redemption-show', compact('redemption'));
-}
-
-    public function mitraRedemptions(Request $request)
-    {
-        $status = $request->input('status', 'all');
-        $type = $request->input('type', 'all');
-
-        $query = \App\Models\RewardRedemption::with('user', 'reward');
-
-        // Filter by status
-        if ($status === 'pending') {
-            $query->where('status', 'pending');
-        } elseif ($status === 'completed') {
-            $query->where('status', 'completed');
-        }
-
-        // Filter by reward type
-        if ($type !== 'all') {
-            $query->whereHas('reward', function ($q) use ($type) {
-                $q->where('type', $type);
-            });
-        }
-
-        // Sorting: pending dulu, baru latest
-        $query->orderByRaw("CASE WHEN status = 'pending' THEN 0 ELSE 1 END ASC")
-              ->orderBy('redeemed_at', 'desc');
-
-        $redemptions = $query->paginate(20)->withQueryString();
-
-        $stats = [
-            'total' => \App\Models\RewardRedemption::count(),
-            'pending_pickup' => \App\Models\RewardRedemption::where('status', 'pending')->count(),
-            'completed' => \App\Models\RewardRedemption::where('status', 'completed')->count(),
-            'today' => \App\Models\RewardRedemption::whereDate('redeemed_at', today())->count(),
-            'pulsa' => \App\Models\RewardRedemption::whereHas('reward', fn($q) => $q->where('type', 'manual'))->count(),
-            'voucher' => \App\Models\RewardRedemption::whereHas('reward', fn($q) => $q->where('type', 'instant'))->count(),
-            'pickup' => \App\Models\RewardRedemption::whereHas('reward', fn($q) => $q->where('type', 'pickup'))->count(),
-        ];
-
-        return view('mitra.rewards.redemptions', compact('redemptions', 'stats', 'status', 'type'));
-    }
-
-    public function mitraVerifyPickup(Request $request, $id)
-    {
-        $request->validate([
-            'pickup_code' => 'required|string',
-        ]);
-
-        $redemption = \App\Models\RewardRedemption::findOrFail($id);
-
-        if ($redemption->status !== 'pending') {
-            return back()->with('error', 'Penukaran ini sudah selesai.');
-        }
-
-        if (strtoupper($request->pickup_code) !== strtoupper($redemption->pickup_code)) {
-            return back()->with('error', 'Kode pengambilan salah. Cek ulang.');
-        }
-
-        if ($redemption->pickup_expires_at && now()->greaterThan($redemption->pickup_expires_at)) {
-            return back()->with('error', 'Kode sudah kadaluarsa.');
-        }
-
-        $redemption->update([
-            'status' => 'completed',
-            'processed_at' => now(),
-            'picked_up_at' => now(),
-        ]);
-
-        try {
-            \App\Models\Notification::create([
-                'user_id' => $redemption->user_id,
-                'title' => 'Barang Berhasil Diambil',
-                'message' => 'Penukaran reward "' . ($redemption->reward->name ?? '-') . '" telah selesai.',
-                'type' => 'success',
-                'link' => route('user.rewards.index'),
-                'is_read' => false,
-            ]);
-        } catch (\Exception $e) {}
-
-        return back()->with('success', 'Pengambilan barang berhasil diverifikasi.');
-    }
-        public function mitraRedemptionShow($id)
     {
         $redemption = \App\Models\RewardRedemption::with('user', 'reward')
-            ->findOrFail($id);
+            ->where('redemption_id', $id)
+            ->where('user_id', auth()->id())
+            ->firstOrFail();
 
-        return view('mitra.rewards.redemption-show', compact('redemption'));
+        return view('user.rewards.redemption-show', compact('redemption'));
     }
 }

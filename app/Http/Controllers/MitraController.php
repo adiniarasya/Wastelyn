@@ -94,3 +94,348 @@ class MitraController extends Controller
                 $chartLabels[] = now()->subDays($i)->format('d M');
                 $chartData[] = PickupRequest::where('mitra_id', $mitraId)
                     ->where('status', 'completed')
+                    ->whereDate('created_at', $date)
+                    ->sum('berat_aktual') ?? 0;
+            }
+
+            return view('mitra.dashboard', compact(
+                'totalPickups',
+                'totalBerat',
+                'totalPendapatan',
+                'totalNasabah',
+                'pendingPickups',
+                'recentPickups',
+                'chartLabels',
+                'chartData',
+                'pendapatanBulanIni',
+                'pendapatanBulanLalu',
+                'persenPendapatan',
+                'setoranBulanIni',
+                'setoranBulanLalu',
+                'persenSetoran',
+                'pendapatanLabels',
+                'pendapatanData'
+            ));
+        } catch (\Exception $e) {
+            return view('mitra.dashboard', [
+                'totalPickups' => 0,
+                'totalBerat' => 0,
+                'totalPendapatan' => 0,
+                'totalNasabah' => 0,
+                'pendingPickups' => collect(),
+                'recentPickups' => collect(),
+                'chartLabels' => [],
+                'chartData' => [],
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
+    public function kelolaSetoran()
+    {
+        try {
+            $mitraId = auth()->id();
+
+            $pickups = PickupRequest::where('mitra_id', $mitraId)
+                ->with('user')
+                ->orderBy('created_at', 'desc')
+                ->paginate(15);
+
+            return view('mitra.kelola-setoran', compact('pickups'));
+        } catch (\Exception $e) {
+            return view('mitra.kelola-setoran', ['pickups' => collect(), 'error' => $e->getMessage()]);
+        }
+    }
+
+    public function detailSetoran($id)
+    {
+        try {
+            $mitraId = auth()->id();
+
+            $pickup = PickupRequest::where('pickup_request_id', $id)
+                ->where('mitra_id', $mitraId)
+                ->with('user')
+                ->firstOrFail();
+
+            return view('mitra.detail-setoran', compact('pickup'));
+        } catch (\Exception $e) {
+            return redirect()->route('mitra.kelola-setoran')
+                ->with('error', 'Data tidak ditemukan');
+        }
+    }
+
+    public function updateStatus(Request $request, $id)
+    {
+        try {
+            $request->validate([
+                'status' => 'required|in:pending,accepted,scheduled,completed,rejected',
+                'berat_aktual' => 'nullable|numeric|min:0',
+                'total_harga' => 'nullable|numeric|min:0',
+            ]);
+
+            $mitraId = auth()->id();
+
+            $pickup = PickupRequest::where('pickup_request_id', $id)
+                ->where('mitra_id', $mitraId)
+                ->firstOrFail();
+
+            $oldStatus = $pickup->status;
+            $pickup->status = $request->status;
+
+            if ($request->status == 'completed') {
+                $pickup->berat_aktual = $request->berat_aktual ?? 0;
+                $pickup->total_harga = $request->total_harga ?? 0;
+
+                if ($oldStatus !== 'completed' && $pickup->user_mission_id) {
+                    $userMission = \App\Models\UserMission::find($pickup->user_mission_id);
+
+                    if ($userMission && $userMission->status !== 'completed') {
+                        $userMission->update([
+                            'status' => 'completed',
+                            'picked_up_at' => now(),
+                            'completed_at' => now(),
+                        ]);
+
+                        $mission = $userMission->mission;
+                        $user = $userMission->user;
+
+                        if ($mission && $user) {
+                            $user->addXp($mission->reward_xp);
+                            $user->addPoints($mission->reward_points);
+
+                            try {
+                                Transaction::create([
+                                    'user_id' => $user->user_id,
+                                    'mitra_id' => $mitraId,
+                                    'pickup_request_id' => $pickup->pickup_request_id,
+                                    'type' => 'earn',
+                                    'points' => $mission->reward_points,
+                                    'description' => "Misi selesai: {$mission->title}",
+                                ]);
+                            } catch (\Exception $e) {
+                            }
+                        }
+                    }
+                }
+            }
+
+            $pickup->save();
+
+            return redirect()->back()->with('success', 'Status setoran berhasil diperbarui');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal memperbarui status: ' . $e->getMessage());
+        }
+    }
+
+    public function riwayatSetoran()
+    {
+        try {
+            $mitraId = auth()->id();
+
+            $riwayat = PickupRequest::where('mitra_id', $mitraId)
+                ->where('status', 'completed')
+                ->with('user')
+                ->orderBy('created_at', 'desc')
+                ->paginate(15);
+
+            return view('mitra.riwayat-setoran', compact('riwayat'));
+        } catch (\Exception $e) {
+            return view('mitra.riwayat-setoran', ['riwayat' => collect(), 'error' => $e->getMessage()]);
+        }
+    }
+
+    public function statistics(Request $request)
+    {
+        try {
+            $mitraId = auth()->id();
+
+            $periode = $request->input('periode', 'all');
+            $bulan = null;
+            $tahun = null;
+
+            if ($periode !== 'all' && preg_match('/^\d{4}-\d{2}$/', $periode)) {
+                [$tahun, $bulan] = explode('-', $periode);
+            }
+
+            $baseQuery = PickupRequest::where('mitra_id', $mitraId)
+                ->where('status', 'completed');
+
+            if ($bulan && $tahun) {
+                $baseQuery->whereYear('created_at', $tahun)
+                    ->whereMonth('created_at', $bulan);
+            }
+
+            $sampahPerJenis = (clone $baseQuery)
+                ->select(
+                    'waste_category_id',
+                    DB::raw('SUM(berat_aktual) as total_berat'),
+                    DB::raw('COUNT(*) as total_transaksi'),
+                    DB::raw('SUM(points_earned) as total_poin'),
+                    DB::raw('SUM(total_harga) as total_pendapatan')
+                )
+                ->groupBy('waste_category_id')
+                ->with('wasteCategory')
+                ->get();
+
+            $totalSemuaBerat = $sampahPerJenis->sum('total_berat');
+            $totalSemuaTransaksi = $sampahPerJenis->sum('total_transaksi');
+            $totalSemuaPoin = $sampahPerJenis->sum('total_poin');
+            $totalSemuaPendapatan = $sampahPerJenis->sum('total_pendapatan');
+            $sampahPerJenis = PickupRequest::where('mitra_id', $mitraId)
+                ->where('status', 'completed')
+                ->select('jenis_sampah', DB::raw('SUM(berat_aktual) as total_berat'), DB::raw('COUNT(*) as total_transaksi'))
+                ->groupBy('jenis_sampah')
+                ->get();
+
+            $bulanLabels = [];
+            $bulanData = [];
+            for ($i = 11; $i >= 0; $i--) {
+                $bln = now()->subMonths($i);
+                $bulanLabels[] = $bln->format('M Y');
+                $bulanData[] = PickupRequest::where('mitra_id', $mitraId)
+                    ->where('status', 'completed')
+                    ->whereYear('created_at', $bln->year)
+                    ->whereMonth('created_at', $bln->month)
+                    ->sum('berat_aktual') ?? 0;
+            }
+
+            $statusStats = [
+                'pending' => PickupRequest::where('mitra_id', $mitraId)->where('status', 'pending')->count(),
+                'accepted' => PickupRequest::where('mitra_id', $mitraId)->where('status', 'accepted')->count(),
+                'completed' => PickupRequest::where('mitra_id', $mitraId)->where('status', 'completed')->count(),
+                'rejected' => PickupRequest::where('mitra_id', $mitraId)->where('status', 'rejected')->count(),
+            ];
+
+            $listPeriode = [];
+            for ($i = 11; $i >= 0; $i--) {
+                $bln = now()->subMonths($i);
+                $listPeriode[$bln->format('Y-m')] = $bln->format('F Y');
+            }
+
+            return view('mitra.statistics', compact(
+                'sampahPerJenis',
+                'totalSemuaBerat',
+                'totalSemuaTransaksi',
+                'totalSemuaPoin',
+                'totalSemuaPendapatan',
+                'bulanLabels',
+                'bulanData',
+                'statusStats',
+                'listPeriode',
+                'periode'
+            ));
+        } catch (\Exception $e) {
+            return view('mitra.statistics', [
+                'sampahPerJenis' => collect(),
+                'totalSemuaBerat' => 0,
+                'totalSemuaTransaksi' => 0,
+                'totalSemuaPoin' => 0,
+                'totalSemuaPendapatan' => 0,
+                'bulanLabels' => [],
+                'bulanData' => [],
+                'statusStats' => ['pending' => 0, 'accepted' => 0, 'completed' => 0, 'rejected' => 0],
+                'listPeriode' => [],
+                'periode' => 'all',
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+    public function profile()
+    {
+        try {
+            $mitra = auth()->user();
+            return view('mitra.profile', compact('mitra'));
+        } catch (\Exception $e) {
+            return view('mitra.profile', ['mitra' => auth()->user()]);
+        }
+    }
+
+    public function updateProfile(Request $request)
+    {
+        try {
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|max:255|unique:users,email,' . auth()->id() . ',user_id',
+                'phone' => 'nullable|string|max:15',
+                'address' => 'nullable|string',
+            ]);
+
+            /** @var \App\Models\User $user */
+            $user = auth()->user();
+            $user->name = $request->name;
+            $user->email = $request->email;
+            $user->phone = $request->phone;
+            $user->address = $request->address;
+            $user->save();
+
+            return redirect()->back()->with('success', 'Profil berhasil diperbarui');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal memperbarui profil: ' . $e->getMessage());
+        }
+    }
+    public function laporan(Request $request)
+    {
+        $mitraId = auth()->id();
+        $bulan = (int) $request->input('bulan', now()->month);
+        $tahun = (int) $request->input('tahun', now()->year);
+        $baseQuery = PickupRequest::where('mitra_id', $mitraId)
+            ->where('status', 'completed')
+            ->whereYear('created_at', $tahun)
+            ->whereMonth('created_at', $bulan);
+
+        $totalTransaksi = (clone $baseQuery)->count();
+        $totalBerat = (clone $baseQuery)->sum('berat_aktual') ?? 0;
+        $totalPoin = (clone $baseQuery)->sum('points_earned') ?? 0;
+        $totalPendapatan = (clone $baseQuery)->sum('total_harga') ?? 0;
+        $totalXp = (clone $baseQuery)->sum('xp_earned') ?? 0;
+        $jumlahHari = \Carbon\Carbon::create($tahun, $bulan, 1)->daysInMonth;
+        $chartLabels = [];
+        $chartData = [];
+        for ($i = 1; $i <= $jumlahHari; $i++) {
+            $chartLabels[] = $i;
+            $chartData[] = PickupRequest::where('mitra_id', $mitraId)
+                ->where('status', 'completed')
+                ->whereYear('created_at', $tahun)
+                ->whereMonth('created_at', $bulan)
+                ->whereDay('created_at', $i)
+                ->sum('berat_aktual') ?? 0;
+        }
+
+        $transaksi = (clone $baseQuery)
+            ->with('user', 'wasteCategory')
+            ->latest()
+            ->paginate(20)
+            ->withQueryString();
+
+        $listBulan = [
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juni',
+            7 => 'Juli',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember',
+        ];
+        $listTahun = range(now()->year - 3, now()->year);
+
+        return view('mitra.laporan.index', compact(
+            'bulan',
+            'tahun',
+            'listBulan',
+            'listTahun',
+            'totalTransaksi',
+            'totalBerat',
+            'totalPoin',
+            'totalPendapatan',
+            'totalXp',
+            'chartLabels',
+            'chartData',
+            'transaksi'
+        ));
+    }
+}
