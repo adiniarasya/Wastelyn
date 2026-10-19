@@ -248,7 +248,7 @@
                                         <td class="text-end pe-3">
                                             <a href="{{ route('user.pickup-requests.show', $pickup->pickup_request_id) }}"
                                                 class="btn btn-sm btn-outline-secondary">
-                                                <i class="bi bi-eye"></i> Detail
+                                                <i class="bi bi-eye"></i>
                                             </a>
                                             @if($pickup->status === 'pending')
                                                 <form action="{{ route('user.pickup-requests.destroy', $pickup->pickup_request_id) }}"
@@ -257,7 +257,7 @@
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-sm btn-outline-danger">
-                                                        <i class="bi bi-x-circle"></i> Batalkan
+                                                        <i class="bi bi-x-circle"></i>
                                                     </button>
                                                 </form>
                                             @endif
