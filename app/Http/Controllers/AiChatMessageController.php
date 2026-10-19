@@ -91,7 +91,7 @@ class AiChatMessageController extends Controller
 
             $botMessage = AiChatMessage::create([
                 'session_id' => $session->session_id,
-                'sender' => 'bero',
+                'sender' => 'ai',
                 'message' => $reply,
             ]);
 
@@ -142,7 +142,7 @@ class AiChatMessageController extends Controller
 
         $botMessage = AiChatMessage::create([
             'session_id' => $session->session_id,
-            'sender' => 'bero',
+            'sender' => 'ai',
             'message' => $parsed['text'],
         ]);
 

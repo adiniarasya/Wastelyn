@@ -10,6 +10,7 @@
             object-fit: cover;
         }
 
+        /* Ukuran foto di riwayat bukti */
         .mission-detail .submission-thumb {
             width: 60px;
             height: 60px;
@@ -17,8 +18,6 @@
             object-fit: cover;
         }
     </style>
-
-    
 
     @php
         $statusLabels = [
@@ -72,6 +71,7 @@
                         <img src="{{ asset('storage/' . $mission->image) }}" alt="{{ $mission->title }}"
                             class="mission-cover rounded-3 mb-4">
                     @endif
+
                     <div class="mb-4">
                         <h6 class="text-muted mb-2">Deskripsi misi</h6>
                         <p class="mb-0">{{ $mission->description }}</p>
@@ -111,6 +111,8 @@
                         @endphp
 
                         <div class="border-top mt-4 pt-4">
+                        {{-- Progres --}}
+                        <div class="border-top mt-4 pt-4 mb-4">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h5 class="mb-0">Progres misi kamu</h5>
                                 <span class="badge bg-warning text-dark">
@@ -146,6 +148,7 @@
                                 </small>
                             </div>
                         </div>
+
                         @if ($userMission->status === 'ongoing')
                             <div class="card border-success mb-4">
                                 <div class="card-header bg-success text-white">
@@ -166,8 +169,7 @@
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                             <small class="text-muted">
-                                                Maksimal 5MB. Foto bersama kode misi
-                                                <strong>{{ $userMission->unique_code }}</strong>.
+                                                Maksimal 5MB. Foto sampah yang sudah kamu kumpulkan.
                                             </small>
                                         </div>
 

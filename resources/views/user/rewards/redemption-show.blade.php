@@ -34,7 +34,6 @@
 
             @if($redemption->status === 'completed')
                 <div class="alert alert-success d-flex align-items-center gap-2 mb-4">
-                    <i class="bi bi-check-circle-fill fs-3"></i>
                     <div>
                         <strong>Transaksi Selesai</strong>
                         <div class="small">Reward telah berhasil diproses.</div>

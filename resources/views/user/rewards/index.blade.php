@@ -210,7 +210,7 @@
                                 @empty
                                     <tr>
                                         <td colspan="6" class="text-center text-muted py-4">
-                                            <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+                                           
                                             Belum ada riwayat penukaran.
                                         </td>
                                     </tr>
